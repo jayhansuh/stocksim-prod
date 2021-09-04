@@ -1,0 +1,156 @@
+
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+<div style="display:flex;width:100%;justify-content: center;">
+    <textarea id="textarea" 
+    style="width:50%;
+        height:70vh;
+        position: relative;
+        background-color:#252525;
+        font-size:16px;"
+    ></textarea>
+    <div style="height:calc(70vh + 12px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;flex-direction:column;justify-content:center;">
+            <div>Scale</div>
+            <div>0~100</div>
+            <input type="text" id="scale" placeholder='10.0' style="
+                width: 30px;
+                background-color: #252525;
+                margin: 5px 0;">
+        </div>
+        <button class="button" onclick="clickOn(0)" style="height:25%;margin: 0 2px 1px 2px;padding: 8px;"> Ex </button>
+        <button class="button" onclick="clickOn(1)" style="height:25%;margin: 1px 2px;padding: 8px;background-color: #466b7d;"> Gen </button>
+        <button class="button" onclick="clickOn(3)" style="height:25%;margin: 1px 2px;padding: 8px;"> Save </button>
+        <button class="button" onclick="clickOn(2)" style="height:25%;margin: 1px 2px 0 2px;padding: 8px;background-color: #466b7d;"> Plot </button>
+        
+    </div>
+</div>
+
+{% if history_list %}
+{{ history_list|json_script:"history_list" }}
+{% endif %}
+
+<script>
+    
+    //const ex_value="[\n\t{\n\t\t\"Date\": \"2020-06-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 3,\n\t\t\t\"DAL\": 72,\n\t\t\t\"ZM\": 9,\n\t\t\t\"AMD\": 36\n\t\t}\n\t},\n\t{\n\t\t\"Date\": \"2020-09-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 1,\n\t\t\t\"AMD\": 36,\n\t\t\t\"COST\": 7,\n\t\t\t\"MRNA\": 10,\n\t\t\t\"_cash\": 4000\n\t\t}\n\t}\n]";
+    const ex_value="[\n\t{\n\t\t\"Date\": \"2020-06-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 6\n\t\t}\n\t},\n\t{\n\t\t\"Date\": \"2020-09-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 1,\n\t\t\t\"AMD\": 36,\n\t\t\t\"COST\": 7,\n\t\t\t\"_cash\": 4000\n\t\t}\n\t}\n]";
+
+    let textarea=document.getElementById("textarea")
+    let scale=document.getElementById("scale")
+    {% if history_list %}
+    const history_list = JSON.parse(document.getElementById('history_list').textContent);
+    textarea.value = JSON.stringify(history_list,
+        (key, value) => ( typeof(value) === 'number' ? parseFloat(value.toFixed(2)) : value),
+        '\t')
+    {% else %}
+    textarea.value=window.localStorage.getItem("lab_histplot")
+    if(!textarea.value){
+        textarea.value=ex_value;
+    }
+    if(window.localStorage.getItem("lab_histplot_scale")){
+        scale.value=window.localStorage.getItem("lab_histplot_scale");
+    }
+    {% endif %}
+
+    function clickOn(num){
+        try{
+            if(num==0){
+                textarea.value = ex_value;
+                return;
+            }
+
+            const data=JSON.parse(textarea.value);
+            const req={"data":data};
+            let url="/simulator/histplot/";
+            let scaleVal=scale.value;
+            if(scaleVal!=""){
+                scaleVal=parseFloat(scaleVal);
+                if(typeof(scaleVal)=="number" && !(isNaN(scaleVal)) && scaleVal>0 && scaleVal<100){
+                    req['mag_ratio']=scaleVal;
+                }
+                else{
+                    throw "Invalid scale value";
+                }
+            }
+            if(num==1){
+                url+="datagen";
+            }
+            else{
+                let flag=true;
+                data.forEach(el => {
+                    if(flag && !('amount' in el) && !('asset' in el)){
+                        flag=false;
+                    }
+                })
+                if(!flag){
+                    alert("Please generate the data first - click the Gen button");
+                    return;
+                }
+                if(num==2){
+                    url+="plot";
+                }
+            }
+
+            if(num==3){
+                window.localStorage.setItem("lab_histplot",textarea.value);
+                window.localStorage.setItem("lab_histplot_scale",scaleVal);
+                alert("Your browser saved your history to autoreload next time. You can append a new date portfolio and the Gen function will calculate the rest for you.");
+                return;
+            }
+
+            window.location=url+"?req="+JSON.stringify(req);
+        }
+        catch(err){
+            alert(err)
+        }
+    }
+
+    textarea.addEventListener('keydown', function(e) {
+        if (e.key == 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+
+            // set textarea value to: text before caret + tab + text after caret
+            this.value = this.value.substring(0, start) +
+            "\t" + this.value.substring(end);
+
+            // put caret at right position again
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+    });
+</script>
+
+{% endblock %}
+
+
+

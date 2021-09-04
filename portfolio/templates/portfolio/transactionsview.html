@@ -1,0 +1,298 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<div id="content-main">
+    <div class="module" id="make-actions-module">
+        
+        <h2>{% translate 'Make Transaction (positive quantity to buy, negative quantity to sell)' %}</h2>
+        <div id="formdiv" style="margin:10px;">
+        {% if anotheruser %}
+            <input type="submit" class="submit-row" value="{% translate 'You are not authorized to place an order for ' %}{{anotheruser}}">
+        {% else %}
+            <form action="{{ app_path }}" method="post" id="trns-form">
+                {% csrf_token %}
+                <label for="id_ticker">Ticker:</label>
+                <div class="autocomplete">
+                {{ form.ticker }}
+                </div>
+                <label for="id_quantity">Quantity:</label>
+                {{ form.quantity }}
+                <input id="valbutton" type="button" class="submit-row" onclick="validateButtonOn();" value="VALIDATE">
+                <input id="submitbutton" type="submit" class="submit-row" value="BUY/SELL" disabled>
+            </form>
+        {% endif %}
+        </div>
+    </div>
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent Transactions' %}</h2>
+        <h3>{% if anotheruser %}{{ anotheruser }}'s{% else %}My{%endif%} transactions</h3>
+            
+            {% if not transaction_list %}
+            <p>{% translate 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in transaction_list %}
+            <li class="{% if entry.validation == "SUCCESS" %}{% if entry.quantity > 0 %}buyaction{% else %}sellaction{% endif %}{% else %} failaction {%endif%}">
+                <a href="/agora/ticker/{{entry.ticker}}">{{ entry.viewlistformat }}</a>
+                <br>
+                <span class="mini quiet">Transaction #{{ entry.pk }} -- {{ entry.pub_date }} -- {{ entry.validation }}</span>
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+<script type='text/javascript'>
+    let trnsstatus="{{trnsstatus|safe}}";
+    if(trnsstatus!="NA" && trnsstatus!="TRANSACTION_SUCCESS"){
+        alert(trnsstatus);
+    }
+</script>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+<h2 style="text-align:center;">Portfolio Snapshot</h2>
+<ul id="portfolio"></ul>
+<script type='text/javascript'>
+
+    async function validateButtonOn(){
+        
+        const formdiv=document.getElementById("formdiv");
+        let ulDOM=null;
+        if(!formdiv.querySelector('ul')){
+            ulDOM=document.createElement("ul");
+            ulDOM.className="actionlist";
+            formdiv.appendChild(ulDOM);
+        }
+        else{
+            ulDOM = formdiv.querySelector('ul');
+        }
+        const quantity = formdiv.querySelector('input[name="quantity"]').value;
+        const ticker = formdiv.querySelector('input[name="ticker"]').value;
+        
+        const response = await fetch('/stockdb/_get_last_price?ticker='+ticker);
+        const response_json = await response.json(); // parses JSON response into native JavaScript objects
+        console.log(response_json)
+        if("ERROR" in response_json){
+            ulDOM.innerHTML=`<li class='failaction'>${response_json.ERROR}</li>`;
+            return;
+        }
+        if(!("price" in response_json)){
+            ulDOM.innerHTML=`<li class='failaction'>UNCAUGHT ERROR</li>`;
+            return;
+        }
+
+        const price = response_json.price;
+
+        document.getElementById("valbutton").setAttribute("disabled","disabled");
+        document.getElementById("submitbutton").removeAttribute("disabled");
+
+        ulDOM.innerHTML=`
+        <li class="${ quantity > 0 ? 'buyaction' : 'sellaction'}">
+            <a href="/agora/ticker/${ticker}">
+                ${ quantity > 0 ? 'BUY' : 'SELL'} , ${ticker} , ${Math.abs(quantity)} shares , at \$${price.toFixed(2)}, total ${(Math.abs(price*quantity)).toFixed(2)}
+            </a>
+        </li>`
+    }
+    function validateButtonOff(e){
+        if(document.getElementById("valbutton").hasAttribute("disabled") && e.target.id!="submitbutton"){
+            document.getElementById("valbutton").removeAttribute("disabled");
+            document.getElementById("submitbutton").setAttribute("disabled","disabled");
+        }
+    }
+    document.addEventListener('mousedown', validateButtonOff );
+
+    const portfolio={{portfolio|safe}};
+    const portDOM=document.getElementById("portfolio")
+    Object.keys(portfolio).forEach((key)=>{
+        let newli=document.createElement("li");
+        if(key=="_cash"){
+            newli.innerHTML="Cash: "+portfolio[key].toFixed(2);
+        }
+        else{
+            newli.innerHTML=`<a href='/agora/ticker/${key}'>${key}</a>: ${portfolio[key]}`;
+        }
+        portDOM.appendChild(newli);
+    })
+
+</script>
+
+<script>
+    
+    /*make a ticker list importing static s&p 500 file*/
+    let tickers = [];
+
+    /*execute a function that upload and process s&p 500 text file*/
+    $(document).ready(function() {
+        $.ajax({
+            type: "json",
+            url: "{% static 'portfolio/s&p500.txt' %}",
+            dataType: "text",
+            success: function(data) {tickers = processData(data);}
+        });
+    });
+
+    function processData(allText) {
+        /* This is a function that convert a text file to a list file
+        note that the "tickers" list must be referenced beforehand.
+
+        - input: text file
+        - output: "tickers" list file */
+
+        let allTextLines = allText.split('\r\n');
+        let lineIdx = 0;
+        
+        while (lineIdx < allTextLines.length){
+            lineIdx += 1;
+            let currentLine = allTextLines[lineIdx]
+            tickers.push(currentLine);
+        };
+
+        return tickers;
+    }    
+
+    function autocomplete(user_input, tickers) {
+    /* This is the autocomplete function takes two arguments: 
+    1. user_input: user input parameters
+    2. tickers : The list of stock tickers of possible autocompleted vaules */
+
+    let currentFocus;
+
+    /*execute a function when a user writes texts in the text field:*/
+    user_input.addEventListener("input", function(e) {
+        let div_1st, div_2nd, input_value = this.value;
+
+        /*close any already open lists of autocompleted tickers*/
+        closeAllLists();
+        if (!input_value) {return false;}
+        currentFocus = -1;
+
+        /*create the first DIV element that will contain the items (values):
+        and append the first DIV element as a child of the autocomplete container*/
+        div_1st = document.createElement("DIV");
+        div_1st.setAttribute("id", this.id + "autocomplete-list");
+        div_1st.setAttribute("class", "autocomplete-items");
+        this.parentNode.appendChild(div_1st);
+
+        /*for each ticker in tickers */
+        for (let i = 0; i < tickers.length -1; i++) {
+
+            /*check if the ticker include the letters that user wrote in the text field*/
+            if (tickers[i].toUpperCase().includes(input_value.toUpperCase())) {
+
+            /*create the second DIV element for each matching element
+            Then, slice the name of the ticker(bold) and information parts in the ticker */
+            div_2nd = document.createElement("DIV");
+            let ticker_end = tickers[i].indexOf(',')
+            let company_end = tickers[i].lastIndexOf(',')
+            div_2nd.innerHTML = "<strong>" + tickers[i].substr(0, ticker_end) + "</strong>";
+            div_2nd.innerHTML += "   "+ tickers[i].substr(ticker_end + 1, );
+            div_2nd.innerHTML += "<input type='hidden' value='" + tickers[i] + "'>";
+
+            /*execute a function that print the ticker name on the textfield 
+            when the user clicks on the ticker value (DIV element):*/
+            div_2nd.addEventListener("click", function(e) {
+                user_input.value = this.getElementsByTagName("input")[0].value.substr(0, ticker_end);
+                closeAllLists();
+            });
+
+            div_1st.appendChild(div_2nd);
+            }
+        }
+        });
+    
+    /*execute a function presses a key on the keyboard:*/
+    user_input.addEventListener("keydown", function(e) {
+    let x = document.getElementById(this.id + "autocomplete-list");
+    if (x) x = x.getElementsByTagName("div");
+    if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable
+        and make the current item more visible:*/
+        currentFocus++;
+        addActive(x);
+    } else if (e.keyCode == 38) { 
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable
+        and make the current item more visible:*/
+        currentFocus--;
+        addActive(x);
+    } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, 
+        prevent the form from being submitted,
+        and simulate a click on the "active" item*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+            if (x) x[currentFocus].click();
+        }
+    }
+});
+
+    function addActive(x) {
+        /*This is the function that classifies a ticker as "active":*/
+
+        /*return false if is not excuted*/
+        if (!x) return false;
+
+        /*remove "active" class on all tickers before start*/
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        /*add class "autocomplete-active":*/
+        x[currentFocus].classList.add("autocomplete-active");
+    }
+
+    function removeActive(x) {
+        /*This is the function removes the "active" class from all autocomplete tickers*/
+        for (let i = 0; i < x.length; i++) {
+        x[i].classList.remove("autocomplete-active");
+        }
+    }
+
+    function closeAllLists(element) {
+        /*close all autocomplete tickers in the document,
+        except the one passed:*/
+        let x = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < x.length; i++) {
+            if (element != x[i] && element != user_input) {
+                x[i].parentNode.removeChild(x[i]);
+            }
+        }
+    }
+
+    /*execute a function when the user clicks a ticker in the document:*/
+    document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+    });
+
+}
+
+autocomplete(document.getElementById("id_ticker"), tickers);
+
+</script>
+
+{% comment %}
+<div id="content-related">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endcomment %}
+{% endblock %}
+

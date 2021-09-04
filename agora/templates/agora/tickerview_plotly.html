@@ -1,0 +1,187 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+
+    <div class="module" id="chrt-container" style="min-height:300px;">
+    <h2 style="font-size: 21px;">{{tickerObj.ticker}} - {{tickerObj.name}}</h2>
+        <div id="chartplot"></div>
+        {% comment %} <script src="{% static "home/d3.v4.js" %}"></script>
+        <script src="{% static "home/dbfetch.js" %}"></script>
+        <script src="{% static "portfolio/d3graph.v0.1.js" %}"></script>
+        <script src="{% static "home/functions.v0.200817.js" %}"></script> {% endcomment %}
+        <script src="{% static "home/dbfetch.js" %}"></script>
+        <script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
+        <script id="asyncsrc" async src="{% static "home/plotly.js" %}"></script>
+        <script type="text/javascript">
+        function resize(){
+            window.plotly.layout.width = document.getElementById("chrt-container").clientWidth;
+            window.plotly.layout.height = Math.min(500,window.innerHeight*0.8,window.plotly.layout.width);
+            window.plotly.plot();
+        }
+
+        window.addEventListener('resize', resize)
+        document.addEventListener('fullscreenchange',resize)
+
+        document.getElementById('asyncsrc').addEventListener('load', ()=>{
+            window.plotly.layout.xaxis.autorange=false;
+            delete window.plotly.layout.xaxis['rangeselector'];
+
+            let key='ticker__{{tickerObj.ticker}}';
+            if(key in window.localdb){
+                window.plotly.enter(key);
+                let dateli=window.plotly.data[window.plotly.dataInd[key]].x;
+                let range=[Math.max(0,dateli.length-300),dateli.length-1];
+                window.plotly.layout.xaxis.range = [dateli[range[0]], dateli[range[1]]];
+                let yvalues=window.plotly.data[window.plotly.dataInd[key]].close.slice(range[0],range[1]+1);
+                let yrange=[yvalues[0], yvalues[0]];
+                yvalues.forEach(y => {
+                    if(y){
+                        if(y<yrange[0]){ yrange[0]=y; }
+                        if(y>yrange[1]){ yrange[1]=y; }
+                    }
+                })
+                if(typeof(yrange[0])=="number" && typeof(yrange[1])=="number"){
+                    window.plotly.layout.yaxis2.autorange=false;
+                    window.plotly.layout.yaxis2.range = [Math.log10(yrange[0]),Math.log10(yrange[1])];
+                };
+                resize();
+                if(window.localdb_meta.__todayind-1500<window.localdb[key].strt_date){
+                    let req={};
+                    req[key]=window.localdb_meta.__todayind-1500;
+                    fetchDB(req).then((response_json)=>{
+                        window.plotly.enter(key);
+                        resize();
+                        saveLocalDB();
+                    });
+                }
+            }
+            else{
+                let req={};
+                req[key]=window.localdb_meta.__todayind-1500;
+                fetchDB(req).then((response_json)=>{
+                    window.plotly.enter(key);
+                    let dateli=window.plotly.data[window.plotly.dataInd[key]].x;
+                    let range=[Math.max(0,dateli.length-300),dateli.length-1];
+                    window.plotly.layout.xaxis.range = [dateli[range[0]], dateli[range[1]]];
+                    let yvalues=window.plotly.data[window.plotly.dataInd[key]].close.slice(range[0],range[1]+1);
+                    let yrange=[yvalues[0], yvalues[0]];
+                    yvalues.forEach(y => {
+                        if(y){
+                            if(y<yrange[0]){ yrange[0]=y; }
+                            if(y>yrange[1]){ yrange[1]=y; }
+                        }
+                    })
+                    if(typeof(yrange[0])=="number" && typeof(yrange[1])=="number"){
+                        window.plotly.layout.yaxis2.autorange=false;
+                        window.plotly.layout.yaxis2.range = [Math.log10(yrange[0]),Math.log10(yrange[1])];
+                    };
+                    resize();
+                    saveLocalDB();
+                });
+            }
+        })
+        </script>
+    </div>
+
+    <div class="module" id="recent-actions-module">
+        <div style="margin:10px;">
+            {% if user.is_authenticated %}
+            <form action="{{ app_path }}" method="post" id="memo-form" style="padding: 10px 0;display:flex;">
+                {% csrf_token %}
+                {{ form }}
+                <input type="hidden" name="flag" id="id_flag" value="add"/>
+                <input type="submit" class="submit-row" value="{% translate 'Add' %}" style="float: right;">
+            </form>
+            {% else %}
+            <input type="submit" class="submit-row" value="Log In is required to leave a memo">
+            {% endif %}
+
+        </div>
+
+    <h2>{% translate 'Recent Memos' %}</h2>
+        {% if not memo_list %}
+        <div><p>{% translate 'No memo yet' %}</p></div>
+        {% else %}
+        <ul class="memolist">
+        {% for entry in memo_list %}
+        <li class="memo">
+            {% if entry.ischild%}
+            <div class="memo-indent"></div>
+            {% endif %}
+            <div class="memo-name"><a href="/portfolio/overview/{{ entry.memo.author }}">{{ entry.memo.author }}</a></div>
+            <span class="memo-content"> {{ entry.memo.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.memo.pub_date | date:"Y/m/d" }}</span>
+                <div>
+                {% if entry.addform %}
+                <button type="button" onclick="document.getElementById('memo-form-{{entry.parentpk}}').style.display='flex';">reply</button>
+                {% endif %}
+                {% if entry.delenable %}
+                <form action="{{ app_path }}" method="post" id="del-form-{{entry.memo.pk}}">
+                    {% csrf_token %}
+                    <input type="hidden" name="content" id="id_content" value="None" />
+                    <input type="hidden" name="flag" value="del" />
+                    <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.memo.pk }}">
+                    <button type="button" class='del' style="color:var(" onclick="document.getElementById('del-form-{{entry.memo.pk}}').submit();return false;">del</button>
+                </form>
+                {% endif %}
+                </div>
+            </div>
+            {% if entry.addform %}
+            </li><li class="memo">
+            <div class="memo-indent"></div>
+            <div class="memo-content">
+            <form action="{{ app_path }}" method="post" id="memo-form-{{entry.parentpk}}" style="padding: 10px 0 35px 0;display:none;">
+                {% csrf_token %}
+                {{ entry.addform.content.errors }}
+                {{ entry.addform.content }}
+                <input type="hidden" name="flag" id="id_flag" value="add" />
+                <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.parentpk }}">
+                <input type="submit" class="submit-row" value="{% translate 'Add' %}" style="float: right;">
+            </form>
+            </div>
+            </li><li class="memo">
+            {% endif %}
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+
+
+{% if alert_msg %}
+<script>
+    alert("{{alert_msg}}");
+    window.location.replace("/agora/")
+</script>
+{% endif %}
+{% comment %}
+<div id="content-related">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endcomment %}
+{% endblock %}
+

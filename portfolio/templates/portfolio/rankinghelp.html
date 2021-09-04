@@ -1,0 +1,75 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+
+<script src="{% static "portfolio/rankingbadge.v0.js" %}"></script>
+<div id="content-main" style="
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+    margin: 30px 0;
+    font-family: 'Azonix';
+">
+
+</div>
+
+<script>
+
+    const content_main = document.getElementById('content-main')
+
+    for(let i = 0 ; i < 11 ; i++){
+        const div = document.createElement('div');
+        content_main.appendChild(div)
+        div.style.setProperty('display','flex');
+        div.style.setProperty('justify-content','space-evenly');
+        div.style.setProperty('align-items','center');
+        div.style.setProperty('text-align','center');
+        div.style.setProperty('height','40px');
+        div.style.setProperty('margin','13px 0');
+        div.style.setProperty('width','50%');
+        div.innerHTML=`<div style="width:80px;color: var(--link-fg);">LEVEL&nbsp;${(i==10) ? '+' : i }</div>
+            <svg style="width:13px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"></svg>`;
+        if(i == 0){
+            div.innerHTML+=`<div style='width: 50px;'>\<${100*(2**(1/3)).toFixed(2)}k</div>`;
+        }
+        else if(i == 10){
+            div.innerHTML+=`<div style='width: 50px;'>\>1M</div>`;
+        }
+        else{
+            div.innerHTML+=`<div style='width: 50px;'>${100*(2**(i/3)).toFixed(2)}k</div>`;
+        }
+    }
+
+    document.querySelectorAll('svg').forEach( (d,i) => {
+        
+        const level = i+1;
+        const asset = 100000*(2**(i/3))+1
+        
+        d.innerHTML=npolyGen(i+3,25,75,11);//13);
+        d.style.width='65px';
+    });
+
+    document.getElementById('content-main').querySelectorAll('p.badgeRow').forEach( (d,i) => {
+        d.innerText += ((1.25992105)**i).toFixed(2);
+    });
+
+    
+    
+
+</script>
+
+{% endblock %}

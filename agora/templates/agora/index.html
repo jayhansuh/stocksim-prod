@@ -1,0 +1,132 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+
+<div id="content-main">
+    
+    <div class="module" id="search-actions-module">
+        <h2>Recent Tickers</h2>
+        <div id="formdiv" style="
+            margin:10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap:wrap;">
+            <input id="tickerinput" type="text" name="ticker" maxlength="16" placeholder="Ticker Lookup">
+            <input type="submit" class="submit-row" onclick="window.location='/agora/ticker/'+document.getElementById('tickerinput').value;" value="Enter" style="height: 27px;line-height: 7px;margin:5px;">
+            
+            <div style="display: flex;flex-wrap: wrap;justify-content:center;">
+            {% for ticker in ticker_list%}
+            <div style='margin:10px 20px;'>
+                <a href="/agora/ticker/{{ticker.ticker}}">{{ticker.ticker}}</a>
+            </div>
+            {% endfor %}
+            </div> 
+        </div>
+    </div>
+
+
+    <div class="module" id="search-actions-module">
+        <h2>Recent Players</h2>
+        <div style="max-width:100%;overflow: auto;">
+        <table id="portfolioboard" class="module" style="width:100%;text-align: center;box-shadow: none;margin-bottom: 5px;">
+        <thead>
+            <tr>
+            <th scope="col" colspan="1" style="width:10%;">Name</th>
+            <th scope="col" colspan="1" style="width:20%;">AllTime</th>
+            <th scope="col" colspan="5" style="width:70%;">Top 5 Positions(weight)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for player in player_list %}
+        <tr>
+            <td><a href="/portfolio/overview/{{ player.name }}">{{ player.name }}</a></td>
+            <td>{{ player.asset | floatformat:"2g" }}</td>
+            {% for topholding in player.topholdings%}
+            <td>
+            <div style="display:flex;">
+            {% if topholding %}
+                {% ifequal topholding.ticker 'Cash' %}
+                <div style="width: 40px;padding-right: .6em;">{{ topholding.ticker }}</div>{{ topholding.percent }}
+                {% else %}
+                <a href="/agora/ticker/{{ topholding.ticker }}" style="width: 40px;padding-right: .6em;">{{ topholding.ticker }}</a>{{ topholding.percent }}
+                {% endifequal %}
+            {% endif %}
+            {% endfor %}
+            </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="module" id="recent-actions-module">
+
+    <h2>{% translate 'Recently Added Memos' %}</h2>
+        {% if not memo_recent_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="memolist">
+        {% for entry in memo_recent_list %}
+        <li class="memo">
+            <div class="memo-name">
+                <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
+                <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
+            </div>
+            <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
+            </div>
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+            
+    </div>
+
+
+    <div class="module" id="recent-actions-module">
+
+    <h2>{% translate 'Your Memos' %}</h2>
+        {% if not memo_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="memolist">
+        {% for entry in memo_list %}
+        <li class="memo">
+            <div class="memo-name">
+                <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
+                <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
+            </div>
+            <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
+            </div>
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+            
+    </div>
+</div>
+
+{% endblock %}
+

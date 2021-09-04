@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Stocksim') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="/">
+        <div class="glow" id="rectlogo"> {{ site_header|default:'StockSim' }} </div>
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div>
+    <div class="glowdimshort" ><a href="/">Welcome</a>,</div>
+{% if user.is_authenticated%}
+    <div class="glowdimshort" ><a href="/portfolio/" style="color: var(--link-fg);">{{user}} </a></div> -
+    <div class="glowdimshort"><a href="/agora/">AGORA</a></div> -
+    <div class="glowdimshort"><a href="/accounts/logout/">Log Out</a></div>
+{% else %}
+    <div class="glowdimshort" >Anonymous</div> -
+    <div class="glowdimshort"><a href="/accounts/login/?next={{ request.get_full_path|urlencode }}">Log In</a></div>
+{% endif %}
+
+</div>
+{% endblock %}
+
+{% block content_title %}
+{% if title_nav %}
+<h1>
+    <div style="display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    flex-wrap: wrap;">
+
+    {% if title_nav.img %}
+    <div class="glowdimshort" style="margin:0 -10px 0 15px;">{{title_nav.img|safe}}</div>
+    {% endif %}
+    <div class="glowdimshort" style="margin:0 15px;">
+    {% if username %}<a href='/portfolio/overview/{{username}}'>{{username}}</a>{% else %}Anonymous{% endif %}
+    </div>
+    <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
+    <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
+    <div class="glowdimshort" style="margin:0 15px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+    </div>
+</h1>
+{% endif %}
+{% endblock %}

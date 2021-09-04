@@ -1,0 +1,48 @@
+
+-- python manage.py sqlmigrate portfolio 0001
+-- sqlite3 db.sqlite3 ".dump portfolio_transaction" > output.txt
+
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS "portfolio_transaction" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "ticker" varchar(16) NOT NULL, "price" real NOT NULL, "player_id" bigint NOT NULL REFERENCES "portfolio_player" ("id") DEFERRABLE INITIALLY DEFERRED, "quantity" integer NOT NULL, "validation" varchar(16) NULL, "pub_date" datetime NOT NULL);
+
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(6,'MRNA',126.00000000000000088,2,240,'SUCCESS','2021-03-08 13:21:38');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(7,'COST',309.92500000000000603,2,100,'SUCCESS','2021-03-05 13:21:38');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(8,'AMD',80.010000000000012221,2,375,'SUCCESS','2021-05-03 12:00:00');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(9,'MRNA',222.82499694824218217,2,1,'SUCCESS','2021-07-07 19:42:13.958922');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(10,'MRNA',222.41999816894533203,2,-1,'SUCCESS','2021-07-07 19:46:39.632692');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(11,'MRNA',221.8999938964843821,2,1,'SUCCESS','2021-07-07 20:33:52.179024');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(12,'MRNA',221.8999938964843821,2,10000000,'NotEnoughCash','2021-07-07 20:45:13.881172');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(13,'MRNA',221.8999938964843821,2,-1000000,'NotEnoughShares','2021-07-07 20:54:05.155657');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(14,'MRNA',221.8999938964843821,2,-1000000,'NotEnoughShares','2021-07-07 20:56:40.463584');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(15,'MRNA',221.8999938964843821,2,1,'SUCCESS','2021-07-07 21:04:05.526382');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(16,'MRNA',221.8999938964843821,2,1,'SUCCESS','2021-07-07 21:04:24.215214');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(17,'MRNA',221.8999938964843821,2,1,'SUCCESS','2021-07-07 21:04:28.349699');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(18,'MRNA',221.8999938964843821,2,0,'SUCCESS','2021-07-07 21:07:22.306426');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(19,'MRNA',221.8999938964843821,2,0,'SUCCESS','2021-07-07 21:14:56.288847');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(20,'MRNA',221.8999938964843821,2,-1,'SUCCESS','2021-07-07 21:25:24.372306');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(21,'MRNA',221.8999938964843821,2,-1,'SUCCESS','2021-07-07 21:26:37.235613');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(22,'MRNA',221.8999938964843821,2,-1,'SUCCESS','2021-07-07 21:26:38.887287');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(23,'AAPL',144.57000732421874111,2,1,'SUCCESS','2021-07-07 21:42:15.133512');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(24,'AAPL',144.57000732421874111,2,1,'SUCCESS','2021-07-07 21:45:21.104298');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(25,'AAPL',144.57000732421874111,2,-1,'SUCCESS','2021-07-07 21:45:31.793489');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(26,'AAPL',144.57000732421874111,2,100,'NotEnoughCash','2021-07-07 21:45:42.816160');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(27,'AAPL',144.57000732421874111,2,100,'NotEnoughCash','2021-07-07 21:46:48.484414');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(28,'AAPL',144.57000732421874111,2,100,'NotEnoughCash','2021-07-07 21:47:07.075860');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(29,'AAPL',144.57000732421874111,2,1,'SUCCESS','2021-07-07 22:32:40.765761');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(30,'AAPL',144.57000732421874111,2,1,'SUCCESS','2021-07-07 22:34:10.745428');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(31,'AAPL',144.57000732421874111,2,7,'SUCCESS','2021-07-08 01:28:03.222388');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(32,'MRNA',221.8999938964843821,2,1000000000,'NotEnoughCash','2021-07-08 01:28:49.764052');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(33,'MRNA',221.8999938964843821,2,-1000000000,'NotEnoughShares','2021-07-08 01:29:09.391259');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(34,'AAPL',143.24000549316407315,2,50,'NotEnoughCash','2021-07-09 04:34:16.608820');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(35,'MRNA',232.7899932861328125,2,-100,'SUCCESS','2021-07-09 04:34:48.445987');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(36,'AAPL',143.24000549316407315,2,50,'SUCCESS','2021-07-09 04:34:56.087256');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(37,'MRNA',232.80999755859372868,2,1,'SUCCESS','2021-07-09 22:01:08.960046');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(38,'MRNA',239.33999633789060368,2,1,'SUCCESS','2021-07-13 09:51:44.643593');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(39,'MRNA',239.33999633789060368,2,1,'SUCCESS','2021-07-13 09:51:48.597432');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(40,'MRNA',239.33999633789060368,2,1,'SUCCESS','2021-07-13 09:51:49.849693');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(41,'MRNA',239.33999633789060368,2,1,'SUCCESS','2021-07-13 09:52:43.770018');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(42,'MRNA',239.33999633789060368,2,1,'SUCCESS','2021-07-13 09:54:18.724277');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(43,'MRNA',239.33999633789060368,2,-1,'SUCCESS','2021-07-13 09:54:25.365238');
+INSERT INTO portfolio_transaction (id,ticker,price,player_id,quantity,validation,pub_date) VALUES(44,'UPRO',119.34999847412108842,1,1,'SUCCESS','2021-07-14 06:34:14.166158');
+COMMIT;

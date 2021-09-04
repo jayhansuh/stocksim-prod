@@ -1,0 +1,191 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="{% static "home/dbfetch.js" %}"></script>
+<script src="{% static "portfolio/d3graph.v0.1.js" %}"></script>
+<script src="{% static "home/functions.v0.200817.js" %}"></script>
+
+<div id="content-main">
+
+
+    <div class="module" id="chrt-container" style="padding:10px;">
+    <h2 style="font-size: 21px;">{{tickerObj.ticker}} - {{tickerObj.name}}</h2>
+
+        <svg id='graph' style='width:100%'></svg>
+        <script type="text/javascript">
+
+        document.getElementById('content').style.setProperty('max-width','none');
+        
+        const window_size = 200 ;
+        const strt_date_max1 = window.localdb_meta.__todayind - 10 * window_size;
+        const strt_date_max2 = window.localdb_meta.__todayind - 1 * window_size;
+        const graph=new d3graph(d3.select("svg#graph"),0)
+        const graphDOM=document.getElementById("graph");
+        const chrt_container=document.getElementById("chrt-container");
+        window.gr=graph;
+        graph.y2color=null;
+        graph.margin = {top: 20, right: 20, bottom: 20, left: 40};
+
+        let key='ticker__{{tickerObj.ticker}}';
+        let fetchedDat = window.localdb[key];
+        if(fetchedDat){
+            initDraw(fetchedDat)
+        }
+        if( (!fetchedDat) || fetchedDat.strt_date>strt_date_max1 || fetchedDat.end_date<window.localdb_meta.__todayind){
+            let req={};
+            req[key]=strt_date_max1;
+            fetchDB(req).then((response_json)=>{
+                if(!(key in window.localdb)){
+                    alert('No data available now');
+                    window.location = '/agora/';
+                }
+                fetchedDat = window.localdb[key];
+                initDraw(fetchedDat);
+                saveLocalDB();
+            })
+        };
+        graphDOM.addEventListener("wheel", function(e) {
+            scrollZoom(e.deltaY);
+            event.preventDefault();
+        }, false);
+
+        function initDraw(fetchedDat){
+            graph.data=[]
+            graph.strt_date = Math.max(strt_date_max1,fetchedDat.strt_date);
+            graph.plot_index = Math.max(0,strt_date_max2 - graph.strt_date);
+            
+            transpose([
+                fetchedDat.High.slice(graph.strt_date - fetchedDat.strt_date),
+                fetchedDat.Low.slice(graph.strt_date - fetchedDat.strt_date),
+                fetchedDat.Open.slice(graph.strt_date - fetchedDat.strt_date),
+                fetchedDat.Close.slice(graph.strt_date - fetchedDat.strt_date)
+            ]).forEach( d => {
+                graph.appendDatum(d);
+            })
+
+            graph.width=graphDOM.clientWidth
+            graph.height=Math.min(600,window.innerHeight*0.8,graph.width);
+            graphDOM.style.height=graph.height+"px";
+            //graph.draw();
+            graph.update();
+            window.addEventListener('resize', resize)
+            document.addEventListener('fullscreenchange',resize)
+        }
+
+        function resize(){
+            document.getElementById("graph").style.width=document.getElementById("chrt-container").clientWidth;
+            graph.width=graphDOM.clientWidth
+            graph.height=Math.min(600,window.innerHeight*0.8,graph.width);
+            graphDOM.style.height=graph.height+"px";
+            graph.update();
+        }
+
+        function scrollZoom(dy){
+            graph.plot_index = Math.max( 0 , Math.min( graph.data.length-160 , graph.plot_index - Math.floor(dy/4) ) );
+            resize();
+        }
+        </script>
+    </div>
+
+    <div class="module" id="recent-actions-module">
+        <div style="margin:10px;">
+            {% if user.is_authenticated %}
+            <form action="{{ app_path }}" method="post" id="memo-form" style="padding: 10px 0;display:flex;">
+                {% csrf_token %}
+                {{ form }}
+                <input type="hidden" name="flag" id="id_flag" value="add"/>
+                <input type="submit" class="submit-row" value="{% translate 'Add' %}" style="float: right;">
+            </form>
+            {% else %}
+            <input type="submit" class="submit-row" value="Log In is required to leave a memo">
+            {% endif %}
+
+        </div>
+
+    <h2>{% translate 'Recent Memos' %}</h2>
+        {% if not memo_list %}
+        <div><p>{% translate 'No memo yet' %}</p></div>
+        {% else %}
+        <ul class="memolist">
+        {% for entry in memo_list %}
+        <li class="memo">
+            {% if entry.ischild%}
+            <div class="memo-indent"></div>
+            {% endif %}
+            <div class="memo-name"><a href="/portfolio/overview/{{ entry.memo.author }}">{{ entry.memo.author }}</a></div>
+            <span class="memo-content"> {{ entry.memo.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.memo.pub_date | date:"Y/m/d" }}</span>
+                <div>
+                {% if entry.addform %}
+                <button type="button" onclick="document.getElementById('memo-form-{{entry.parentpk}}').style.display='flex';">reply</button>
+                {% endif %}
+                {% if entry.delenable %}
+                <form action="{{ app_path }}" method="post" id="del-form-{{entry.memo.pk}}">
+                    {% csrf_token %}
+                    <input type="hidden" name="content" id="id_content" value="None" />
+                    <input type="hidden" name="flag" value="del" />
+                    <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.memo.pk }}">
+                    <button type="button" class='del' style="color:var(" onclick="document.getElementById('del-form-{{entry.memo.pk}}').submit();return false;">del</button>
+                </form>
+                {% endif %}
+                </div>
+            </div>
+            {% if entry.addform %}
+            </li><li class="memo">
+            <div class="memo-indent"></div>
+            <div class="memo-content">
+            <form action="{{ app_path }}" method="post" id="memo-form-{{entry.parentpk}}" style="padding: 10px 0 35px 0;display:none;">
+                {% csrf_token %}
+                {{ entry.addform.content.errors }}
+                {{ entry.addform.content }}
+                <input type="hidden" name="flag" id="id_flag" value="add" />
+                <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.parentpk }}">
+                <input type="submit" class="submit-row" value="{% translate 'Add' %}" style="float: right;">
+            </form>
+            </div>
+            </li><li class="memo">
+            {% endif %}
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block sidebar %}
+
+
+{% if alert_msg %}
+<script>
+    alert("{{alert_msg}}");
+    window.location.replace("/agora/")
+</script>
+{% endif %}
+{% comment %}
+<div id="content-related">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endcomment %}
+{% endblock %}
+

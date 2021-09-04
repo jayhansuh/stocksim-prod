@@ -1,0 +1,195 @@
+
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+
+<style>
+    svg {
+	//box-shadow: -40px 5px 40px -5px rgba(0,0,0,0.2);
+	//border-radius: 5px;
+	//margin: 20px;
+}
+    .draggable {
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+    }
+
+    .dragging {
+        cursor: grabbing;
+        cursor: -moz-grabbing;
+        cursor: -webkit-grabbing;
+    }
+
+
+</style>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script> {% endcomment %}
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script src="{% static 'portfolio/d3chart.js' %}"></script>
+<svg width="100%" height="500px" id="chart">
+</svg>
+<script>
+
+    const svg=d3.select("svg#chart")
+    chrt=new d3chart(svg,1,"svg#chart");
+
+    chrt.addRectRow({
+        portfolio_quant:{{last_history.quant|safe}},
+        portfolio_money:{{last_history.amount|safe}},
+        date:"{{last_history.Date|date}}",
+        asset:{{last_history.asset|safe}},
+    })
+
+    svg.attr('height',document.querySelector("svg#chart").clientHeight-25);
+
+    draginit();
+
+   
+    chrt.svg.selectAll("rect")
+    .data(chrt.pointlist)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .call(dragOn);
+    window.addEventListener('resize', resizeChrt);
+
+    // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
+    // use curve monotone y
+    // https://archive.nytimes.com/www.nytimes.com/interactive/2012/10/15/us/politics/swing-history.html
+
+</script>
+
+<div style="
+    display:flex;
+    justify-content: center;
+    align-items:flex-start;
+    flex-wrap: wrap;
+">
+
+<div style="
+    display:flex;
+    justify-content: center;
+    flex-direction:column;
+    align-items:center;
+    margin:0 17px;
+    max-width: 100%;
+">
+
+    <div class="module multicol" id="recent-actions-module" style="height: fit-content;">
+        <h2>{% translate 'Portfolio' %} (<a href="/portfolio/history/{{username}}">view history</a>)</h2>
+        <div style="max-width:100%;overflow: auto;">
+        <table id="portfolioboard" class="module" style="width:100%;text-align: center;box-shadow: none;margin-bottom: 5px;">
+        <thead>
+            <tr>
+            <th scope="col">Ticker</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Price</th>
+            <th scope="col">Value({{ asset |floatformat:"2g" }})</th>
+            <th scope="col">Weight(100%)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in portfolioOverview %}
+            <tr>
+            <td>
+            {% ifequal row.ticker 'Cash(USD)' %}
+            {{ row.ticker }}
+            {% else %}
+            <a href="/agora/ticker/{{ row.ticker }}">{{ row.ticker }}</a>
+            {% endifequal %}
+            </td>
+            <td>
+            {{ row.quantity }}
+            </td>
+            <td>
+            {{ row.price }}
+            </td>
+            <td>
+            {{ row.value | floatformat:"2g" }}
+            </td>
+            <td>
+            {{ row.weight }}
+            </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+        </div>
+    </div>
+
+    <div class="module multicol" id="recent-actions-module">
+        <h2>{% translate 'Transactions' %} (<a href="/portfolio/transactions/{{username}}">trade</a>)</h2>
+        {% if not transaction_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="actionlist">
+        {% for entry in transaction_list %}
+        <li class="{% if entry.validation == "SUCCESS" %}{% if entry.quantity > 0 %}buyaction{% else %}sellaction{% endif %}{% else %} failaction {%endif%}">
+            <a href="/agora/ticker/{{entry.ticker}}">{{ entry.viewlistformat }}</a>
+            <br>
+            <span class="mini quiet">Transaction #{{ entry.pk }} -- {{ entry.pub_date }} -- {{ entry.validation }}</span>
+        </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="module multicol" id="recent-actions-module" style="max-width:630px">
+<h2>{% translate 'Memos' %} (<a href="/agora/hashtag/{{username}}">more</a>)</h2>
+    {% if not memo_list %}
+    <p>{% translate 'None available' %}</p>
+    {% else %}
+    <ul class="memolist" style="margin: 0;padding: 0;">
+    {% for entry in memo_list %}
+    <li class="memo">
+        <div class="memo-name">
+            <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
+            <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
+        </div>
+        <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
+        <div class="memo-date">
+            <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
+        </div>
+    </li>
+    <hr>
+    {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+</div>
+{% endblock %}
+
+
+

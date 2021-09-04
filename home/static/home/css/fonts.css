@@ -1,0 +1,57 @@
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Bold-webfont.woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Regular-webfont.woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../fonts/Roboto-Light-webfont.woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Vogue';
+    src: url('../fonts/Vogue.ttf');
+}
+
+@font-face {
+    font-family: 'Heaters';
+    src: url('../fonts/Heaters.otf');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'PaybAck';
+    src: url('../fonts/PaybAck.ttf');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Akira Expanded Demo';
+    src: url('../fonts/Akira Expanded Demo.otf');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Azonix';
+    src: url('../fonts/Azonix.otf');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'STJEDISE';
+    src: url('../fonts/STJEDISE.ttf');
+    font-weight: 300;
+    font-style: normal;
+}

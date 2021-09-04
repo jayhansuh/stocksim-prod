@@ -1,0 +1,47 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+
+{% block content %}
+<div id="content-main" style="
+    display:flex;
+    flex-direction:column;
+    align-items: center;
+    height:80vh;
+    justify-content: center;
+">
+    <div class="glowdim" style="
+        margin: 50px 10px;
+        width:500px;
+        height:300px;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        max-width: 80vw;
+    ">
+        <div style="
+            text-align:center;
+            color:white;
+            {% if css_style %}
+            {{css_style}}
+            {% endif %}
+        ">{{construction_msg}}</div>
+    </div>
+</div>
+
+{% endblock %}
+
+

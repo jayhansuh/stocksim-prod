@@ -1,0 +1,112 @@
+
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+
+
+<style>
+    svg {
+	//box-shadow: -40px 5px 40px -5px rgba(0,0,0,0.2);
+	//border-radius: 5px;
+	//margin: 20px;
+}
+    .draggable {
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+    }
+
+    .dragging {
+        cursor: grabbing;
+        cursor: -moz-grabbing;
+        cursor: -webkit-grabbing;
+    }
+
+
+</style>
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script> {% endcomment %}
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script src="{% static 'portfolio/d3chart.js' %}"></script>
+
+<svg width="100%">
+</svg>
+<div id="test"></div>
+<script>
+
+    const svg=d3.select("svg")
+    chrt=new d3chart(svg,{{history_list|length}});
+    {% if mag_ratio %}
+    chrt.rectWidth=chrt.rectWidth*{{mag_ratio}};
+    {% endif %}
+    let portfolio={};
+    let date="";
+    let asset=0.;
+    {% if history_list %}
+        {% for history in history_list %}
+
+            chrt.addRectRow({
+                portfolio_quant:{{history.quant|safe}},
+                portfolio_money:{{history.amount|safe}},
+                date:"{{history.Date|date}}",
+                asset:{{history.asset|safe}},
+            })
+
+        {% endfor %}
+    {% else %}
+
+    {% endif %}
+
+    draginit();
+
+    var loop = setInterval(() =>{
+        if(chrt.animationPlaying<5){
+                chrt.svg.selectAll("rect")
+                .data(chrt.pointlist)
+                .on("mouseover", handleMouseOver)
+                .on("mouseout", handleMouseOut)
+                .call(dragOn);
+                clearInterval(loop);
+        }
+    }, 30);
+
+    window.addEventListener('resize', resizeChrt);
+
+    // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
+    // use curve monotone y
+    // https://archive.nytimes.com/www.nytimes.com/interactive/2012/10/15/us/politics/swing-history.html
+
+</script>
+{% endblock %}
+
+
+

@@ -1,0 +1,31 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} login{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+
+
+<div class="submit-row">{% translate "Thanks for visiting StockSim today." %}</div>
+
+<div class="submit-row"><p><a href="/">{% translate 'Home' %}</a></p></div>
+
+<div class="submit-row"><p><a href="/accounts/login/">{% translate 'Log in again' %}</a></p></div>
+
+{% endblock %}

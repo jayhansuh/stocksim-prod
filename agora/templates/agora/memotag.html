@@ -1,0 +1,48 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+
+    <div class="module" id="recent-actions-module">
+
+    <h2>{% translate 'Recent Memos' %}</h2>
+        {% if not memo_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="memolist">
+        {% for entry in memo_list %}
+        <li class="memo">
+            <div class="memo-name">
+                <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
+                <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
+            </div>
+            <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
+            </div>
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
+

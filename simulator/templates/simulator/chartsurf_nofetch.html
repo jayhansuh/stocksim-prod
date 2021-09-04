@@ -1,0 +1,461 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block header %}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+	<link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+
+{% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script> {% endcomment %}
+{% comment %} <script src="https://d3js.org/d3.v7.min.js"></script> {% endcomment %}
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="{% static "home/dbfetch.js" %}"></script>
+<script src="{% static "portfolio/d3graph.v0.1.js" %}"></script>
+<script src="{% static "home/functions.v0.200817.js" %}"></script>
+		
+{% if fetchedDat %}
+{{ fetchedDat | json_script:"fetchedDat" }}
+{% endif %}
+
+<div id="content-main" style="
+	display:flex;
+	justify-content:center;
+	height:100vh;
+	align-items:center;
+	width: 100vw;
+	position: absolute;
+	top: 0;
+	left: 0;
+	">
+
+	<div id="chrt-container" style="
+		min-height:300px;
+		max-width:1000px;
+		height:70%;
+		width:calc(90% - 160px);
+		min-width: 700px;
+		margin:15px;
+		">
+		<svg id="graph" width="100%" height="100%"></svg>
+	</div>
+	<div style="
+		display:flex;
+		flex-direction:column;
+		min-height:300px;
+		width: 100px;
+		height:70%;
+		margin:15px;
+		font-family: 'Azonix';
+	">
+		<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;">
+			<div>Days</div>
+			<input type="text" id="days" value='1/365' style="
+					width: 63%;
+					text-align:center;
+					background-color: #252525;
+					margin: 5px 0;">
+		</div>
+		<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;margin: 2px 0;">
+			<div>Position</div>
+			<div>-100%~200%</div>
+			<input type="text" id="pos" value='0' style="
+					width: 43%;
+					background-color: #252525;
+					text-align:right;
+					margin: 5px 0;">
+		</div>
+		<div style="display:flex;align-items:center;flex-direction:column;justify-content:center;">
+			<div>Asset</div>
+			<input type="text" id="asset" value='1000' style="
+					width: 43%;
+					background-color: #252525;
+					text-align:right;
+					margin: 5px 0;">
+		</div>
+		<svg id="posbar" style="
+		    width: 100%;
+    		flex-grow: 1;
+    		margin: 2px;
+		">
+		</svg>
+		<div class='glowdim glowColored'>
+			Next✔
+		</div>
+		<div class='glowdim glowColored' style="
+			color : #4c4;
+			box-shadow: inset 0 0 45px 0px rgba(0,255,0,0.1),
+				inset 0px 0px 1.5px 1.5px #6b6,
+				inset 0px 0px 1.5px 1.5px #6b6,
+				0 0 1.5px 1.5px #6b6;">
+			Play▷
+		</div>
+		<div style="display:flex;width:100%;margin: 2px;">
+			<div class='glowdim glowColored' style="
+				margin: 0 2px 0 0;
+			    width: 50%;">
+				△
+			</div>
+			<div class='glowdim glowColored' style="
+				margin: 0 0 0 2px;
+			    width: 50%;">
+				▽
+			</div>
+		</div>
+		<div class='glowdim glowColored' style="
+			color : #b66;
+			box-shadow: inset 0 0 45px 0px rgba(255,0,0,0.1),
+				inset 0px 0px 1.5px 1.5px #b66,
+				inset 0px 0px 1.5px 1.5px #b66,
+				0 0 1.5px 1.5px #b66;">
+			Quit✘
+		</div>
+	</div>
+</div>
+
+<form action="{{ app_path }}" method="post" id="QJOI" style="display:none">
+	{% csrf_token %}
+	{{ form.OHUQ.as_hidden }}
+	{{ form.AGLW.as_hidden }}
+</form>
+
+<script type="text/javascript">
+
+	{% if redirect %}
+	setTimeout(()=>{window.location = "/simulator/";},3000);
+	{% endif %}
+	{% if fetchedDat %}
+    const fetchedDat = JSON.parse(document.getElementById('fetchedDat').textContent);
+	{% else %}
+	alert("Unable to download data now. Please try again later.")
+	window.location="/simulator/";
+	{% endif %}
+
+	const ticker =  "{{ticker}}" ;
+	const strt_date = fetchedDat['strt_date']
+	
+	const colors = {
+		'r' : ['#c55','rgba(255,0,0,0.1)'],
+		'g' : ['#5c5','rgba(0,255,0,0.1)'],
+		'b' : ['#55c','rgba(0,0,255,0.1)'],
+		'a' : ['#888','rgba(255,255,255,0.1)'],
+		
+		'r-mi' : ['#f77','rgba(255,0,0,0.1)'],
+		'g-mi' : ['#7f7','rgba(0,255,0,0.1)'],
+		'b-mi' : ['#77f','rgba(0,0,255,0.1)'],
+
+		'r-br' : ['#f77','rgba(255,100,100,0.5)','rgba(255,100,100,0.5)'],
+		'g-br' : ['#7f7','rgba(100,255,100,0.5)','rgba(100,255,100,0.5)'],
+		'b-br' : ['#77f','rgba(100,100,255,0.7)','rgba(100,100,255,0.7)'],
+		'a-br' : ['#ddd','rgba(255,255,255,0.5)','rgba(255,255,255,0.5)'],
+	}
+
+	function setColor(el,carr){
+		el.style.setProperty('color', carr[0]);
+		el.style.setProperty( 'box-shadow' , `inset 0 0 45px 0px ${carr[1]},
+				inset 0px 0px 1.5px 1.5px ${carr[0]},
+				inset 0px 0px 1.5px 1.5px ${carr[0]},
+				0 0 1.5px 1.5px ${carr[0]}`);
+		if(carr[2]){
+			el.style.setProperty( 'box-shadow' , 
+			el.style.boxShadow+`, 0 0 45px 0px ${carr[2]}`);
+		};
+	}
+
+
+	const graph=new d3graph(d3.select("svg#graph"),strt_date)
+	const posbar = new d3posbar('posbar')
+	window.gr=graph;
+	window.pb=posbar;
+	graph.margin = {top: 20, right: 40, bottom: 30, left: 40};
+
+	const window_size = 200 ;
+	window.index = window_size;
+	transpose([
+		fetchedDat.High.slice(0,window.index),
+		fetchedDat.Low.slice(0,window.index),
+		fetchedDat.Open.slice(0,window.index),
+		fetchedDat.Close.slice(0,window.index)
+	]).forEach( d => {
+		graph.appendDatum(d);
+	})
+
+	graph.height=document.getElementById('chrt-container').clientHeight;
+	graph.width=document.getElementById('chrt-container').clientWidth;
+	graph.draw();
+	function resize(){
+		graph.height=document.getElementById('chrt-container').clientHeight;
+		graph.width=document.getElementById('chrt-container').clientWidth;
+		graph.update();
+		posbar.update();
+	}
+	window.addEventListener('resize', resize)
+	document.addEventListener('fullscreenchange',resize)
+	
+	function onestepQue(){
+		const max_que=2;
+		if(graph.inputdata_que.length>max_que){return;}
+		graph.inputdata_que.push({
+			'High':fetchedDat.High[window.index],
+			'Low':fetchedDat.Low[window.index],
+			'Open':fetchedDat.Open[window.index],
+			'Close':fetchedDat.Close[window.index]
+		});
+		graph.digest_que(0,()=>{
+			document.getElementById("pos").value=`${Math.round(graph.player.pos*100)}`;
+			document.getElementById("asset").value=`${Math.round(graph.player.asset)}`;
+			posbar.update( (1-graph.player.pos) * graph.player.asset  , graph.player.pos * graph.player.asset)
+		})
+		window.index+=1;
+		const days = window.index - window_size + 1;
+		document.getElementById("days").value = `${days}/365`;
+		if( days > 364 ){
+			pause();
+			setColor(cntButtons[1],colors[ccodemap[1]]);
+			setTimeout( gameSummary , (max_que+1) * window.gr.ANIM_INTERVAL);
+		}
+	}
+	
+	function play(){
+		if(!window.playInterval){
+			window.playInterval = setInterval(onestepQue,graph.PLAY_INTERVAL);
+		}
+	}
+
+	function pause(){
+		if(window.playInterval){
+			clearInterval(window.playInterval);
+			window.playInterval = null ;
+		}
+	}
+
+	function gameSummary(){
+
+		const myprofit = (graph.player.asset/1000 - 1)*100;			
+		const indprofit = (graph.data[ graph.data.length - 1 ].Close/graph.data[ window_size - 1 ].Close - 1)*100;
+
+		window.guidelayer.style.removeProperty('display');
+		window.guidelayer.style.setProperty('opacity','0.4');
+
+		window.tip1.style.setProperty('display','flex');
+		//window.tip1.style.setProperty('flex-direction','column');
+		window.tip1.style.setProperty('opacity','1');
+		window.tip1.style.setProperty('color','white');
+		function profitFormat(profit){
+			return `<div style="display:inline;color:${profit<0 ? 'LightCoral':'LawnGreen'};">${(profit).toFixed(2)}%</div>`;
+		}
+		function profitDescript(deltaProfit){
+			if(deltaProfit>0){
+				return `<div style="font-size: 10px;line-height: 2;margin: 0 30px;color: aquamarine;">CONGRATS! You outperformed the index by ${(deltaProfit).toFixed(2)}%</div>`;
+			}
+			return '';
+		}
+		document.getElementById('QJOI').querySelector('input#id_AGLW').value = ((myprofit/100)*1000*100).toFixed(0)
+		window.tip1.innerHTML=`
+		<div style="font-size: 14px;">TICKER | ${ticker}</div>
+		<div style="line-height: 1.5;"> ${indtodate( strt_date + (window_size - 1) )}  /  ${indtodate( strt_date + (window_size -1 ) + (365 -1))}</div>
+		<div style="padding: 10px 0 0 8px;">YOUR PROFIT | ${profitFormat(myprofit)}</div>
+		<div>INDEX PROFIT | ${profitFormat(indprofit)}</div>
+		${profitDescript(myprofit-indprofit)}
+		<div>GAIN FOR PORTFOLIO | <div style="display:inline;color:aquamarine;">\$${(Math.max(0,myprofit/100*1000)).toFixed(2)}</div></div>
+		<div><a href="javascript:{}" onclick="document.getElementById('QJOI').submit();" style="margin: 10px 0 0 0;">Receive & TRY AGAIN</a></div>
+		<div><a href="/simulator/"> NO GAIN & BACK TO MENU</a></div>`
+	}
+
+	function quitFunction(){
+		window.guidelayer.style.removeProperty('display');
+		window.guidelayer.style.setProperty('opacity','0.4');
+		
+		window.tip1.style.setProperty('display','flex');
+		//window.tip1.style.setProperty('flex-direction','column');
+		window.tip1.style.setProperty('opacity','1');
+		window.tip1.style.setProperty('color','white');
+		window.tip1.innerHTML=`
+		Your progress will not be saved
+		<br>Do you want to quit?
+		<br><a href="/simulator/" style="margin: 10px 0 0 0;">Yes</a>
+		<a style="color:var(--link-fg);cursor:pointer;" onclick='window.navbarclick(0);'>No</a>`
+	}
+
+	function cntClick(code){
+		
+		const el = cntButtons[code];
+		const c = ccodemap[code];
+		
+		const days = window.index - window_size +1;
+		if( days > 364 ){ pause(); return }
+
+		if(code==1){
+			el.style.setProperty( 'transition' , 'color 0.5s, box-shadow 0.5s');
+			if(window.playInterval){
+				pause();
+				setColor(el,colors[c]);
+			}
+			else{
+				play();
+				setColor(el,colors[c+'-br']);
+			}
+		}
+		else{
+			
+			if(code==0){
+				onestepQue();
+			}
+			else if(code==2 || code==3){
+				const pos_val = Math.max(graph.min_pos * 100,
+					Math.min(graph.max_pos * 100,
+					parseInt(document.getElementById("pos").value) + ((code==2) ? 20 : -20) ));
+				document.getElementById("pos").value=`${pos_val}`;
+				graph.player.pos=pos_val/100.;
+				posbar.update( (1-graph.player.pos) * graph.player.asset  , graph.player.pos * graph.player.asset)
+			}
+			else if(code ==4 ){
+				quitFunction();
+			}
+
+			el.style.setProperty('transition','');
+			setColor(el,colors[c+'-br']);
+			setTimeout(()=>{
+				el.style.setProperty( 'transition' , 'color 0.5s, box-shadow 0.5s');
+				setColor(el,colors[c]);
+			},200)
+		}
+	}
+	window.cntClick=cntClick;
+
+	const cntButtons=document.querySelectorAll('.glowColored')
+	const ccodemap={0:'b',1:'g',2:'a',3:'a',4:'r'};
+	for(let i = 0 ; i < 5 ; i++ ){
+		const el = cntButtons[i];
+		const c = ccodemap[i];
+		setColor(el,colors[c]);
+		el.setAttribute('onclick',`window.cntClick(${i});`);
+	}
+
+	const cntdiv=document.querySelector('div.content');
+	const guidelayer = appendGuideLayer(cntdiv);
+	const tip1=appendTextBox(cntdiv);
+	applyStyle(tip1,{
+		'font-size':'11px',
+		'top':'calc(50vh - 200px)',
+		'left':'calc(50vw - 200px)',
+		'padding' : '25px 20px 15px 20px',
+		'width':'360px',
+		'height':'360px',
+		'background' : "rgba(40,40,40,0.8)",
+		'transition': 'color .2s, text-shadow .2s, opacity 0.2s',
+		'flex-direction':'column'
+	})
+	const navbar=document.createElement('div');
+	applyStyle(navbar,{
+		'position':'absolute',
+		'display' : 'flex',
+		'justify-content' : 'space-between',
+		'font-family':'Azonix',
+		'margin' : '0 12px',
+		'width' : 'calc(400px - 2 * 12px)',
+		'font-size':'10px',
+		'top':'calc(50vh + 200px - 18px)',
+		'left':'calc(50vw - 200px)',
+		'z-index':11,
+		'transition': 'opacity 0.2s',
+		'text-shadow': '0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888',
+		'-webkit-touch-callout': 'none',
+		'-webkit-user-select': 'none',
+		'-khtml-user-select': 'none',
+		'-moz-user-select': 'none',
+		'-ms-user-select': 'none',
+		'user-select': 'none',
+		'cursor': 'pointer',
+	})
+	navbar.innerHTML="<div onclick='window.navbarclick(-1);'><a>&lang; prev</a></div>";
+	navbar.innerHTML+="<div onclick='window.navbarclick(0);'><a>skip & start</a></div>";
+	navbar.innerHTML+="<div onclick='window.navbarclick(+1);'><a>next &rang;</a></div>";
+	cntdiv.appendChild(navbar);
+
+	window.guidelayer=guidelayer;
+	window.tip1=tip1;
+	window.navbar=navbar;
+	window.navbarnum = 0;
+	window.navtiparr = [
+
+		`SWING TRADE SIMULATION
+		<br>This is actual data one of the NASDAQ, S&P500, DJIA index
+		<br>It starts from a random date
+		<br>in the past`,
+
+		`SEED MONEY | 1000
+		<br>Asset calculation | Daily basis
+		<br>Total period | 365 days
+		<br>ASSET = CASH + INVESTED
+		<br>Position = INVESTED / ASSET x 100`,
+
+		`Press → to jump to the next day
+		<br>Press ↑ ↓ to change position ±20%
+		<br>Press spacebar to auto skip days`,
+
+		`<div>After 365 days you will be</div>
+		<div>returned with the profit you made</div>
+		<div>(daily maximum gain is 1000)</div>
+		<div>Losses will not be passed on you</div>
+		<div>Now it's time to begin the game</div>`,
+	]
+	{% if alert_msg %}
+	window.navtiparr.unshift(`{{alert_msg|safe}}`)
+	{% endif %}
+	window.tip1.innerHTML = window.navtiparr[window.navbarnum];
+	window.keyboardListner = null;
+	window.navbarclick = (code) => {
+		if(code==1){ window.navbarnum += 1 }
+		else if(code==-1){ window.navbarnum -= 1 };
+		if(window.navbarnum < 0 ){ window.navbarnum = 0 };
+
+		window.tip1.style.setProperty('color','transparent');
+		window.tip1.style.setProperty('text-shadow','none');
+		if(code == 0 || window.navbarnum == window.navtiparr.length){
+			window.guidelayer.style.setProperty('opacity','0');
+			window.tip1.style.setProperty('opacity','0');
+			window.navbar.style.setProperty('opacity','0');
+		}
+
+		setTimeout(() => {
+			if(code == 0 || window.navbarnum == window.navtiparr.length){
+				window.guidelayer.style.setProperty('display','none');
+				window.tip1.style.setProperty('display','none');
+				window.navbar.style.setProperty('display','none');
+				if(!window.keyboardListner){
+					window.keyboardListner=true;
+					document.addEventListener('keydown',(e)=>{
+						e.preventDefault();
+						if (e.code === 'ArrowRight') {window.cntClick(0);}
+						else if (e.code === 'Space'){window.cntClick(1);}
+						else if (e.code === 'ArrowUp') {window.cntClick(2);}
+						else if (e.code === 'ArrowDown') {window.cntClick(3);}
+						else if (e.code === 'Escape') {window.cntClick(4);}
+					})
+				}
+				return
+			}
+			window.tip1.innerHTML = window.navtiparr[window.navbarnum];
+			window.tip1.style.setProperty('color','white');
+			window.tip1.style.setProperty('text-shadow', '0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888');
+		},200);
+	}
+
+	// Original code https://observablehq.com/@d3/candlestick-chart
+	
+
+</script>
+
+{% endblock %}
+
+

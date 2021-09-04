@@ -1,0 +1,332 @@
+
+svg{
+  font-family: "Azonix";
+}
+
+div .glow {
+    margin: 5px 0;
+    width: 195px;
+    height: 33px;
+    font-size: 24px;
+    box-shadow:
+      inset 0 0 45px 0px #fff,
+      inset 0px 0px 1.5px 1.5px #fff,
+      inset 0px 0px 1.5px 1.5px #fff,
+      0 0 1.5px 1.5px #fff,
+      0px 0 45px #fff;
+    text-shadow:
+      0 0 5.4px #fff,
+      0px 0px 1.5px white,
+      0px 0px 0.6px #fff,
+      0px 0 36px #ffffff;
+    
+    line-height: 36.4px;
+    text-align: center;
+    color: white;
+
+    font-family: 'Azonix';
+    letter-spacing: 3px;
+
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+     -khtml-user-select: none; 
+       -moz-user-select: none; 
+        -ms-user-select: none; 
+            user-select: none;
+
+    transform: scale(1);
+}
+
+
+div .glowdim {
+  margin: 2px;
+  width: 195px;
+  height: 33px;
+  font-size: 17px;
+  box-shadow:
+    inset 0 0 45px 0px #555,
+    inset 0px 0px 1.5px 1.5px #ccc,
+    inset 0px 0px 1.5px 1.5px #ccc,
+    0 0 1.5px 1.5px #ccc,
+    0px 0 45px #555;
+  text-shadow:
+    0 0 5.4px #555,
+    0px 0px 1.5px #555,
+    0px 0px 0.6px #555,
+    0px 0 36px #555;
+  
+  line-height: 36.4px;
+  text-align: center;
+  color: white;
+
+  font-family: 'Azonix';
+  letter-spacing: 3px;
+
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+    -khtml-user-select: none; 
+      -moz-user-select: none; 
+      -ms-user-select: none; 
+          user-select: none;
+
+  transform: scale(1);
+}
+
+div .glowdimMobile {
+  position: absolute;
+  top: calc( 50% - 25px);
+  left: 5%;
+  width: 90%;
+  height: 50px;
+  font-size: 20px;
+  box-shadow: inset 0 0 50px 0px #fff, inset 0px 0px 2px 0px #fff, inset 0px 0px 3px 3px #fff, 0 0 3px 3px #fff, 0px 0 150px #fff;
+  text-shadow: 0 0 18px #fff, 0px 0px 5px white, 0px 0px 2px #fff, 0px 0 120px #ffffff;
+  line-height: 54px;
+  text-align: center;
+  color: white;
+  font-family: 'Azonix';
+  letter-spacing: 10px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+div .glowdimshort:hover {
+  color: gray;
+}
+
+div .glowdimshort {
+  /*width: 125px;*/
+  height: 24px;
+  font-size: 14px;
+  display: inline-block;
+  /* box-shadow:
+    inset 0 0 45px 0px #555,
+    inset 0px 0px 1.5px 1.5px #ccc,
+    inset 0px 0px 1.5px 1.5px #ccc,
+    0 0 1.5px 1.5px #ccc,
+    0px 0 45px #555; */
+  text-shadow:
+    0 0 5.4px #555,
+    0px 0px 1.5px #555,
+    0px 0px 0.6px #555,
+    0px 0 36px #555,
+    0px 0 12px #888;
+  line-height: 28px;
+  text-align: center;
+  color: white;
+
+  font-family: 'Azonix';
+
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+   -khtml-user-select: none; 
+     -moz-user-select: none; 
+      -ms-user-select: none; 
+          user-select: none;
+
+
+    letter-spacing: 3px;
+}
+
+div .glowmain {
+    position: absolute;
+    top: calc(50% - 50px);
+    left: calc(50vw - 325px);
+    width: 650px;
+    height: 110px;
+    font-size: 80px;
+    box-shadow:
+      inset 0 0 150px 0px #fff,
+      inset 0px 0px 5px 5px #fff,
+      inset 0px 0px 5px 5px #fff,
+      0 0 5px 5px #fff,
+      0px 0 150px #fff;
+    text-shadow:
+      0 0 18px #fff,
+      0px 0px 5px white,
+      0px 0px 2px #fff,
+      0px 0 120px #ffffff;
+    
+    line-height: 128px;
+    text-align: center;
+    color: white;
+
+    font-family: 'Azonix';
+    letter-spacing: 10px;
+
+    -webkit-touch-callout: none; 
+    -webkit-user-select: none; 
+     -khtml-user-select: none; 
+       -moz-user-select: none; 
+        -ms-user-select: none; 
+            user-select: none;
+
+}
+
+div .no-mouse-select {
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+   -khtml-user-select: none; 
+     -moz-user-select: none; 
+      -ms-user-select: none; 
+          user-select: none;
+}
+
+#content-main .memolist {
+  padding: 0;
+  margin: 5px 0;
+}
+
+ul.memolist li {
+  list-style-type: none;
+  overflow: hidden;
+  display:flex;
+  text-overflow: ellipsis;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+ul.memolist li div.memo-indent {
+  width:20px;
+  margin : 5px;
+  flex-shrink: 0;
+}
+
+ul.memolist li div.memo-name {
+  width:70px;
+  text-align: center;
+  margin: 5px 0;
+  flex-shrink: 0;
+  overflow-wrap: anywhere;
+}
+
+ul.memolist li .memo-content {
+  margin : 5px;
+  flex-grow:1;
+  flex-shrink:1;
+  overflow-wrap: anywhere;
+}
+
+ul.memolist li div.memo-date {
+  margin : 5px;
+  flex-shrink:0;
+  align-self: flex-end;
+  flex-direction: column;
+}
+
+
+ul.memolist li .memo-date span{
+  display: flex;
+  
+}
+
+ul.memolist li .memo-date div{
+  display: flex;
+
+  flex-direction: row;
+}
+
+ul.memolist button {
+  background: none;
+  color: var(--link-fg);
+  border: none;
+}
+
+ul.memolist form {
+  flex-grow:1;
+}
+
+
+ul.memolist button:hover {
+  color: var(--link-hover-color);
+}
+
+
+ul.memolist td:hover {
+  color:white;
+}
+
+ul.memolist button.del {
+  color: var(--delete-button-bg);
+}
+
+ul.memolist button.del:hover {
+  color: var(--delete-button-hover-bg);
+}
+
+div.multicol {
+  min-width:300px;
+  width:100%;
+  margin:20px;
+}
+
+/* https://css-tricks.com/snippets/css/a-guide-to-flexbox/ */
+
+
+.colMcenter {
+  display: flex;
+  justify-content: center;
+}
+
+a.no_underline:link { text-decoration: none; }
+
+a.no_underline:visited { text-decoration: none; }
+
+a.no_underline:hover { text-decoration: none; }
+
+a.no_underline:active { text-decoration: none; }
+
+
+div .glowColored{
+  width: 100%;
+  font-size: 14px;
+  color : #666;
+  text-shadow : none;
+  box-shadow: inset 0 0 45px 0px rgba(255,255,255,0.1),
+    inset 0px 0px 1.5px 1.5px #666,
+    inset 0px 0px 1.5px 1.5px #666,
+    0 0 1.5px 1.5px #666;
+}
+
+div.glowColored:hover{
+  cursor: pointer;
+}
+
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+.autocomplete-items { 
+  position: absolute;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  top: 100%; /*position the autocomplete items to be the same width as the container:*/
+  left: 0;
+  right: 0;
+  width: 400px;
+}
+
+.autocomplete-items div {
+  padding: 5px 6px;
+  cursor: pointer;
+  background-color: #333; 
+  border-bottom: 1px solid rgba(0,0,0,0.5); 
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #222; 
+}
+
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important; 
+  color: #ffffff; 
+}

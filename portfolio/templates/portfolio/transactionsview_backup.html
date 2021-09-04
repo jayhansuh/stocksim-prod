@@ -1,0 +1,136 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module" id="make-actions-module">
+        
+        <h2>{% translate 'Make Transaction (positive quantity to buy, negative quantity to sell)' %}</h2>
+        <div id="formdiv" style="margin:10px;">
+        {% if anotheruser %}
+            <input type="submit" class="submit-row" value="{% translate 'You are not authorized to place an order for ' %}{{anotheruser}}">
+        {% else %}
+            <form action="{{ app_path }}" method="post" id="trns-form">
+                {% csrf_token %}
+                {{ form }}
+                <input id="valbutton" type="button" class="submit-row" onclick="validateButtonOn();" value="VALIDATE">
+                <input id="submitbutton" type="submit" class="submit-row" value="BUY/SELL" disabled>
+            </form>
+        {% endif %}
+        </div>
+    </div>
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent Transactions' %}</h2>
+        <h3>{% if anotheruser %}{{ anotheruser }}'s{% else %}My{%endif%} transactions</h3>
+            
+            {% if not transaction_list %}
+            <p>{% translate 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in transaction_list %}
+            <li class="{% if entry.validation == "SUCCESS" %}{% if entry.quantity > 0 %}buyaction{% else %}sellaction{% endif %}{% else %} failaction {%endif%}">
+                <a href="/agora/ticker/{{entry.ticker}}">{{ entry.viewlistformat }}</a>
+                <br>
+                <span class="mini quiet">Transaction #{{ entry.pk }} -- {{ entry.pub_date }} -- {{ entry.validation }}</span>
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+<script type='text/javascript'>
+    let trnsstatus="{{trnsstatus|safe}}";
+    if(trnsstatus!="NA" && trnsstatus!="TRANSACTION_SUCCESS"){
+        alert(trnsstatus);
+    }
+</script>
+
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+<h2 style="text-align:center;">Portfolio Snapshot</h2>
+<ul id="portfolio"></ul>
+<script type='text/javascript'>
+
+    async function validateButtonOn(){
+        
+        const formdiv=document.getElementById("formdiv");
+        let ulDOM=null;
+        if(!formdiv.querySelector('ul')){
+            ulDOM=document.createElement("ul");
+            ulDOM.className="actionlist";
+            formdiv.appendChild(ulDOM);
+        }
+        else{
+            ulDOM = formdiv.querySelector('ul');
+        }
+        const quantity = formdiv.querySelector('input[name="quantity"]').value;
+        const ticker = formdiv.querySelector('input[name="ticker"]').value;
+        
+        const response = await fetch('/stockdb/_get_last_price?ticker='+ticker);
+        const response_json = await response.json(); // parses JSON response into native JavaScript objects
+        console.log(response_json)
+        if("ERROR" in response_json){
+            ulDOM.innerHTML=`<li class='failaction'>${response_json.ERROR}</li>`;
+            return;
+        }
+        if(!("price" in response_json)){
+            ulDOM.innerHTML=`<li class='failaction'>UNCAUGHT ERROR</li>`;
+            return;
+        }
+
+        const price = response_json.price;
+
+        document.getElementById("valbutton").setAttribute("disabled","disabled");
+        document.getElementById("submitbutton").removeAttribute("disabled");
+
+        ulDOM.innerHTML=`
+        <li class="${ quantity > 0 ? 'buyaction' : 'sellaction'}">
+            <a href="/agora/ticker/${ticker}">
+                ${ quantity > 0 ? 'BUY' : 'SELL'} , ${ticker} , ${Math.abs(quantity)} shares , at \$${price.toFixed(2)}, total ${(Math.abs(price*quantity)).toFixed(2)}
+            </a>
+        </li>`
+    }
+    function validateButtonOff(e){
+        if(document.getElementById("valbutton").hasAttribute("disabled") && e.target.id!="submitbutton"){
+            document.getElementById("valbutton").removeAttribute("disabled");
+            document.getElementById("submitbutton").setAttribute("disabled","disabled");
+        }
+    }
+    document.addEventListener('mousedown', validateButtonOff );
+
+    const portfolio={{portfolio|safe}};
+    const portDOM=document.getElementById("portfolio")
+    Object.keys(portfolio).forEach((key)=>{
+        let newli=document.createElement("li");
+        if(key=="_cash"){
+            newli.innerHTML="Cash: "+portfolio[key].toFixed(2);
+        }
+        else{
+            newli.innerHTML=`<a href='/agora/ticker/${key}'>${key}</a>: ${portfolio[key]}`;
+        }
+        portDOM.appendChild(newli);
+    })
+
+</script>
+{% comment %}
+<div id="content-related">
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endcomment %}
+{% endblock %}
+
