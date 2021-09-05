@@ -1,5 +1,5 @@
 # Custom Django ignore files
-# **/migrations/**
+**/migrations/**
 *.sqlite3
 
 ## Ignore Visual Studio temporary files, build results, and
