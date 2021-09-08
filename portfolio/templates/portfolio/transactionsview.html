@@ -141,14 +141,11 @@
     let tickers = [];
 
     /*execute a function that upload and process s&p 500 text file*/
-    $(document).ready(function() {
-        $.ajax({
-            type: "json",
-            url: "{% static 'portfolio/s&p500.txt' %}",
-            dataType: "text",
-            success: function(data) {tickers = processData(data);}
-        });
-    });
+    async function getTicker(){
+        const response = await fetch("{% static 'portfolio/snp500.txt' %}")
+        const response_text = await response.text();
+        return response_text.split('\n');
+    }
 
     function processData(allText) {
         /* This is a function that convert a text file to a list file
@@ -285,7 +282,7 @@
 
 }
 
-autocomplete(document.getElementById("id_ticker"), tickers);
+getTicker().then(tickers => autocomplete(document.getElementById("id_ticker"), tickers));
 
 </script>
 
