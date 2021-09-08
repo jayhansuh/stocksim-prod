@@ -50,13 +50,13 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 ## Browser localstorage
 
-1. Add date marking to call clearLocalDB function
+1. Add date marking to call clearLocalDB function (JYL)
 
 ## Main page & Table UI
 
 1. Add page numbers to transaction or memo lists
 
-2. Replace ticker name by today's change and MA25 number
+2. Replace ticker name by today's change and MA25 number (JYL)
 
 3. Add stocksim index line
 
@@ -64,13 +64,17 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 ## Database & Server hosting
 
-1. Migrate server hosting service to Azure from pythonanywhere
+1. Migrate server hosting service to Azure from pythonanywhere (HGS)
 
-2. Redesign job scheduler
+2. Redesign job scheduler (HGS)
 
 3. Yf bulk download
 
 4. Marking tickers and players needed to be updated
+
+5. International stocks(Mainly Korea and European countries not listed on Yahoo finance)
+
+6. Dividend update
 
 ## Agora/Portfolio model
 
@@ -99,3 +103,11 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 3. Build a basic VR by using three.js like https://www.cryptovoxels.com/
 
 4. Npm parcel and source code minimization or js obfuscation
+
+5. Language preference(eng default) and auto translation
+
+6. Azonix font to special letters and Korean letters
+
+7. Mobile app
+
+8. License and terms of use / about us page
