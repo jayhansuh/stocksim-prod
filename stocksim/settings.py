@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-!o7dquqgiq9-p2%p17voz3okf)qv-b5cc25qkvkkn_4zx9#w72'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS =  []#['.localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS =  ['stocksim.net','www.stocksim.net']#['.localhost', '127.0.0.1', '[::1]']
 
 
 # Application definition
@@ -78,23 +78,23 @@ WSGI_APPLICATION = 'stocksim.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'localdb.sqlite3',
-        #'OPTIONS': {'charset': 'utf8mb4'},
-    }
-}
-
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'hankyulsuh$default',
-#         'USER': 'hankyulsuh',
-#         'PASSWORD': 'eR79@NZST8CadFc',
-#         'HOST': 'hankyulsuh.mysql.pythonanywhere-services.com',
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'localdb.sqlite3',
+#         #'OPTIONS': {'charset': 'utf8mb4'},
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hankyulsuh$default',
+        'USER': 'hankyulsuh',
+        'PASSWORD': 'eR79@NZST8CadFc',
+        'HOST': 'hankyulsuh.mysql.pythonanywhere-services.com',
+    }
+}
 
 
 # Password validation
@@ -134,7 +134,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = "/home/hankyulsuh/stocksim/stocksim/static"
+STATIC_ROOT = "/home/hankyulsuh/static-stocksim"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
