@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,14 +80,29 @@ WSGI_APPLICATION = 'stocksim.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'localdb.sqlite3',
-        #'OPTIONS': {'charset': 'utf8mb4'},
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django',
+        'USER': 'hansuh@stocksim-db',
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': 'stocksim-db.postgres.database.azure.com',
+        'PORT': '5432',
+        "OPTIONS": { "sslmode" : "require" },
     }
 }
 
+### local DB ###
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'localdb.sqlite3',
+#         #'OPTIONS': {'charset': 'utf8mb4'},
+#     }
+# }
+
+### pythonanywhere mysql ###
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
