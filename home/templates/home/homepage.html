@@ -374,8 +374,12 @@
       if(window.localdb["ticker__" +dailyDOM.id]){
 
         let [da,ma] =  getTBdata(dailyDOM.id);
-
-        if((da.toFixed(2) + '%')!=dailyDOM.innerHTML){
+        
+        if(da=="NA"){
+          dailyDOM.style.color="white";
+          dailyDOM.innerHTML=da;
+        }
+        else if((da.toFixed(2) + '%')!=dailyDOM.innerHTML){
           dailyDOM.style.color="white";
           dailyDOM.innerHTML = (da.toFixed(2) + '%');
           setTimeout(()=>{
@@ -383,7 +387,11 @@
           },300)
         };
 
-        if((ma.toFixed(2) + '%')!=ma25DOM.innerHTML){
+        if(ma=="NA"){
+          ma25DOM.style.color="white";
+          ma25DOM.innerHTML=ma;
+        }
+        else if((ma.toFixed(2) + '%')!=ma25DOM.innerHTML){
           ma25DOM.style.color="white";
           ma25DOM.innerHTML = (ma.toFixed(2) + '%');
           setTimeout(()=>{

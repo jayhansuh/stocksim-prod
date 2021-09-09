@@ -1,14 +1,21 @@
 //Initializing window.localdb
-window.localdb_meta = JSON.parse(window.localStorage.getItem("localdb_meta"));
-if (!window.localdb_meta) {
-    window.localdb_meta = {__keys:[]};
+function initLocalDB(){
+    window.localdb_meta = JSON.parse(window.localStorage.getItem("localdb_meta"));
+    if (!window.localdb_meta) {
+        window.localdb_meta = {
+            __keys:[],
+            __lastcleardayind : Math.floor((Date.now()-(new Date(1900,0,1)).getTime())/(24*60*60*1000))+1
+        };
+    }
+    window.localdb={};
+    window.localdb_meta.__keys.forEach((key)=>{
+        window.localdb[key]=JSON.parse(window.localStorage.getItem(key))
+    })
+    window.localdb_meta['__todayind']=Math.floor((Date.now()-(new Date(1900,0,1)).getTime())/(24*60*60*1000))+1;
 }
-window.localdb={};
-window.localdb_meta.__keys.forEach((key)=>{
-    window.localdb[key]=JSON.parse(window.localStorage.getItem(key))
-})
 
-window.localdb_meta['__todayind']=Math.floor((Date.now()-(new Date(1900,0,1)).getTime())/(24*60*60*1000))+1;
+initLocalDB();
+refreshLocalDB(44447);//"2021-09-09"
 
 function saveLocalDB(){
     if(window.localdb_meta.__keys.length===0){
@@ -38,9 +45,20 @@ function saveLocalDB(){
 }
 
 function clearLocalDB(){
+    console.log("clearLocalDB");
     window.localdb={};
-    window.localdb_meta = {__keys:[]};
+    window.localdb_meta = {
+        __keys:[],
+        __lastcleardayind : Math.floor((Date.now()-(new Date(1900,0,1)).getTime())/(24*60*60*1000))+1
+    };
     window.localStorage.clear();
+}
+
+function refreshLocalDB(dateind){
+    if( !window.localdb_meta['__lastcleardayind'] || window.localdb_meta['__lastcleardayind'] < dateind){
+        clearLocalDB();
+        initLocalDB();
+    }
 }
 
 function updateData(newdata,target){
