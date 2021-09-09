@@ -11,10 +11,8 @@ from stockdb.models import *
 from stockdb.makedb import *
 
 def updateALL(date,lastprice_set=None):
-
     if(not lastprice_set):
         lastprice_set={}
-
     ticker_que=Ticker.objects.exclude(ticker__in=["_QUECONTROL","WORK"])
     player_que=Player.objects.all()
 
