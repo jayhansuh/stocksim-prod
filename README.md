@@ -81,6 +81,10 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 4. Marking tickers and players needed to be updated
 
+5. International stocks(Mainly Korea and European countries not listed on Yahoo finance)
+
+6. Dividend update
+
 ## Agora/Portfolio model (JYL)
 
 1. follower list (*)
@@ -108,3 +112,11 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 3. Build a basic VR by using three.js like https://www.cryptovoxels.com/
 
 4. Npm parcel and source code minimization or js obfuscation
+
+5. Language preference(eng default) and auto translation
+
+6. Azonix font to special letters and Korean letters
+
+7. Mobile app
+
+8. License and terms of use / about us page (*)
