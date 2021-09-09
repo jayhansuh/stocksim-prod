@@ -80,6 +80,7 @@
       <tr>
         <th scope="col">Ticker</th>
         <th scope="col">name</th>
+        <th scope="col">daily</th>
         <th scope="col">Chart</th>
       </tr>
     </thead>
@@ -92,6 +93,7 @@
         <td>
         {{ ticker.name | safe }}
         </td>
+        <td class = "daily" id = "{{ticker.ticker}}"></td>
         <td>
         <input type="checkbox" id="chbx:{{ ticker.ticker | safe }}" onclick="tickerCheckBox('{{ ticker.ticker | safe }}');">
         </td>
@@ -317,6 +319,56 @@
     return (new Date(1900,0,ind)).getMonth();
   };
 
+  function searchLocalDB(tag, name, property){
+    let key = tag + '__' + name;
+    return window.localdb[key][property];
+  };
+
+  function getDailyFluct(ticker_name){
+    let close_set = searchLocalDB("ticker",ticker_name,"Close");
+    let pnt = close_set.length -1;
+    let currnt_price = close_set[pnt];
+    while(!currnt_price){currnt_price = close_set[pnt]};
+    pnt -=1;
+    let prvs_price = close_set[pnt];
+    while(!prvs_price){prvs_price = close_set[pnt]};
+    return ((currnt_price-prvs_price)/prvs_price*100).toFixed(2).toString() + '%';
+  };
+
+  function enterDailyFluct() {
+    let tableElement = tickerboard;
+    let daily_list = tableElement.getElementsByClassName("daily");
+    let len = daily_list.length;
+    for(let i =0; i<len; i++){
+      let x = daily_list[i];
+      if(window.localdb["ticker__" +x.id])
+      x.innerHTML = getDailyFluct(x.id);
+    };
+  };
+  function makeDailyData(tag){
+
+    let data=[];
+ 
+    Object.keys(window.localdb).forEach((el)=>{
+      let key=el.split("__");
+      if(key[0]!=tag){return;};
+
+      let strt_date=window.localdb[el].strt_date;
+      let currnt_date=window.localdb[el].end_date;
+      while(currnt_date > strt_date && !window.localdb[el].Close[end_date-strt_date-1]){currnt_date-=1};
+      let previous_date=currnt_date-1;
+      while(previous_date > strt_date && !window.localdb[el].Close[end_date-strt_date-1]){previous_date-=1};
+
+      let latest_price = window.localdb[el].Close[currnt_date];
+      let previous_close = window.localdb[el].Close[previous_date];
+      let daily_fluct = (lastest_price - previous_close)/previous_close;
+
+      data.push([ key[1], daily_fluct ]);
+    });
+    return data;
+  }
+
+
   //function makeRankingBoardData(tableId){
   function makeTableData(tag){
 
@@ -341,6 +393,7 @@
 
     return data;
   }
+
 
   function enterTableData(tableId, data, sortind){
 
@@ -528,11 +581,11 @@
   })
 
   function initPlayerData(){
-
+    
     window.rbdata = makeTableData("player");
     enterTableData("rankingboard", window.rbdata , 0 );
     enterTableData("rankingboard", window.rbdata , 2 );
-
+    enterDailyFluct();
     Object.keys(window.localdb).forEach((key)=>{
       if(key.split("__")[0]=="player"){
         window.plotly.enter(key,DISPLAY_DATES)
@@ -599,7 +652,7 @@
         window.rbdata = makeTableData("player");
         enterTableData("rankingboard", window.rbdata , 0 );
         enterTableData("rankingboard", window.rbdata , 2 );
-
+        enterDailyFluct();
         Object.keys(window.localdb).forEach((key)=>{
           if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
             window.plotly.enter(key,DISPLAY_DATES)
