@@ -40,13 +40,16 @@ CSS flexbox
 https://youtu.be/7neASrWEFEM
 https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
+
 # To Do v1
+
+(*) are milestone markings for the first release version
 
 ## How To pages
 
-1. Add graphics to the How-To pages for Main, Swing trade game
+1. Add graphics to the How-To pages for Main, Swing trade game (*)
 
-2. Mobile version How-To
+2. Mobile version How-To (*)
 
 ## Browser localstorage
 
@@ -54,41 +57,47 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 ## Main page & Table UI
 
-1. Add page numbers to transaction or memo lists
+1. Add page numbers to transaction or memo lists (*)
 
-2. Replace ticker name by today's change and MA25 number
+2. Replace ticker name by today's change and MA25 number (JYL)\
+
+2.1 Update localdb for today's change of tickers (HGS)
 
 3. Add stocksim index line
 
-4. Use d3.js for main page chart
+4. Use d3.js for main page chart (*)
+
+5. number of asset lines based on follower list (JYL)
+
+6. Discontinous animation during entry mode scroll (*)
 
 ## Database & Server hosting
 
-1. Migrate server hosting service to Azure from pythonanywhere
+1. Migrate server hosting service to Azure from pythonanywhere (HGS)
 
-2. Redesign job scheduler
+2. Redesign job scheduler (HGS)
 
 3. Yf bulk download
 
 4. Marking tickers and players needed to be updated
 
-## Agora/Portfolio model
+## Agora/Portfolio model (JYL)
 
-1. follower list
+1. follower list (*)
 
-2. favorite tickers
+2. favorite tickers (*)
 
-3. Show filtered player list in the main page
+3. Show filtered player list in the main page (*)
 
-4. Agora configuration based on follower or ticker list
+4. Agora configuration based on follower or ticker list (*)
 
-5. Add news article link and headline for tickers
+5. Add news article link and headline for tickers (*)
 
 ## Registration
 
-1. SNS login system
+1. SNS login system (*)
 
-2. Referral code system
+2. Referral code system (*)
 
 ## Etc
 
