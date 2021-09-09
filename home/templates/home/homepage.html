@@ -486,7 +486,7 @@
 
   document.querySelector(".plot-container.plotly").style.display="inline-block";
 
-  let request={"recent_players":13,"update_trigger":true};
+  let request={"recent_players":14,"update_trigger":true};
   Object.keys(window.localdb).forEach((key)=>{
       request[key]=window.localdb[key].end_date-1;
   });
