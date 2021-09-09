@@ -79,8 +79,9 @@
     <thead>
       <tr>
         <th scope="col">Ticker</th>
-        <th scope="col">name</th>
+        {% comment %} <th scope="col">name</th> {% endcomment %}
         <th scope="col">daily</th>
+        <th scope="col">ma25{% comment %} ℹ️{% endcomment %}</th> 
         <th scope="col">Chart</th>
       </tr>
     </thead>
@@ -90,10 +91,11 @@
         <td>
         <a href="/agora/ticker/{{ ticker.ticker }}">{{ ticker.ticker }}</a>
         </td>
-        <td>
+        {% comment %} <td>
         {{ ticker.name | safe }}
-        </td>
-        <td class = "daily" id = "{{ticker.ticker}}"></td>
+        </td> {% endcomment %}
+        <td class = "daily" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+        <td class = "ma25" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
         <td>
         <input type="checkbox" id="chbx:{{ ticker.ticker | safe }}" onclick="tickerCheckBox('{{ ticker.ticker | safe }}');">
         </td>
@@ -328,21 +330,69 @@
     let close_set = searchLocalDB("ticker",ticker_name,"Close");
     let pnt = close_set.length -1;
     let currnt_price = close_set[pnt];
-    while(!currnt_price){currnt_price = close_set[pnt]};
+    while(!currnt_price){currnt_price = close_set[pnt]};//pnt-=1 inside?
     pnt -=1;
     let prvs_price = close_set[pnt];
     while(!prvs_price){prvs_price = close_set[pnt]};
-    return ((currnt_price-prvs_price)/prvs_price*100).toFixed(2).toString() + '%';
+    return ((currnt_price-prvs_price)/prvs_price*100).toFixed(2).toString() + '%';//toString not needed
+  };
+
+  function getTBdata(ticker_name){
+    
+    const close_set = window.localdb[`ticker__${ticker_name}`]["Close"];
+  
+    let pnt = close_set.length -1;
+    let last_prices = [];
+    while( pnt>=0 && last_prices.length<=25 ){
+      let price = close_set[pnt]
+      if(price){last_prices.push(price)};
+      pnt=pnt-1;
+    }
+
+    let daily_str = "NA";
+    let ma25_str = "NA";
+    if(last_prices.length>1){daily_str = ((last_prices[0]-last_prices[1])/last_prices[1]*100)}
+    if(last_prices.length>24){
+      const ma25_price=Mathavg(last_prices.slice(0,25));
+      ma25_str = ((last_prices[0]-ma25_price)/ma25_price*100)
+    }
+
+    return [daily_str,ma25_str];
   };
 
   function enterDailyFluct() {
-    let tableElement = tickerboard;
-    let daily_list = tableElement.getElementsByClassName("daily");
-    let len = daily_list.length;
+    
+    const daily_list = tickerboard.getElementsByClassName("daily");
+    const ma25_list = tickerboard.getElementsByClassName("ma25");
+    const len = daily_list.length;
+    
     for(let i =0; i<len; i++){
-      let x = daily_list[i];
-      if(window.localdb["ticker__" +x.id])
-      x.innerHTML = getDailyFluct(x.id);
+      
+      const dailyDOM = daily_list[i];
+      const ma25DOM = ma25_list[i];
+      //Assuming here dailyDOM.id==ma25DOM.id
+      if(window.localdb["ticker__" +dailyDOM.id]){
+
+        let [da,ma] =  getTBdata(dailyDOM.id);
+
+        if((da.toFixed(2) + '%')!=dailyDOM.innerHTML){
+          dailyDOM.style.color="white";
+          dailyDOM.innerHTML = (da.toFixed(2) + '%');
+          setTimeout(()=>{
+            dailyDOM.style.color=(da<0) ? "LightCoral" : "lightgreen";
+          },300)
+        };
+
+        if((ma.toFixed(2) + '%')!=ma25DOM.innerHTML){
+          ma25DOM.style.color="white";
+          ma25DOM.innerHTML = (ma.toFixed(2) + '%');
+          setTimeout(()=>{
+            ma25DOM.style.color=(ma<0) ? "LightCoral" : "lightgreen";
+          },300)
+        }
+
+      }
+      
     };
   };
   function makeDailyData(tag){
@@ -479,6 +529,7 @@
 
   //add player data from localdb
   initPlayerData();
+  enterDailyFluct();
   //add S&P 500 data
   const baseTicker = "{{ticker_list.0.ticker}}";
   document.getElementById("chbx:"+baseTicker).checked=true;
@@ -486,13 +537,25 @@
 
   document.querySelector(".plot-container.plotly").style.display="inline-block";
 
-  let request={"recent_players":14,"update_trigger":true};
-  Object.keys(window.localdb).forEach((key)=>{
-      request[key]=window.localdb[key].end_date-1;
-  });
 
+  let request={"recent_players":14,"update_trigger":true};
+  const daily_list = tickerboard.getElementsByClassName("daily");
+  for(let i = 0 ; i < daily_list.length; i++ ){
+    const ticker_key = 'ticker__'+daily_list[i].id;
+    request[ticker_key]=window.localdb_meta.__todayind-40;
+  }
+  Object.keys(window.localdb).forEach((key)=>{
+    if(key in request){
+      request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+    }
+    else{
+      request[key]=window.localdb[key].end_date-1;
+    }
+  });
+  
   fetchDB(request).then((response_json)=>{
     initPlayerData();
+    enterDailyFluct();
     saveLocalDB();
   })
 
@@ -642,8 +705,16 @@
   setInterval(()=>{
     if(document.hasFocus()){
       let request={};
+      const daily_list = tickerboard.getElementsByClassName("daily");
+      for(let i = 0 ; i < daily_list.length; i++ ){
+        const ticker_key = 'ticker__'+daily_list[i].id;
+        request[ticker_key]=window.localdb_meta.__todayind-40;
+      }
       Object.keys(window.localdb).forEach((key)=>{
-        if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
+        if(key in request){
+          request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+        }
+        else if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
           request[key]=window.localdb[key].end_date-1;
         }
       });
