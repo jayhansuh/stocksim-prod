@@ -53,15 +53,15 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 ## Browser localstorage
 
-1. Add date marking to call clearLocalDB function
+1. ~~Add date marking to call clearLocalDB function~~ (HGS)
 
 ## Main page & Table UI
 
 1. Add page numbers to transaction or memo lists (*)
 
-2. Replace ticker name by today's change and MA25 number (JYL)\
+2. ~~Replace ticker name by today's change and MA25 number~~ (JYL)\
 
-2.1 Update localdb for today's change of tickers (HGS)
+2.1 ~~Update localdb for today's change of tickers~~ (HGS)
 
 3. Add stocksim index line
 
@@ -73,7 +73,11 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
 ## Database & Server hosting
 
-1. Migrate server hosting service to Azure from pythonanywhere (HGS)
+1. Migrate server hosting service to Azure from pythonanywhere (HGS)\
+
+1.1 ~~Set up B1 service plan and PostgreSQL~~
+
+1.2 Import previous data from pythonanywhere
 
 2. Redesign job scheduler (HGS)
 
@@ -96,6 +100,10 @@ https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 4. Agora configuration based on follower or ticker list (*)
 
 5. Add news article link and headline for tickers (*)
+
+6. Add Q&A board for portfolio review (*)
+
+7. Share function - embedded html image with stocksim.net link, or png download
 
 ## Registration
 
