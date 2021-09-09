@@ -542,7 +542,7 @@
   const daily_list = tickerboard.getElementsByClassName("daily");
   for(let i = 0 ; i < daily_list.length; i++ ){
     const ticker_key = 'ticker__'+daily_list[i].id;
-    request[ticker_key]=window.localdb_meta.__todayind-40;
+    request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
   }
   Object.keys(window.localdb).forEach((key)=>{
     if(key in request){
@@ -675,7 +675,7 @@
       let request={};
       request[key]=window.localdb_meta.__todayind-DISPLAY_DATES;
       if(key in window.localdb && window.localdb[key].end_date>=request[key]){
-        request[key]=window.localdb[key].end_date-1;
+        request[key]=Math.min(request[key],window.localdb[key].end_date-1);
       }
       if(key in window.localdb){
         window.plotly.enter(key,DISPLAY_DATES)
@@ -708,7 +708,7 @@
       const daily_list = tickerboard.getElementsByClassName("daily");
       for(let i = 0 ; i < daily_list.length; i++ ){
         const ticker_key = 'ticker__'+daily_list[i].id;
-        request[ticker_key]=window.localdb_meta.__todayind-40;
+        request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
       }
       Object.keys(window.localdb).forEach((key)=>{
         if(key in request){
