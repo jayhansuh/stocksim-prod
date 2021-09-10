@@ -27,9 +27,11 @@ def index(request):
         template='home/homepage_mobile.html'
 
     username = request.user.username
-    p=User.objects.get(username=username).player_set.all()[0]
-    favrt_tickers = p.favrt_ticker.all()
-
+    if(request.user.is_authenticated):
+        p=User.objects.get(username=username).player_set.all()[0]
+        favrt_tickers = p.favrt_ticker.all()
+    else: 
+        favrt_tickers = []
     
     ticker_list = [Ticker.objects.get(ticker='^GSPC')]
     num_full = 10; num_in = 1

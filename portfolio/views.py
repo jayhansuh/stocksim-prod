@@ -132,6 +132,14 @@ def PortfolioView(request,username):
             'weight': "{:.1f}".format(value/last_history.asset*100),
         })
     portfolioOverview.sort(reverse=True, key=(lambda x : x['value']))
+ 
+    isfollowed = False
+    if request.user.is_authenticated:
+        myname = request.user.username
+        me=User.objects.get(username=myname).player_set.all()[0]
+        whotofollow = User.objects.get(username=username).player_set.all()[0]
+        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
+
     return render(request, 'portfolio/overview.html', {
                     'title':'Overview',
                     'username':username,
@@ -141,6 +149,7 @@ def PortfolioView(request,username):
                     'memo_list' : MemoTag.getMemos(tag=username),
                     'asset' : last_history.asset,
                     'portfolioOverview' : portfolioOverview,
+                    'isfollowed': isfollowed
                 })
 
 def trnsrender(request,player,form,trnsstatus):
@@ -215,3 +224,17 @@ def getBadge(asset):
         return envelope[0]+'<circle style="fill: black;stroke:none;filter:drop-shadow(0px 0px 11px rgb(255 255 255 / .9));" cx="50" cy="50.000" r="25.000"></circle></svg></a>'
     return envelope[0] + envelope[1] + badgelist[n] + envelope[2]
 
+def AddFollowing(request,username):
+    if not request.user.is_authenticated:
+        raise Http404("The user does not log-in")
+    else:    
+        myname = request.user.username
+        me=User.objects.get(username=myname).player_set.all()[0]
+        whotofollow = User.objects.get(username=username).player_set.all()[0]
+        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
+        if isfollowed:
+            me.following.remove(whotofollow)
+        else:
+            me.following.add(whotofollow)
+        me.save()
+    return redirect('portfolio:overview',username)

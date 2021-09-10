@@ -84,7 +84,7 @@ def TickerView(request,ticker):
 
         username = request.user.username
         p=User.objects.get(username=username).player_set.all()[0]
-        subscribed = tickerObj in p.favrt_ticker.all()
+        subscribed = p.favrt_ticker.filter(pk = tickerObj.pk).exists()
 
         return render(request,'agora/tickerview.html',{
             'tickerObj' : tickerObj,
@@ -118,7 +118,7 @@ def AddFavorite(request,ticker):
         username = request.user.username
         p=User.objects.get(username=username).player_set.all()[0]
         t = Ticker.objects.filter(ticker=ticker)[0]
-        if t in p.favrt_ticker.all():
+        if p.favrt_ticker.filter(pk = t.pk).exists():
             p.favrt_ticker.remove(t)
         else:
             p.favrt_ticker.add(t)

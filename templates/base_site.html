@@ -43,7 +43,16 @@
     <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
     <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
     <div class="glowdimshort" style="margin:0 15px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+    {% if user.is_authenticated and user.username != username %}
+        {% if isfollowed %}
+            <div class="glowdimshort" style="margin:0 15px;color:rgba(255,255,255,0.3)"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >UNFOLLOW</a></div>
+        {% else  %}
+            <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >FOLLOW</a></div>   
+        {% endif %}
+    {% endif %}
+
     </div>
 </h1>
 {% endif %}
+
 {% endblock %}
