@@ -1,5 +1,3 @@
-#python stocksim/manage.py shell < stocksim/sch.py
-
 from django.utils import timezone
 from portfolio.scheduler import *
 import time
@@ -15,29 +13,11 @@ def updateALL(date,lastprice_set=None):
         lastprice_set={}
     ticker_que=Ticker.objects.exclude(ticker__in=["_QUECONTROL","WORK"])
     player_que=Player.objects.all()
-
     today=timezone.now().date()
     print(" === update ticker",flush=True)
-    # request=""
-    # for ticker in ticker_que:
-    #     if(ticker.last_date==None or ticker.last_date.date()<today-datetime.timedelta(days=5)):
-    #         updateTicker(ticker)
-    #     else:
-    #         request+=ticker.ticker+" "
-
-    # data = yf.download( request, start=str(today), end=str(today))
-    # tickerObj=None
-    # if(str(today) in data.index):
-    #     for ticker in ticker_que:
-    #         tickerObj=ticker.dayprice_set.filter
-
-    # for ticker in ticker_que:
-    #     lastprice_set[ticker.ticker]=ticker.last_price
-
     for ticker in ticker_que:
         updateTicker(ticker)
         lastprice_set[ticker.ticker]=ticker.last_price
-
     if(date!=today):
         print(" === new day update player",today,flush=True)
         for player in player_que:
@@ -45,8 +25,6 @@ def updateALL(date,lastprice_set=None):
         for ticker in ticker_que:
             lastprice_set[ticker.ticker]=ticker.last_price
         return today, lastprice_set
-
-
     print(" === update player",flush=True)
     history_que=AssetHistory.objects.filter(Date=date)
     for player in player_que:
@@ -85,32 +63,29 @@ def elapsedtime(currenttime,task_time=EACH_TASK_TIME):
     return newtime
 
 def main():
-
+    #
     today=timezone.now().date()
     ls={}
-
+    #
     #####TIME STAMP 0
     currenttime=time.time()
     print("TIMESTAMP0",flush=True)
     #####
-
+    #
     last_date=None
-
+    #
     while(True):
-
+        #
         target_date=Ticker.objects.get(ticker="_QUECONTROL").last_date
         if(target_date==None or target_date.date().year<2000):
             break
-
+        #    
         #####TIME STAMP 0
         currenttime=time.time()
         print("TIMESTAMP0",flush=True)
         #####
-
         if(timezone.now()<target_date):
-
             today, ls = updateALL(today,ls)
-
             #####TIME STAMP i
             print("TIMESTAMP1",flush=True)
             currenttime=elapsedtime(currenttime,10)
@@ -126,7 +101,4 @@ def killsch():
     qc.last_date=qc.last_date-datetime.timedelta(days=days)
     qc.save()
 
-if __name__ == '__main__':
-    main()
-else:
-    main()
+main()

@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect, Http404
 
 # Create your views here.
 from django.contrib.auth.decorators import login_required
@@ -9,6 +9,7 @@ from .models import Memo, MemoTag
 from .forms import MemoForm
 from django.http import JsonResponse
 from stockdb.makedb import setTicker
+from django.contrib.auth.models import User
 
 from portfolio.scheduler import quetrigger
 
@@ -81,11 +82,17 @@ def TickerView(request,ticker):
             elif form.cleaned_data['flag']=="del":
                 return form.delMemo(ticker,request.user)
 
+        username = request.user.username
+        p=User.objects.get(username=username).player_set.all()[0]
+        subscribed = tickerObj in p.favrt_ticker.all()
+
         return render(request,'agora/tickerview.html',{
             'tickerObj' : tickerObj,
             'memo_list' : MemoForm.getMemoFormlist(tickerObj,request.user),
             'form' : MemoForm(),
-            'title' : ticker})
+            'title' : ticker,
+            'subscribed': subscribed
+            })
     #S&P 500 is the example page able to access
     elif ticker=="^GSPC":
         if request.method == 'POST':
@@ -98,3 +105,22 @@ def TickerView(request,ticker):
             'memo_list' : MemoForm.getMemoFormlist(tickerObj,request.user)})
 
     return HttpResponseRedirect("/accounts/login/?next=/agora/ticker/"+ticker)
+
+def AddFavorite(request,ticker):
+    if(not Ticker.objects.filter(ticker=ticker).exists()):
+        setTicker(ticker)
+        return render(request,'home/construction.html',{
+            'css_style':'font-size:16px;',
+            'construction_msg': ticker.upper() +' - Invalid ticker or initializing'})
+    if not request.user.is_authenticated:
+        raise Http404("The user does not log-in")
+    else:    
+        username = request.user.username
+        p=User.objects.get(username=username).player_set.all()[0]
+        t = Ticker.objects.filter(ticker=ticker)[0]
+        if t in p.favrt_ticker.all():
+            p.favrt_ticker.remove(t)
+        else:
+            p.favrt_ticker.add(t)
+        p.save()
+    return redirect('agora:agoraticker',ticker)
