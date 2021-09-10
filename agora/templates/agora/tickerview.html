@@ -20,12 +20,24 @@
 <script src="{% static "home/dbfetch.js" %}"></script>
 <script src="{% static "portfolio/d3graph.v0.1.js" %}"></script>
 <script src="{% static "home/functions.v0.200817.js" %}"></script>
+<script src="http://kit.fontawesome.com/2d323a629b.js" crossorigin = "anonymous"></script>
 
 <div id="content-main">
 
 
     <div class="module" id="chrt-container" style="padding:10px;">
-    <h2 style="font-size: 21px;">{{tickerObj.ticker}} - {{tickerObj.name}}</h2>
+        <div class="titleshow" style="display:flex;background:#264b5d">
+            <h2 style="font-size: 21px;">{{tickerObj.ticker}} - {{tickerObj.name}}</h2>
+            {% if subscribed  %}
+            <a href="addfav/" style="margin:0px;padding: 10px 12px;">
+                <i class="fas fa-star" style = "font-size:21px; color:white"></i>
+            </a>
+            {% else %}
+            <a href="addfav/" style="margin:0px;padding:10px 12px">
+                <i class="far fa-star" style = "font-size:21px; color: white"></i>
+            </a>
+            {% endif %}
+        </div>
 
         <svg id='graph' style='width:100%'></svg>
         <script type="text/javascript">
