@@ -321,22 +321,6 @@
     return (new Date(1900,0,ind)).getMonth();
   };
 
-  function searchLocalDB(tag, name, property){
-    let key = tag + '__' + name;
-    return window.localdb[key][property];
-  };
-
-  function getDailyFluct(ticker_name){
-    let close_set = searchLocalDB("ticker",ticker_name,"Close");
-    let pnt = close_set.length -1;
-    let currnt_price = close_set[pnt];
-    while(!currnt_price){currnt_price = close_set[pnt]};//pnt-=1 inside?
-    pnt -=1;
-    let prvs_price = close_set[pnt];
-    while(!prvs_price){prvs_price = close_set[pnt]};
-    return ((currnt_price-prvs_price)/prvs_price*100).toFixed(2).toString() + '%';//toString not needed
-  };
-
   function getTBdata(ticker_name){
     
     const close_set = window.localdb[`ticker__${ticker_name}`]["Close"];
