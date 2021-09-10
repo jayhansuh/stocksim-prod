@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User
+from portfolio.models import Player
 
 # Create your views here.
 from django.contrib.auth.decorators import login_required
@@ -24,9 +26,23 @@ def index(request):
         print('mobile')
         template='home/homepage_mobile.html'
 
-    ticker_list = [Ticker.objects.get(ticker='^GSPC')]
+    username = request.user.username
+    p=User.objects.get(username=username).player_set.all()[0]
+    favrt_tickers = p.favrt_ticker.all()
 
-    ticker_list += list(Ticker.objects.order_by('-last_date').exclude(ticker__in=['^GSPC','_QUECONTROL','WORK'])[:9])
+    
+    ticker_list = [Ticker.objects.get(ticker='^GSPC')]
+    num_full = 10; num_in = 1
+
+    for ticker in favrt_tickers:
+        ticker_list.append(ticker)
+        num_in +=1 
+        if(num_in == num_full):
+            break
+    
+    if(num_in < num_full):
+        exclude_lst = ['^GSPC','_QUECONTROL','WORK']+list(favrt_tickers)
+        ticker_list += list(Ticker.objects.order_by('-last_date').exclude(ticker__in=exclude_lst)[:num_full-num_in])
     return render(request, template,{
         'is_main':True,
         'ticker_list':ticker_list,

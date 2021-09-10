@@ -214,3 +214,4 @@ def getBadge(asset):
     if(n>len(badgelist)-1):
         return envelope[0]+'<circle style="fill: black;stroke:none;filter:drop-shadow(0px 0px 11px rgb(255 255 255 / .9));" cx="50" cy="50.000" r="25.000"></circle></svg></a>'
     return envelope[0] + envelope[1] + badgelist[n] + envelope[2]
+
