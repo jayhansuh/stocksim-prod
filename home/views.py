@@ -21,7 +21,7 @@ def mobile(request):
 
 def index(request):
 
-    template='home/homepage.html'
+    template='home/homepage_hexabin.html'
     if(mobile(request) or request.GET.get('mobile')):
         print('mobile')
         template='home/homepage_mobile.html'
