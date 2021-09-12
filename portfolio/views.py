@@ -78,6 +78,7 @@ class HistoryView(generic.ListView):
         context['title']='History'
         context['username']=self.kwargs['username']
         context['title_nav'] = True
+        context['isfollowed'] = isfollowed(self.request,self.kwargs['username'])
         return context
 
     def get_queryset(self):
@@ -101,6 +102,15 @@ class HistoryView(generic.ListView):
         return queryset
         #else:
         #    return redirect("/accounts/login/?next=/portfolio/history/"+self.kwargs['username'])
+
+def isfollowed(request,username):
+    isfollowed = False
+    if request.user.is_authenticated:
+        myname = request.user.username
+        me=User.objects.get(username=myname).player_set.all()[0]
+        whotofollow = User.objects.get(username=username).player_set.all()[0]
+        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
+    return isfollowed
 
 #@login_required
 def PortfolioView(request,username):
@@ -133,13 +143,6 @@ def PortfolioView(request,username):
         })
     portfolioOverview.sort(reverse=True, key=(lambda x : x['value']))
  
-    isfollowed = False
-    if request.user.is_authenticated:
-        myname = request.user.username
-        me=User.objects.get(username=myname).player_set.all()[0]
-        whotofollow = User.objects.get(username=username).player_set.all()[0]
-        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
-
     return render(request, 'portfolio/overview.html', {
                     'title':'Overview',
                     'username':username,
@@ -149,7 +152,7 @@ def PortfolioView(request,username):
                     'memo_list' : MemoTag.getMemos(tag=username),
                     'asset' : last_history.asset,
                     'portfolioOverview' : portfolioOverview,
-                    'isfollowed': isfollowed
+                    'isfollowed': isfollowed(request,username)
                 })
 
 def trnsrender(request,player,form,trnsstatus):

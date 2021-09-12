@@ -640,7 +640,6 @@
     window.rbdata = makeTableData("player");
     enterTableData("rankingboard", window.rbdata , 0 );
     enterTableData("rankingboard", window.rbdata , 2 );
-    enterDailyFluct();
     Object.keys(window.localdb).forEach((key)=>{
       if(key.split("__")[0]=="player"){
         window.plotly.enter(key,DISPLAY_DATES)
