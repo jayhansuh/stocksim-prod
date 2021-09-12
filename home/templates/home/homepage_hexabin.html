@@ -751,15 +751,15 @@ var delta = 2.2523513741471,
     n = 8000, // Total number of random points.
     k = 30; // Number of points to replace per frame.
 
-var rx = d3.randomNormal(width / 2, 40),
-    ry = d3.randomNormal(height / 2, 40),
+var rx = d3.randomNormal(width / 2, 240),
+    ry = d3.randomNormal(height / 2, 180),
     points = d3.range(n).map(function() { return [rx(), ry()]; });
 
-var color = d3.scaleSequential(d3.interpolateLab("black", "white"))
+var color = d3.scaleSequential(d3.interpolateLab("black", "#6f6f6f"))
     .domain([0, 20]);
 
 var hexbin = d3.hexbin()
-    .radius(60)
+    .radius(30)
     .extent([[0, 0], [width, height]]);
 
 const shadow= svg.append("g").attr('class','shadow')
@@ -769,22 +769,51 @@ var hexagon = shadow.selectAll("path")
   .enter().append("path")
     .attr("d", hexbin.hexagon(120))
     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-    .attr("fill", function(d) { return color(d.length); })
-    .attr("opacity", 0.2 );
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
 
-var rx2 = d3.randomNormal(width / 2, 80),
+{% comment %} var rx2 = d3.randomNormal(width / 2, 80),
     ry2 = d3.randomNormal(height / 2, 80),
-    points2 = d3.range(35).map(function() { return [rx2(), ry2()]; });
+    points2 = d3.range(35).map(function() { return [rx2(), ry2()]; }); {% endcomment %}
+
+const offset = hexbin([[width/2,height/2]])[0];
+const points2 = [
+    //[0,0,0,59],
+    [-2.5,-0,3,60,'#aaa', 'Back'],
+    [-0.5,3,1,59,'#d2ebf9', 'Accounts'],
+    [-0.5,2,1,59,'#678', 'Portfolio'],
+    [-1.5,2,1,59,'#678', 'Hist Chart'],
+    [.5,3,1,59,'#678', 'Trade'],
+    [-.5,1,2,119,'#d2ebf9', 'VR'],
+    [0,0,2.5,59,'#678',  'Ticker'],
+    [1,0,2.5,59,'#678',  'PF review'],
+    [0,-1,2.5,59,'#d2ebf9', 'Agora'],
+
+    [5,4,2.5,59,'#678',  'Chart'],
+    [4,4,2.5,59,'#678',  'Quant Lab'],
+    [4,3,2.5,59,'#d2ebf9',  'Simulator'],
+    [3,3,2.5,59,'#678',  'Swing'],
+  ].map((el)=>{
+  const [i,j,k,r,color,text] = el;
+  return {x:(Math.sqrt(3)*60*(i-j/2) + offset.x) , y: offset.y - 1.5*60*j + k*60 , 'r': r , 'color': color , 'text' : text}
+})
+
+d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+window.redlineDOM = null;
 
 const menudom= svg.append("g").attr('class','menu')
 const menuhexagon = menudom.selectAll("path")
-  .data(hexbin(points2))//[[width/2,height/2],[width/2-120,height/2]]))
+  .data(points2)//[[width/2,height/2],[width/2-120,height/2]]))
   .enter().append("path")
-    .attr("d", hexbin.hexagon(59))
+    .attr("d", d => hexbin.hexagon(d.r))
     .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-    .attr("fill", ()=> ( Math.random()>0.15 ? '#d2ebf9' : "#111" ))
+    .attr("fill", d => d.color )
     .attr("stroke-width", 1.5)
-    .on("mouseover", (d,i) => {
+    {% comment %} .on("mouseover", (d,i) => {
       menudom.selectAll("path")
       .data(hexbin(points2))
       .transition()
@@ -794,8 +823,7 @@ const menuhexagon = menudom.selectAll("path")
         return "translate(" + d.x + "," + d.y + ")"+((i==j)?' scale(1.5)':'');
       })
       .attr("stroke", (d,j) => ((i==j)?'red':''));
-    })
-    .on("mouseout", (d,i) => {
+    }).on("mouseout", (d,i) => {
       menudom.selectAll("path")
       .data(hexbin(points2))
       .transition()
@@ -804,16 +832,48 @@ const menuhexagon = menudom.selectAll("path")
       .attr("transform", (d,j) => {
         return "translate(" + d.x + "," + d.y + ")";
       })
+    }); {% endcomment %}
+    .on("mouseover", function (d,i) {
+      menudom.selectAll("path")
+      .attr("stroke", '');
+
+      d3.select(this)
+      .moveToFront()
+      .attr("stroke", 'red')
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform')+' scale(1.5)' )
+    })
+    .on("mouseout", function () {
+      d3.select(this)
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform').split('scale')[0] )
+      //.on('end',function () {
+      //  d3.select(this).attr("stroke", '');;
+      //})
     });
     //.on("mouseout", (d,i) => console.log('out',i));
+
+svg.append("g").attr('class','menu-text').selectAll("text")
+  .data(points2)//[[width/2,height/2],[width/2-120,height/2]]))
+  .enter().append("text")
+    .attr('text-anchor' , 'middle')
+    .attr('alignment-baseline' , 'middle')
+    .text(d => d.text)
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", 'black' )
+    .style('font-size',12)
 
 let num = 0 ;
 d3.timer(function(elapsed) {
   
   if(elapsed < num*100 ){return;}
   num+=1;
-  rx = d3.randomNormal(width / 2 + 80 * Math.cos(elapsed * delta), 60),
-  ry = d3.randomNormal(height / 2 + 80 * Math.sin(elapsed * delta), 60);
+  rx = d3.randomNormal(width / 2 + 240 * Math.cos(elapsed * delta), 180),
+  ry = d3.randomNormal(height / 2 + 160 * Math.sin(elapsed * delta), 120);
   for (j = 0; j < k; ++j, i = (i + 1) % n) points[i][0] = rx(), points[i][1] = ry();
 
   hexagon = hexagon
@@ -822,11 +882,11 @@ d3.timer(function(elapsed) {
   hexagon.exit().remove();
 
   hexagon = hexagon.enter().append("path")
-      .attr("d", hexbin.hexagon(120))
+      .attr("d", hexbin.hexagon(30))
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
     .merge(hexagon)
-      .attr("fill", function(d) { return color(d.length); })
-      .attr("opacity", 0.2 );
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
 });
 
 </script>
