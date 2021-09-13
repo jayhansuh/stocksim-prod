@@ -10,8 +10,39 @@ from .forms import MemoForm
 from django.http import JsonResponse
 from stockdb.makedb import setTicker
 from django.contrib.auth.models import User
-
 from portfolio.scheduler import quetrigger
+
+from portfolio.views import getBadge
+from home.views import getFavrtTickers
+
+color_order=[
+    "MRNA" ,
+    "W"  ,
+    "MU"  ,
+    "NVDA"  ,
+    "INTC"  ,
+    "BABA"  ,
+    "OB" ,
+    "VSAT" ,
+    "ILMN" ,
+    "SJR" ,
+    "MSFT" ,
+    "SHOP" ,
+    "AAPL" ,
+    "GOOGL" ,
+    "PDD" ,
+    "FB" ,
+    "TTD" ,
+    "SPOT" ,
+    "LBTYK" ,
+    "GOOG" ,
+    "_cash" ,
+    "NFLX" ,
+    "QRVO" ]
+color_order_players = ['BAILLIE_GIFFORD','BAUPOST','jj']
+
+
+
 
 def index(request):
     quetrigger(100)
@@ -43,6 +74,30 @@ def index(request):
 def MemoTagsView(request,tag):
     return render(request,'agora/memotag.html',{
         'memo_list' : MemoTag.getMemos(tag)})
+
+def FeedsView(request):
+    username = request.user.username
+    player=User.objects.get(username=username).player_set.all()[0]
+    #async_thread(player.makeHistory)()
+    last_history=player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]
+    ####################
+    if(username in color_order_players):
+        newamt={}
+        for t in color_order:
+            if(t in last_history.amount):
+                newamt[t]=last_history.amount[t]
+        for t in last_history.amount:
+            if(not (t in newamt)):
+                newamt[t]=last_history.amount[t]
+        if(len(newamt)==len(last_history.amount)):
+            last_history.amount = newamt
+    ####################
+    context = {}
+    context['badgeimg']=getBadge(last_history.asset)
+    context['show_left_sidebar'] =True
+    context['last_history'] = last_history
+    context['ticker_list'] = getFavrtTickers(request, 10)
+    return render(request, 'agora/feeds.html',context  )
 
 def TickerView(request,ticker):
     quetrigger(100)

@@ -1,0 +1,195 @@
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+
+{{ form.media }}
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+
+{% block content %}
+
+<div style= "display:flex;
+justify-content: space-evenly">
+{% if show_left_sidebar %}
+    <div id = "sidebar" style = "display: flex;
+    flex-direction: column;
+    width: 300px;
+    margin: 0;
+    float: center;
+    border-right: 3px solid rgb(77, 76, 76);
+    ">
+        <div style = "display: flex; flex-direction: row;justify-content: center; margin-top:20px">
+            {% if badgeimg %}
+            <div class="glowdimshort" style="margin:0 -10px 0 15px;">{{badgeimg|safe}}</div>
+            {% endif %}
+            <div class="glowdimshort" style="margin:0 15px;">
+                {% if user.is_authenticated %}<a href='/portfolio/overview/{{user.username}} '>{{user.username}}</a>
+                {% else %}Anonymous
+                {% endif %}
+            </div>
+        </div>
+
+        <div style = "display: flex; flex-direction: row;justify-content: center; margin-top:10px">
+            <div style = "display: flex; flex-direction: column;justify-content: center">
+                <div class="glowdimshort" style="margin:0 5px; font-size: 7px;letter-spacing: 1px;">Followers</div>
+                <div class="glowdimshort" style="margin:0 5px;font-size: 14px">  <a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">
+                39</a></div>
+            </div>
+            <div style = "display: flex; flex-direction: column;justify-content: center">
+                <div class="glowdimshort" style="margin:0 5px; font-size: 7px;letter-spacing: 1px;">Followings</div>
+                <div class="glowdimshort" style="margin:0 5px;font-size: 14px"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">24</a></div>
+            </div>
+        </div>
+    
+        <div style="margin:0;">
+        <!-- <style>
+            svg {
+            //box-shadow: -40px 5px 40px -5px rgba(0,0,0,0.2);
+            //border-radius: 5px;
+            //margin: 20px;
+            }   
+            .draggable {
+                cursor: move; /* fallback if grab cursor is unsupported */
+                cursor: grab;
+                cursor: -moz-grab;
+                cursor: -webkit-grab;
+            }
+        
+            .dragging {
+                cursor: grabbing;
+                cursor: -moz-grabbing;
+                cursor: -webkit-grabbing;
+            }    
+        </style> -->
+        {% comment %}  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script> {% endcomment %}
+        <script src="{% static "home/d3.v4.js" %}"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <script src="{% static 'portfolio/d3chart.js' %}"></script>
+        <svg width="100%" height="500px" id="chart" ></svg>
+        <script>
+            const svg=d3.select("svg#chart")
+            chrt=new d3chart(svg,1,"svg#chart");
+
+            chrt.addRectRow({
+                portfolio_quant:{{last_history.quant|safe}},
+                portfolio_money:{{last_history.amount|safe}},
+                date:"{{last_history.Date|date}}",
+                asset:{{last_history.asset|safe}},
+            })
+
+            svg.attr('height',document.querySelector("svg#chart").clientHeight-25);
+
+            draginit();
+
+        
+            chrt.svg.selectAll("rect")
+            .data(chrt.pointlist)
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .call(dragOn);
+            window.addEventListener('resize', resizeChrt);
+
+            // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
+            // use curve monotone y
+            // https://archive.nytimes.com/www.nytimes.com/interactive/2012/10/15/us/politics/swing-history.html
+
+        </script>
+        </div>
+
+        <div style="margin: 0 0 0 0; ">
+            <table id="tickerboard" class="module" style="width:220px;text-align: center;  margin-left: auto;
+            margin-right: auto;">
+            <thead>
+                <tr>
+                <th scope="col">Ticker</th>
+                {% comment %} <th scope="col">name</th> {% endcomment %}
+                <th scope="col">daily</th>
+                <th scope="col">ma25{% comment %} ℹ️{% endcomment %}</th> 
+                </tr>
+            </thead>
+            <tbody style="align:center">
+            {% for ticker in ticker_list %}
+                <tr>
+                <td>
+                <a href="/agora/ticker/{{ ticker.ticker }}">{{ ticker.ticker }}</a>
+                </td>
+                {% comment %} <td>
+                {{ ticker.name | safe }}
+                </td> {% endcomment %}
+                <td class = "daily" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+                <td class = "ma25" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+
+            <script src="{% static "home/dbfetch.js" %}"></script>
+            <script src="{% static "home/maketable.js" %}"></script>
+            <script src="{% static "home/functions.v0.200817.js" %}"></script>
+            <script type="text/javascript">
+                const tickerboard=document.getElementById("tickerboard").getElementsByTagName('tbody')[0];
+                enterDailyFluct();
+                DISPLAY_DATES = 30;
+                setInterval(()=>{
+                    if(document.hasFocus()){
+                    let request={};
+                    const daily_list = tickerboard.getElementsByClassName("daily");
+                    for(let i = 0 ; i < daily_list.length; i++ ){
+                        const ticker_key = 'ticker__'+daily_list[i].id;
+                        request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
+                    }
+                    Object.keys(window.localdb).forEach((key)=>{
+                        if(key in request){
+                        request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+                        }
+                        else if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
+                        request[key]=window.localdb[key].end_date-1;
+                        }
+                    });
+
+                    fetchDB(request).then((response_json)=>{
+                        enterDailyFluct();
+                        saveLocalDB();
+                    })
+                    }
+                },10000);
+            </script>
+        </div>
+
+        <div style = "display: flex; flex-direction: row;justify-content: center; ">
+            {% if user.is_authenticated  %}
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
+        <div id="feedbox" style="display:flex;
+        flex-direction: column;
+        margin: 0;
+        height: 100%;
+        width: 1000px;">
+        <div class= "feedpage" >
+            <h1> Here, the feeds will appear</h1>
+        </div>
+
+
+
+
+</div>
+
+{% endblock %}
+

@@ -18,14 +18,7 @@ def mobile(request):
     else:
         return False
 
-
-def index(request):
-
-    template='home/homepage.html'
-    if(mobile(request) or request.GET.get('mobile')):
-        print('mobile')
-        template='home/homepage_mobile.html'
-
+def getFavrtTickers(request, num_full = 10):
     favrt_tickers = []
     if (request.user.is_authenticated):
         try:
@@ -36,7 +29,7 @@ def index(request):
             favrt_tickers = []
     
     ticker_list = [Ticker.objects.get(ticker='^GSPC')]
-    num_full = 10; num_in = 1
+    num_in = 1
 
     for ticker in favrt_tickers:
         ticker_list.append(ticker)
@@ -47,9 +40,20 @@ def index(request):
     if(num_in < num_full):
         exclude_lst = ['^GSPC','_QUECONTROL','WORK']+list(favrt_tickers)
         ticker_list += list(Ticker.objects.order_by('-last_date').exclude(ticker__in=exclude_lst)[:num_full-num_in])
+    
+    return ticker_list
+
+def index(request):
+
+    template='home/homepage.html'
+    if(mobile(request) or request.GET.get('mobile')):
+        print('mobile')
+        template='home/homepage_mobile.html'
+
+
     return render(request, template,{
         'is_main':True,
-        'ticker_list':ticker_list,
+        'ticker_list':getFavrtTickers(request),
         'title':'Home',
         'help' : request.GET.get('help')
 })
