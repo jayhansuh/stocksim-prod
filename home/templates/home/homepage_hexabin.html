@@ -1,0 +1,948 @@
+
+{% extends "base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} nodownscroll {% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block coltype %}colMcenter{% endblock %}
+
+{% block content %}
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
+<script src="{% static "portfolio/rankingbadge.v0.js" %}"></script>
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+<script src="{% static "home/functions.v0.200817.js" %}"></script>
+
+{% if not user.is_authenticated %}
+{% comment %} <div class="glowmain" id="rectlogo"> {{ site_header|default:'StockSim' }} </div> {% endcomment %}
+<div id="rectlogo" style="
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+">
+<img src="{% static "home/img/mainlogo.svg" %}">
+</div>
+<div id="scrollIndicator" style="
+    position: absolute;
+    left: calc(100% - 100px);
+    color: white;
+    top: 78%;
+    font-size: 16px;
+    font-family: 'Azonix';
+    opacity:0;
+    ">scroll⇅</div>
+<div id="mobileIndicator" style="
+    position: absolute;
+    left: calc(100% - 100px);
+    color: white;
+    top: 81%;
+    font-size: 12px;
+    font-family: 'Azonix';
+    opacity:0;
+    z-index:5;
+    "><a href='/?mobile=true'>MOBILE VER</a></div>
+{% endif %}
+
+<div id="contents" style="opacity:0;display: inline-flex;
+    flex-direction: column;">
+
+<div id="content-main0" style="width:100%;height:100%;display:block;"></div>
+<div style="display:flex;margin: -30px;justify-content:space-between;width: 1100px;">
+  <div style="display:flex;">
+    {% comment %} <img src="{% static "home/img/mainlogo.svg" %}" width="600" style="margin: -150px -120px;"> {% endcomment %}
+    <img src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: 0 -30px 0 35px;">
+    <div style="font-family:azonix;font-size: 21px;line-height: 4;margin: 9px 0 0 0;text-shadow:
+        0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}</div>
+  </div>
+  <div style="display: flex;">
+    {% if user.is_authenticated%}
+    <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
+    {% else %}
+    <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
+    {% endif %}
+    <a href='/?help=force' class="nav-bar-text">HELP</a>&nbsp;
+    <a href='/?mobile=true' class="nav-bar-text">MOBILE</a>&nbsp;
+    <div style="
+      margin:5px;
+      align-self: center;
+      text-align: left;
+      height: 27px;
+      line-height: 29.8px;
+      font-size: 13px;
+      width: 165px;
+      box-shadow:
+        inset 0 0 45px 0px #555,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        0px 0 25px #555;
+      display: flex;
+      align-content: center;
+      ">
+      &nbsp;&nbsp;🔍&nbsp;&nbsp;
+      <input placeholder="Search" style='margin: 0;
+        background: none;
+        border: none;
+        color: #bbb;'>
+      </input>
+    </div>
+    <img src="{% static "home/img/icon-bell.svg" %}" width="31" style="margin:5px;">
+    <a style="margin: 0 3px;font-family:azonix;align-self: center;" onclick="menuonoff();">Menu</a>
+  </div>
+</div>
+<div id="content-main1" style="
+  aspect-ratio: 2 / 1;
+  width:1100px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: flex-start;
+  ">
+
+<div style="margin: 40px 10px 0 0;">
+  <table id="tickerboard" class="module" style="width:100%;text-align: center;">
+    <thead>
+      <tr>
+        <th scope="col">Ticker</th>
+        {% comment %} <th scope="col">name</th> {% endcomment %}
+        <th scope="col">daily</th>
+        <th scope="col">ma25{% comment %} ℹ️{% endcomment %}</th> 
+        <th scope="col">Chart</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for ticker in ticker_list %}
+      <tr>
+        <td>
+        <a href="/agora/ticker/{{ ticker.ticker }}">{{ ticker.ticker }}</a>
+        </td>
+        {% comment %} <td>
+        {{ ticker.name | safe }}
+        </td> {% endcomment %}
+        <td class = "daily" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+        <td class = "ma25" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+        <td>
+        <input type="checkbox" id="chbx:{{ ticker.ticker | safe }}" onclick="tickerCheckBox('{{ ticker.ticker | safe }}');">
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div id="chartplot" style="width:550px;height:550px;"></div>
+
+<div style="width:calc(25% - 15px);margin: 25px 0 0 10px;">
+
+  <table id="rankingboard" class="module" style="width:100%;text-align: center;">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 1 );">Name</th>
+        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 2 );">Monthly</th>
+        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 3 );">AllTime</th>
+      </tr> 
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</table>
+
+</div>
+
+</div>
+
+<div style="display:flex;flex-direction:column;align-items: center;"> 
+  {% comment %} <div id="menu" style="
+      display: flex;
+      justify-content: center;">
+
+    {% if user.is_authenticated%}
+      <a href="/portfolio/"><div class="glowdim" style="display:inline-block">PORTFOLIO</div></a>
+    {% else %}
+      <a href="/accounts/login/"><div class="glowdim" style="display:inline-block">Log In</div></a>
+    {% endif %}
+
+    <a href="/portfolio/history/" ><div class="glowdim"  style="display:inline-block">History</div></a>
+
+    <a href="/agora/" ><div class="glowdim"  style="display:inline-block">Agora</div></a>
+
+    <div style="display:flex;flex-direction:column;">
+      <a href='/simulator/' ><div class="glowdim"  style="display:inline-block">SIMULATOR</div></a>
+      
+    </div>
+  </div> {% endcomment %}
+
+  <div style="
+      text-align: end;
+      font-size: 12px;
+      font-family: 'Azonix';
+      margin: 5px 0 ;
+      width: 796px;
+      ">
+    <!--
+    {% if user.is_authenticated%}
+    <a href='/?help=force' style="margin: 0 0 0 3px;">HELP</a>
+    {% endif %}
+    <a href='/?mobile=true' style="margin: 0 3px;">MOBILE</a>
+    <a style="margin: 0 3px;" onclick="menuonoff();">Menu</a>
+    <a href='/?mobile=true' style="margin: 0 2px;">About us</a>
+    <a href='/?mobile=true' style="margin: 0 2px;">Accounts</a>
+    <a href='/?mobile=true'>REGISTER</a>
+    -->
+  </div>
+</div>
+
+</div>
+<script src="{% static "home/dbfetch.js" %}"></script>
+<script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
+<script id="asyncsrc" async src="{% static "home/plotly.js" %}"></script>
+<script src="{% static "home/functions.v0.200817.js" %}"></script>
+<script type="text/javascript">
+  {% if help %}
+  const helpcode="{{help}}";
+  let helpsetting = null;
+  try{
+    helpsetting = JSON.parse(window.localStorage.getItem("helpsetting"))||{};
+  }
+  catch{
+    helpsetting = {};
+    window.localStorage.setItem("helpsetting", JSON.stringify(helpsetting))
+  }
+  if(helpcode=="force" || !helpsetting || !helpsetting[window.location.pathname]){
+    startHelpPage();
+  }
+  {% endif %}
+  function startHelpPage(){
+    const cntdiv=document.querySelector('div.content');
+    const guidelayer = appendGuideLayer(cntdiv);
+    const tip1=appendTextBox(cntdiv);
+    applyStyle(tip1,{
+      'font-size':'11px',
+      'top':'calc(50vh - 200px)',
+      'left':'calc(50vw - 180px)',
+      'padding' : '25px 20px 15px 20px',
+      'width':'360px',
+      'height':'360px',
+      'background' : "rgba(40,40,40,0.8)",
+      'transition': 'color .3s, text-shadow .3s, opacity 0.3s, transform 0.3s, height 0.3s',
+      'flex-direction':'column',
+      'transform' : 'translate(0, 0)',
+    })
+    const navbar=document.createElement('div');
+    applyStyle(navbar,{
+      'position':'absolute',
+      'display' : 'flex',
+      'justify-content' : 'space-between',
+      'font-family':'Azonix',
+      'margin' : '0 12px',
+      'width' : 'calc(400px - 2 * 12px)',
+		  'font-size':'12px',
+      'top':'calc(50vh + 125px)',
+		  'left':'calc(50vw - 180px)',
+      'z-index':11,
+      'transition': 'opacity 0.2s',
+      'text-shadow': '0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888',
+      '-webkit-touch-callout': 'none',
+      '-webkit-user-select': 'none',
+      '-khtml-user-select': 'none',
+      '-moz-user-select': 'none',
+      '-ms-user-select': 'none',
+      'user-select': 'none',
+      'cursor': 'pointer',
+      'transition': 'color .3s, text-shadow .3s, opacity 0.3s, transform 0.3s, height 0.3s',
+      'transform' : 'translate(0px, 50px)',
+    })
+    navbar.innerHTML="<div onclick='window.navbarclick(-1);'><a>&lang; prev</a></div>";
+    //navbar.innerHTML+="<div onclick='window.navbarclick(0);'><a>skip & start</a></div>";
+    navbar.innerHTML+="<div onclick='window.navbarclick(+1);'><a>next &rang;</a></div>";
+    cntdiv.appendChild(navbar);
+
+    window.guidelayer=guidelayer;
+    window.tip1=tip1;
+    window.navbar=navbar;
+    window.navbarnum = 0;
+    window.navtiparr = [
+      `Welcome to STOCKSIM!
+      <br>Every player starts with $100k
+      <br>and you want to get richer`,
+
+      `<div>You can earn daily income here</div>
+      <div>SIMULATOR > SWING TRADE GAME</div>`,
+
+      `<div>This is a polygon badge representing the player's level</div>
+      <div>more on the ranking system <a href='/portfolio/ranking/help/' target="_blank" rel="noopener noreferrer" >here</a></div>`,
+
+      `<div>You can place an order here to manage your portfolio</div>
+      <div>PORTFOLIO > TRADE</div>`,
+
+      `<div>Leave a memo to share your investment ideas or to remind yourself later</div>`,
+
+      `<div>Many parts of this website are still under construction. Especially when you make a transaction it takes about<div> <u>a minute or more</u></div> to be reflected on your porfolio</div>
+      <div>Thanks for visiting stocksim</div>`,
+    ]
+    window.navtransarr = [
+      [ 'translate( 0 , 0 )' , '360px' , 'translate( 0 , 50px )'],
+      [ 'translate(320px, 290px)' , '110px' , 'translate(320px, 130px)'],
+      [ 'translate(310px, -195px)' , '120px' , 'translate(312px, -350px)'],
+      [ 'translate(-400px, 280px)' , '110px' , 'translate(-400px, 113px)'],
+      [ 'translate(80px, 280px)' , '110px' , 'translate(80px, 113px)'],
+      [ 'translate( 0 , 0 )' , '360px' , 'translate( 0 , 50px )'],
+      [ 'translate( 0 , 0 )' , '360px' , 'translate( 0 , 50px )'],
+    ]
+    window.tip1.innerHTML = window.navtiparr[window.navbarnum];
+    window.keyboardListner = null;
+    window.navbarclick = (code) => {
+      if(code==1){ window.navbarnum += 1 }
+      else if(code==-1){ window.navbarnum -= 1 };
+      if(window.navbarnum < 0 ){ window.navbarnum = 0 };
+
+      window.tip1.style.setProperty('color','transparent');
+      window.tip1.style.setProperty('text-shadow','none');
+      window.tip1.style.setProperty('transform',window.navtransarr[window.navbarnum][0]);
+      window.tip1.style.setProperty('height',window.navtransarr[window.navbarnum][1]);
+      window.navbar.style.setProperty('transform',window.navtransarr[window.navbarnum][2]);
+      if(code == 0 || window.navbarnum == window.navtiparr.length){
+        window.guidelayer.style.setProperty('opacity','0');
+        window.tip1.style.setProperty('opacity','0');
+        window.navbar.style.setProperty('opacity','0');
+      }
+
+      setTimeout(() => {
+        if(code == 0 || window.navbarnum == window.navtiparr.length){
+          window.guidelayer.style.setProperty('display','none');
+          window.tip1.style.setProperty('display','none');
+          window.navbar.style.setProperty('display','none');
+          donotshowagain();
+          return
+        }
+        window.tip1.innerHTML = window.navtiparr[window.navbarnum];
+        window.tip1.style.setProperty('color','white');
+        window.tip1.style.setProperty('text-shadow', '0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888');
+      },200);
+    }             
+    return 0
+  }
+  function donotshowagain(){
+    try{
+      helpsetting[window.location.pathname] = true;
+      window.localStorage.setItem("helpsetting", JSON.stringify(helpsetting));
+    }
+    catch(e){
+      console.error(e)
+      alert("donotshow function failed - "+e)
+    }
+  }
+
+  const DISPLAY_DATES=200;
+  const rectlogo=document.getElementById("rectlogo");
+  const maincontent=document.getElementById("contents");
+  const maincontent0=document.getElementById("content-main0");
+  const maincontent1=document.getElementById("content-main1");
+  const rankingboard=document.getElementById("rankingboard");
+  const tickerboard=document.getElementById("tickerboard").getElementsByTagName('tbody')[0];
+  const menu=document.getElementById("menu");
+
+  function getMonth(ind){
+    return (new Date(1900,0,ind)).getMonth();
+  };
+
+  function getTBdata(ticker_name){
+    
+    const close_set = window.localdb[`ticker__${ticker_name}`]["Close"];
+  
+    let pnt = close_set.length -1;
+    let last_prices = [];
+    while( pnt>=0 && last_prices.length<=25 ){
+      let price = close_set[pnt]
+      if(price){last_prices.push(price)};
+      pnt=pnt-1;
+    }
+
+    let daily_str = "NA";
+    let ma25_str = "NA";
+    if(last_prices.length>1){daily_str = ((last_prices[0]-last_prices[1])/last_prices[1]*100)}
+    if(last_prices.length>24){
+      const ma25_price=Mathavg(last_prices.slice(0,25));
+      ma25_str = ((last_prices[0]-ma25_price)/ma25_price*100)
+    }
+
+    return [daily_str,ma25_str];
+  };
+
+  function enterDailyFluct() {
+    
+    const daily_list = tickerboard.getElementsByClassName("daily");
+    const ma25_list = tickerboard.getElementsByClassName("ma25");
+    const len = daily_list.length;
+    
+    for(let i =0; i<len; i++){
+      
+      const dailyDOM = daily_list[i];
+      const ma25DOM = ma25_list[i];
+      //Assuming here dailyDOM.id==ma25DOM.id
+      if(window.localdb["ticker__" +dailyDOM.id]){
+
+        let [da,ma] =  getTBdata(dailyDOM.id);
+        
+        if(da=="NA"){
+          dailyDOM.style.color="white";
+          dailyDOM.innerHTML=da;
+        }
+        else if((da.toFixed(2) + '%')!=dailyDOM.innerHTML){
+          dailyDOM.style.color="white";
+          dailyDOM.innerHTML = (da.toFixed(2) + '%');
+          setTimeout(()=>{
+            dailyDOM.style.color=(da<0) ? "LightCoral" : "lightgreen";
+          },300)
+        };
+
+        if(ma=="NA"){
+          ma25DOM.style.color="white";
+          ma25DOM.innerHTML=ma;
+        }
+        else if((ma.toFixed(2) + '%')!=ma25DOM.innerHTML){
+          ma25DOM.style.color="white";
+          ma25DOM.innerHTML = (ma.toFixed(2) + '%');
+          setTimeout(()=>{
+            ma25DOM.style.color=(ma<0) ? "LightCoral" : "lightgreen";
+          },300)
+        }
+
+      }
+      
+    };
+  };
+  function makeDailyData(tag){
+
+    let data=[];
+ 
+    Object.keys(window.localdb).forEach((el)=>{
+      let key=el.split("__");
+      if(key[0]!=tag){return;};
+
+      let strt_date=window.localdb[el].strt_date;
+      let currnt_date=window.localdb[el].end_date;
+      while(currnt_date > strt_date && !window.localdb[el].Close[end_date-strt_date-1]){currnt_date-=1};
+      let previous_date=currnt_date-1;
+      while(previous_date > strt_date && !window.localdb[el].Close[end_date-strt_date-1]){previous_date-=1};
+
+      let latest_price = window.localdb[el].Close[currnt_date];
+      let previous_close = window.localdb[el].Close[previous_date];
+      let daily_fluct = (lastest_price - previous_close)/previous_close;
+
+      data.push([ key[1], daily_fluct ]);
+    });
+    return data;
+  }
+
+
+  //function makeRankingBoardData(tableId){
+  function makeTableData(tag){
+
+    let data=[];
+
+    Object.keys(window.localdb).forEach((el)=>{
+      let key=el.split("__");
+      if(key[0]!=tag){return;};
+
+      let strt_date=window.localdb[el].strt_date;
+      let end_date=window.localdb[el].end_date;
+
+      let thismonth = getMonth(end_date-1);
+      let asset_thismonth = window.localdb[el].asset[end_date-1-strt_date];
+      let lastmonth = end_date-1;
+      while(lastmonth>strt_date && getMonth(lastmonth)==thismonth){lastmonth-=1};
+      let asset_lastmonth = window.localdb[el].asset[lastmonth-strt_date];
+      let monthly_gain=(asset_thismonth/asset_lastmonth-1)*100;
+
+      data.push([ key[1], monthly_gain, asset_thismonth ]);
+    });
+
+    return data;
+  }
+
+
+  function enterTableData(tableId, data, sortind){
+
+    let tableElement = document.querySelector('table#'+tableId);
+    let tableMeta = document.querySelector(`meta[name='meta#${tableId}']`);
+    if(!tableMeta){
+      tableMeta = document.createElement(`meta`);
+      tableMeta.name = "meta#"+tableId;
+      tableMeta.content = "0:▼:▲";
+      tableElement.appendChild(tableMeta);
+    }
+
+    let thElements = tableElement.getElementsByTagName('thead')[0].getElementsByTagName('th');
+    let sortInfo = tableMeta.content.split(":");
+    //Remove an arrow to thead
+    sortInfo[0]=parseInt(sortInfo[0]);
+    if(sortInfo[0]!=0){
+      thElements[Math.abs(sortInfo[0])].innerText=thElements[Math.abs(sortInfo[0])].innerText.slice(0,-1);
+    }
+    //Add an arrow to thead
+    let reverseflag = (sortInfo[0]!=-sortind);
+    if(sortind!=0){
+      thElements[sortind].innerText += ( reverseflag ? sortInfo[2] : sortInfo[1] );
+    }
+    sortInfo[0]= ( reverseflag ? -sortind : sortind )
+    tableMeta.content = sortInfo.join(":")
+
+    //Sorting
+    sortdata(data,sortind-1,reverseflag)
+
+    //Recontruct tbody
+    const tbodyEl=tableElement.getElementsByTagName('tbody')[0];
+    tbodyEl.innerHTML="";
+    let rownum=0;
+    data.forEach((el)=>{
+      let row = tbodyEl.insertRow(rownum);
+      rownum++;
+      row.innerHTML = `<td><a href='/portfolio/ranking/help/'>${getBadge(el[2],true)}</a></td>`;
+      //row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${el[0]}</a></td>`;
+      row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${ (el[0].length>7) ? el[0].slice(0,7)+'...' : el[0] }</a></td>`;
+      row.innerHTML += `<td>${numformat(el[1])}%</td>`;
+      row.innerHTML += `<td>${numformat(el[2])}</td>`;
+    });
+  }
+
+  function block0height(){
+    return (window.innerHeight/2-315)+"px";
+  }
+
+  function resize(){
+    window.plotly.layout.width = document.getElementById("content-main1").clientWidth/2;
+    window.plotly.layout.height = document.getElementById("content-main1").clientWidth/2 ;
+    maincontent0.style.height=block0height();
+    window.plotly.layout.yaxis2.autorange=true;
+    if(window.innerWidth>document.getElementById("content-main1").clientWidth){
+      document.getElementById("content").style="justify-content: center;"
+    }
+    else{
+      document.getElementById("content").style="justify-content: flex-start;"
+    }
+    window.plotly.plot();
+    //let gtb = document.querySelector('g.trace.boxes')
+    //if(gtb){
+    //  gtb.querySelectorAll('path.box').forEach(el => {
+    //    el.style.setProperty('stroke-width','1px');
+    //    el.style.setProperty('fill-opacity','1');
+    //})}
+  }
+
+  //////////////////////////////////
+  //window.plotly variables onload//
+  //////////////////////////////////
+  document.getElementById('asyncsrc').addEventListener('load', ()=>{
+
+  window.plotly.layout.width = document.getElementById("content-main1").clientWidth/2 ;
+  window.plotly.layout.height = document.getElementById("content-main1").clientWidth/2;
+  {%if not user.is_authenticated %}
+  window.plotly.config = {'scrollZoom': false };
+  window.plotly.layout.dragmode=false;
+  {% endif %}
+  window.plotly.layout.xaxis.autorange=false;
+  window.plotly.layout.xaxis.range = [indtodate(window.localdb_meta.__todayind-DISPLAY_DATES), indtodate(window.localdb_meta.__todayind)];
+
+  //add player data from localdb
+  initPlayerData();
+  enterDailyFluct();
+  //add S&P 500 data
+  const baseTicker = "{{ticker_list.0.ticker}}";
+  document.getElementById("chbx:"+baseTicker).checked=true;
+  tickerCheckBox(baseTicker);
+
+  document.querySelector(".plot-container.plotly").style.display="inline-block";
+
+
+  let request={"recent_players":14,"update_trigger":true};
+  const daily_list = tickerboard.getElementsByClassName("daily");
+  for(let i = 0 ; i < daily_list.length; i++ ){
+    const ticker_key = 'ticker__'+daily_list[i].id;
+    request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
+  }
+  Object.keys(window.localdb).forEach((key)=>{
+    if(key in request){
+      request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+    }
+    else{
+      request[key]=window.localdb[key].end_date-1;
+    }
+  });
+  
+  fetchDB(request).then((response_json)=>{
+    initPlayerData();
+    enterDailyFluct();
+    saveLocalDB();
+  })
+
+  window.addEventListener('resize', resize)
+  document.addEventListener('fullscreenchange',resize)
+
+  //scroll entry page
+  {% if not user.is_authenticated %}
+
+  let scrollIndicator = document.getElementById('scrollIndicator');
+  let mobileIndicator = document.getElementById('mobileIndicator');
+  let scrollopacity = -2.5;
+  let dopacity=0.05;
+  let scrollInterval=setInterval(()=>{
+    if(scrollopacity>1){dopacity=-0.05;mobileIndicator.style.opacity=1;}
+    if(scrollopacity<0){dopacity=+0.05}
+    scrollopacity+=dopacity;
+    scrollIndicator.style.opacity=scrollopacity
+    },60);
+
+  let zoom = 0.;
+  const ZOOM_SPEED = 0.35;
+  let isDown=false;
+  let y_init=0;
+  let y_new=0;
+
+  function dragZoom(dzoom){
+    if(zoom>-7.){
+      zoom += dzoom;
+      zoom = Math.min(zoom,1.4)
+      rectlogo.style.transform = `scale(${Math.exp(zoom)})`;
+      maincontent.style.opacity=-zoom/7;
+      maincontent.style.transform=`scale(${Math.exp((1+zoom/7))})`;
+      maincontent0.style.height="calc( "+(1+zoom/7)*100*0.1+'vw + '+block0height()+")";
+      if(zoom<=-7.+ZOOM_SPEED/2){
+        dragOver();
+      };
+    }
+  }
+
+  function dragOver(){
+    clearInterval(scrollInterval);
+    scrollIndicator.style.display="none";
+    mobileIndicator.style.display="none";
+    rectlogo.style.display="none";
+    maincontent.style.opacity=1;
+    maincontent.style.transform="none";
+    document.body.style.overflow="auto";
+    resize();
+    setTimeout(()=>{
+      window.plotly.config={scrollZoom:true};
+      window.plotly.layout.dragmode="pan";
+      resize();
+    }, 500);
+  }
+
+  document.addEventListener("wheel", function(e) {
+      dragZoom(( e.deltaY > 0 ? 1: -1) * ZOOM_SPEED);
+  });
+
+  {% comment %}
+  document.addEventListener('touchstart', (e) => {
+    isDown = true;
+    y_init = e.changedTouches[0].pageY;
+  });
+  document.addEventListener('touchcancel', () => {
+    isDown = false;
+  });
+  document.addEventListener('touchend', () => {
+    isDown = false;
+  });
+  document.addEventListener('touchmove', (e) => {
+    if(!isDown || zoom<=-7. ) { return; };
+    e.preventDefault();
+    y_new=e.changedTouches[0].pageY;
+    dragZoom((y_init-y_new)/70);
+    y_init=y_new;
+  });
+  {% endcomment %}
+
+  {% else %}
+  document.body.style.overflow="auto";
+  maincontent.style.opacity=1;
+  {% endif %}
+
+  })
+
+  function initPlayerData(){
+    
+    window.rbdata = makeTableData("player");
+    enterTableData("rankingboard", window.rbdata , 0 );
+    enterTableData("rankingboard", window.rbdata , 2 );
+    enterDailyFluct();
+    Object.keys(window.localdb).forEach((key)=>{
+      if(key.split("__")[0]=="player"){
+        window.plotly.enter(key,DISPLAY_DATES)
+      }
+    });
+    resize();
+  }
+
+  function tickerCheckBox(ticker,checked=null){
+
+    const key='ticker__'+ticker;
+    const chbx=document.getElementById("chbx:"+ticker);
+
+    if(typeof(checked)=="boolean"){
+      chbx.checked=checked;
+    }
+
+    if(chbx.checked){
+
+      if(window.drawnTicker && window.drawnTicker!=ticker){
+        tickerCheckBox( window.drawnTicker , false );
+      };
+
+      let request={};
+      request[key]=window.localdb_meta.__todayind-DISPLAY_DATES;
+      if(key in window.localdb && window.localdb[key].end_date>=request[key]){
+        request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+      }
+      if(key in window.localdb){
+        window.plotly.enter(key,DISPLAY_DATES)
+        window.drawnTicker=ticker;
+        resize();
+      }
+      fetchDB(request).then((response_json)=>{
+        if(key in window.localdb){
+          if( !window.drawnTicker || window.drawnTicker==ticker ){
+            window.plotly.enter(key,DISPLAY_DATES)
+            window.drawnTicker=ticker;
+            resize();
+          }
+          saveLocalDB();
+        }
+      })
+    }
+    else{
+      window.plotly.drop(key);
+      if(window.drawnTicker==ticker){
+        window.drawnTicker=null;
+      }
+      resize();
+    }
+  }
+
+  setInterval(()=>{
+    if(document.hasFocus()){
+      let request={};
+      const daily_list = tickerboard.getElementsByClassName("daily");
+      for(let i = 0 ; i < daily_list.length; i++ ){
+        const ticker_key = 'ticker__'+daily_list[i].id;
+        request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
+      }
+      Object.keys(window.localdb).forEach((key)=>{
+        if(key in request){
+          request[key]=Math.min(request[key],window.localdb[key].end_date-1);
+        }
+        else if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
+          request[key]=window.localdb[key].end_date-1;
+        }
+      });
+
+      fetchDB(request).then((response_json)=>{
+        window.rbdata = makeTableData("player");
+        enterTableData("rankingboard", window.rbdata , 0 );
+        enterTableData("rankingboard", window.rbdata , 2 );
+        enterDailyFluct();
+        Object.keys(window.localdb).forEach((key)=>{
+          if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
+            window.plotly.enter(key,DISPLAY_DATES)
+          }
+        });
+        window.plotly.plot();
+        saveLocalDB();
+      })
+    }
+  },10000)
+
+</script>
+
+<div id="menusvgcontainer" style="
+  position:absolute;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  display:none;
+  opacity:0;
+  transition: opacity .3s;
+  "><svg class="menunav" width="100%" height="100%"></svg></div>
+<script>
+
+const cntdiv=document.querySelector('div#menusvgcontainer');
+function menuonoff(){
+  if(cntdiv.style.display=='none'){
+    cntdiv.style.display="";
+    setTimeout(()=>{cntdiv.style.opacity="1"},10);
+  }
+  else{
+    cntdiv.style.opacity="0";
+    setTimeout(()=>{cntdiv.style.display="none"},300);
+  }
+}
+
+var svg = d3.select("svg.menunav"),
+    width = window.innerWidth,
+    height = window.innerHeight;
+
+var delta = 2.2523513741471,
+    i = 0, j,
+    n = 8000, // Total number of random points.
+    k = 30; // Number of points to replace per frame.
+
+var rx = d3.randomNormal(width / 2, 240),
+    ry = d3.randomNormal(height / 2, 180),
+    points = d3.range(n).map(function() { return [rx(), ry()]; });
+
+var color = d3.scaleSequential(d3.interpolateLab("black", "#6f6f6f"))
+    .domain([0, 20]);
+
+var hexbin = d3.hexbin()
+    .radius(30)
+    .extent([[0, 0], [width, height]]);
+
+const shadow= svg.append("g").attr('class','shadow')
+
+var hexagon = shadow.selectAll("path")
+  .data(hexbin(points))
+  .enter().append("path")
+    .attr("d", hexbin.hexagon(120))
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
+
+{% comment %} var rx2 = d3.randomNormal(width / 2, 80),
+    ry2 = d3.randomNormal(height / 2, 80),
+    points2 = d3.range(35).map(function() { return [rx2(), ry2()]; }); {% endcomment %}
+
+const offset = hexbin([[width/2,height/2]])[0];
+const points2 = [
+    [-2.5,-0,3,60,'#aaa', 'Back' , false],
+    [-0.5,3,1,59,'#d2ebf9', 'Accounts' , '/accounts/password_change/'],
+    [-0.5,2,1,59,'#678', 'Portfolio', '/portfolio/'],
+    [-1.5,2,1,59,'#678', 'Hist Chart', '/portfolio/history/'],
+    [.5,3,1,59,'#678', 'Trade' , '/portfolio/transactions/'],
+    [-.5,1,2,119,'#d2ebf9', 'VR' , '/simulator/qlab/'],
+    [0,0,2.5,59,'#678',  'Ticker' , '/agora/'],
+    [1,0,2.5,59,'#678',  'PF review', '/agora/'],
+    [0,-1,2.5,59,'#d2ebf9', 'Agora', '/agora/'],
+
+    [5,4,2.5,59,'#678',  'Custom Chart' , '/simulator/histplot/'],
+    [4,4,2.5,59,'#678',  'Quant Lab' , '/simulator/qlab/'],
+    [4,3,2.5,59,'#d2ebf9',  'Simulator', '/simulator/'],
+    [3,3,2.5,59,'#678',  'Swing' , '/simulator/chartsurf/'],
+  ].map((el)=>{
+  const [i,j,k,r,color,text,onclick] = el;
+  return {x:(Math.sqrt(3)*60*(i-j/2) + offset.x) , y: offset.y - 1.5*60*j + k*60 , 'r': r , 'color': color , 'text' : text, 'onclick':onclick}
+})
+
+d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+window.redlineDOM = null;
+
+const menudom= svg.append("g").attr('class','menu')
+const menuhexagon = menudom.selectAll("path")
+  .data(points2)//[[width/2,height/2],[width/2-120,height/2]]))
+  .enter().append("path")
+    .attr("d", d => hexbin.hexagon(d.r))
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", d => d.color )
+    .attr("stroke-width", 1.5)
+    .on("mouseover", function (d,i) {
+      menudom.selectAll("path")
+      .attr("stroke", '');
+
+      d3.select(this)
+      .moveToFront()
+      .attr("stroke", 'red')
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform').split('scale')[0]+' scale(1.5)' )
+    })
+    .on("mouseout", function () {
+      d3.select(this)
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform').split('scale')[0] )
+    })
+    .on("click",function(d,i){
+      if(d.onclick){
+        console.log(d.onclick);
+        window.location=d.onclick;
+      }
+      else{
+        menuonoff();
+      }
+    });
+
+svg.append("g").attr('class','menu-text').selectAll("text")
+  .data(points2)
+  .enter().append("text")
+    .attr('text-anchor' , 'middle')
+    .attr('alignment-baseline' , 'middle')
+    .text(d => d.text)
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", 'black' )
+    .style('font-size',12)
+
+let num = 0 ;
+d3.timer(function(elapsed) {
+  
+  if(elapsed < num*100 ){return;}
+  num+=1;
+  rx = d3.randomNormal(width / 2 + 240 * Math.cos(elapsed * delta), 180),
+  ry = d3.randomNormal(height / 2 + 160 * Math.sin(elapsed * delta), 120);
+  for (j = 0; j < k; ++j, i = (i + 1) % n) points[i][0] = rx(), points[i][1] = ry();
+
+  hexagon = hexagon
+    .data(hexbin(points), function(d) { return d.x + "," + d.y; });
+
+  hexagon.exit().remove();
+
+  hexagon = hexagon.enter().append("path")
+      .attr("d", hexbin.hexagon(30))
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .merge(hexagon)
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
+});
+
+</script>
+
+{% endblock %}

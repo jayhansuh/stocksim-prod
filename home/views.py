@@ -19,6 +19,7 @@ def mobile(request):
         return False
 
 def getFavrtTickers(request, num_full = 10):
+
     favrt_tickers = []
     if (request.user.is_authenticated):
         try:
@@ -41,11 +42,15 @@ def getFavrtTickers(request, num_full = 10):
         exclude_lst = ['^GSPC','_QUECONTROL','WORK']+list(favrt_tickers)
         ticker_list += list(Ticker.objects.order_by('-last_date').exclude(ticker__in=exclude_lst)[:num_full-num_in])
     
-    return ticker_list
+    def exclude_filter(tickerObj):
+        return not tickerObj.ticker in ['_QUECONTROL','WORK']
+    filtered_list = list(filter(exclude_filter,ticker_list))
+    
+    return filtered_list
 
 def index(request):
 
-    template='home/homepage.html'
+    template='home/homepage_hexabin.html'
     if(mobile(request) or request.GET.get('mobile')):
         print('mobile')
         template='home/homepage_mobile.html'

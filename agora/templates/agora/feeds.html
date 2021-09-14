@@ -76,15 +76,24 @@ justify-content: space-evenly">
         <script src="{% static "home/d3.v4.js" %}"></script>
         <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
         <script src="{% static 'portfolio/d3chart.js' %}"></script>
-        <svg width="100%" height="500px" id="chart" ></svg>
+        <svg width="300" height="500px" id="chart" ></svg>
         <script>
             const svg=d3.select("svg#chart")
             chrt=new d3chart(svg,1,"svg#chart");
-
+            try{
+                chrt.rectWidth=.87/{{last_history.asset}};
+                if(typeof(chrt.rectWidth)!='number'){throw '';}
+            }
+            catch{
+                chrt.rectWidth=1./150/1000;
+            }
+            
+            chrt.textOffSet.asset=-12;
+            
             chrt.addRectRow({
                 portfolio_quant:{{last_history.quant|safe}},
                 portfolio_money:{{last_history.amount|safe}},
-                date:"{{last_history.Date|date}}",
+                date:"",
                 asset:{{last_history.asset|safe}},
             })
 
@@ -92,7 +101,10 @@ justify-content: space-evenly">
 
             draginit();
 
-        
+            svg.select('text.assettext')
+            .attr('text-anchor' , 'middle')
+            .attr('x',150)
+
             chrt.svg.selectAll("rect")
             .data(chrt.pointlist)
             .on("mouseover", handleMouseOver)
@@ -178,6 +190,14 @@ justify-content: space-evenly">
             </script>
         </div>
 
+        <div style = "display: flex; flex-direction: row;justify-content: center; ">
+            {% if user.is_authenticated  %}
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/transactions/{{user.username}}" style="color:var(--header-link-color);">Trade</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/history/{{user.username}}" style="color:var(--header-link-color);">History</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/agora/hashtag/{{user.username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+            {% endif %}
+
+        </div>
     </div>
     {% endif %}
 
