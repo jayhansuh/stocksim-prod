@@ -42,7 +42,11 @@ def getFavrtTickers(request, num_full = 10):
         exclude_lst = ['^GSPC','_QUECONTROL','WORK']+list(favrt_tickers)
         ticker_list += list(Ticker.objects.order_by('-last_date').exclude(ticker__in=exclude_lst)[:num_full-num_in])
     
-    return ticker_list
+    def exclude_filter(tickerObj):
+        return not tickerObj.ticker in ['_QUECONTROL','WORK']
+    filtered_list = list(filter(exclude_filter,ticker_list))
+    
+    return filtered_list
 
 def index(request):
 
