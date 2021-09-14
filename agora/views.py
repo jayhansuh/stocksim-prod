@@ -96,6 +96,7 @@ def FeedsView(request):
     context['badgeimg']=getBadge(last_history.asset)
     context['show_left_sidebar'] =True
     context['last_history'] = last_history
+    context['asset'] = "{:.2f}".format(last_history.asset)
     context['ticker_list'] = getFavrtTickers(request, 10)
     return render(request, 'agora/feeds.html',context  )
 

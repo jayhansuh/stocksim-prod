@@ -50,8 +50,9 @@ justify-content: space-evenly">
                 <div class="glowdimshort" style="margin:0 5px;font-size: 14px"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">24</a></div>
             </div>
         </div>
+
     
-        <div style="margin:0;">
+        <div style="margin:0 0 0 0;">
         <!-- <style>
             svg {
             //box-shadow: -40px 5px 40px -5px rgba(0,0,0,0.2);
@@ -106,7 +107,18 @@ justify-content: space-evenly">
         </script>
         </div>
 
-        <div style="margin: 0 0 0 0; ">
+        <div class="glowdimshort" style="margin:0 0 0 0;"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">${{asset}}</a></div>
+
+        <div style = "display: flex; flex-direction: row;justify-content: center; ">
+            {% if user.is_authenticated  %}
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
+            <div class="glowdimshort" style="margin:0 5px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+            {% endif %}
+
+        </div>
+                
+        <div style="margin: 5px 0 0 0; ">
             <table id="tickerboard" class="module" style="width:220px;text-align: center;  margin-left: auto;
             margin-right: auto;">
             <thead>
@@ -166,25 +178,15 @@ justify-content: space-evenly">
             </script>
         </div>
 
-        <div style = "display: flex; flex-direction: row;justify-content: center; ">
-            {% if user.is_authenticated  %}
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
-            {% endif %}
-
-        </div>
     </div>
     {% endif %}
 
-        <div id="feedbox" style="display:flex;
-        flex-direction: column;
-        margin: 0;
-        height: 100%;
-        width: 1000px;">
-        <div class= "feedpage" >
-            <h1> Here, the feeds will appear</h1>
-        </div>
+    <div id="feedbox" style="display:flex;
+    flex-direction: column;
+    margin: 0;
+    height: 100%;
+    width: 1000px;">
+    </div>
 
 
 
