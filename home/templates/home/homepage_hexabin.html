@@ -43,7 +43,20 @@
 <script src="{% static "home/functions.v0.200817.js" %}"></script>
 
 {% if not user.is_authenticated %}
-<div class="glowmain" id="rectlogo"> {{ site_header|default:'StockSim' }} </div>
+{% comment %} <div class="glowmain" id="rectlogo"> {{ site_header|default:'StockSim' }} </div> {% endcomment %}
+<div id="rectlogo" style="
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+">
+<img src="{% static "home/img/mainlogo.svg" %}">
+</div>
 <div id="scrollIndicator" style="
     position: absolute;
     left: calc(100% - 100px);
@@ -69,7 +82,48 @@
     flex-direction: column;">
 
 <div id="content-main0" style="width:100%;height:100%;display:block;"></div>
-
+<div style="display:flex;margin: -30px;justify-content:space-between;width: 1100px;">
+  <div style="display:flex;">
+    {% comment %} <img src="{% static "home/img/mainlogo.svg" %}" width="600" style="margin: -150px -120px;"> {% endcomment %}
+    <img src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: 0 -30px 0 35px;">
+    <div style="font-family:azonix;font-size: 21px;line-height: 4;margin: 9px 0 0 0;text-shadow:
+        0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}</div>
+  </div>
+  <div style="display: flex;">
+    {% if user.is_authenticated%}
+    <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
+    {% else %}
+    <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
+    {% endif %}
+    <a href='/?help=force' class="nav-bar-text">HELP</a>&nbsp;
+    <a href='/?mobile=true' class="nav-bar-text">MOBILE</a>&nbsp;
+    <div style="
+      margin:5px;
+      align-self: center;
+      text-align: left;
+      height: 27px;
+      line-height: 29.8px;
+      font-size: 13px;
+      width: 165px;
+      box-shadow:
+        inset 0 0 45px 0px #555,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        0px 0 25px #555;
+      display: flex;
+      align-content: center;
+      ">
+      &nbsp;&nbsp;🔍&nbsp;&nbsp;
+      <input placeholder="Search" style='margin: 0;
+        background: none;
+        border: none;
+        color: #bbb;'>
+      </input>
+    </div>
+    <img src="{% static "home/img/icon-bell.svg" %}" width="31" style="margin:5px;">
+    <a style="margin: 0 3px;font-family:azonix;align-self: center;" onclick="menuonoff();">Menu</a>
+  </div>
+</div>
 <div id="content-main1" style="
   aspect-ratio: 2 / 1;
   width:1100px;
@@ -132,7 +186,7 @@
 </div>
 
 <div style="display:flex;flex-direction:column;align-items: center;"> 
-  <div id="menu" style="
+  {% comment %} <div id="menu" style="
       display: flex;
       justify-content: center;">
 
@@ -150,7 +204,7 @@
       <a href='/simulator/' ><div class="glowdim"  style="display:inline-block">SIMULATOR</div></a>
       
     </div>
-  </div>
+  </div> {% endcomment %}
 
   <div style="
       text-align: end;
@@ -159,12 +213,12 @@
       margin: 5px 0 ;
       width: 796px;
       ">
+    <!--
     {% if user.is_authenticated%}
     <a href='/?help=force' style="margin: 0 0 0 3px;">HELP</a>
     {% endif %}
     <a href='/?mobile=true' style="margin: 0 3px;">MOBILE</a>
     <a style="margin: 0 3px;" onclick="menuonoff();">Menu</a>
-    <!--
     <a href='/?mobile=true' style="margin: 0 2px;">About us</a>
     <a href='/?mobile=true' style="margin: 0 2px;">Accounts</a>
     <a href='/?mobile=true'>REGISTER</a>

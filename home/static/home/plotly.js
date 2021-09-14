@@ -17,35 +17,35 @@ window.plotly['layout'] = {
         rangeslider: {
             visible: false,
         },
-        rangeselector: {
-            buttons: [
-                {
-                count: 3,
-                label: "3 mo",
-                step: "month",
-                stepmode: "backward",
-                },
-                {
-                count: 6,
-                label: "6 mo",
-                step: "month",
-                stepmode: "backward",
-                },
-                {
-                count: 1,
-                label: "1 yr",
-                step: "year",
-                stepmode: "backward",
-                },
-                {
-                count: 1,
-                label: "YTD",
-                step: "year",
-                stepmode: "todate",
-                },
-                { step: "all" },
-            ],
-        },
+        // rangeselector: {
+        //     buttons: [
+        //         {
+        //         count: 3,
+        //         label: "3 mo",
+        //         step: "month",
+        //         stepmode: "backward",
+        //         },
+        //         {
+        //         count: 6,
+        //         label: "6 mo",
+        //         step: "month",
+        //         stepmode: "backward",
+        //         },
+        //         {
+        //         count: 1,
+        //         label: "1 yr",
+        //         step: "year",
+        //         stepmode: "backward",
+        //         },
+        //         {
+        //         count: 1,
+        //         label: "YTD",
+        //         step: "year",
+        //         stepmode: "todate",
+        //         },
+        //         { step: "all" },
+        //     ],
+        // },
         title: "",
     },
 

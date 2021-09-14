@@ -25,7 +25,7 @@
         {% if anotheruser %}
             <input type="submit" class="submit-row" value="{% translate 'You are not authorized to place an order for ' %}{{anotheruser}}">
         {% else %}
-            <form action="{{ app_path }}" method="post" id="trns-form">
+            <form autocomplete="off" action="{{ app_path }}" method="post" id="trns-form">
                 {% csrf_token %}
                 <label for="id_ticker">Ticker:</label>
                 <div class="autocomplete">

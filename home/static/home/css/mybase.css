@@ -330,3 +330,10 @@ div.glowColored:hover{
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
+
+.nav-bar-text {
+  margin: 3px;
+  font-family : azonix;
+  align-self: center;
+  font-size: 12.5px;
+}
