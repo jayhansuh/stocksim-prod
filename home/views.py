@@ -19,6 +19,7 @@ def mobile(request):
         return False
 
 def getFavrtTickers(request, num_full = 10):
+
     favrt_tickers = []
     if (request.user.is_authenticated):
         try:
@@ -45,7 +46,7 @@ def getFavrtTickers(request, num_full = 10):
 
 def index(request):
 
-    template='home/homepage.html'
+    template='home/homepage_hexabin.html'
     if(mobile(request) or request.GET.get('mobile')):
         print('mobile')
         template='home/homepage_mobile.html'
