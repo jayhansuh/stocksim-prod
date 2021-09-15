@@ -4,14 +4,15 @@ from django.http import HttpResponseRedirect, Http404
 # Create your views here.
 from django.contrib.auth.decorators import login_required
 from stockdb.models import Ticker
-from portfolio.models import Player
+from portfolio.models import Player, Transaction
 from .models import Memo, MemoTag
 from .forms import MemoForm
 from django.http import JsonResponse
 from stockdb.makedb import setTicker
 from django.contrib.auth.models import User
 from portfolio.scheduler import quetrigger
-
+from django.core.paginator import Paginator
+from itertools import chain
 from portfolio.views import getBadge
 from home.views import getFavrtTickers
 
@@ -75,30 +76,47 @@ def MemoTagsView(request,tag):
     return render(request,'agora/memotag.html',{
         'memo_list' : MemoTag.getMemos(tag)})
 
-def FeedsView(request):
+def getFeedList(request):
     username = request.user.username
-    player=User.objects.get(username=username).player_set.all()[0]
-    #async_thread(player.makeHistory)()
-    last_history=player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]
-    ####################
-    if(username in color_order_players):
-        newamt={}
-        for t in color_order:
-            if(t in last_history.amount):
-                newamt[t]=last_history.amount[t]
-        for t in last_history.amount:
-            if(not (t in newamt)):
-                newamt[t]=last_history.amount[t]
-        if(len(newamt)==len(last_history.amount)):
-            last_history.amount = newamt
-    ####################
-    context = {}
-    context['badgeimg']=getBadge(last_history.asset)
-    context['show_left_sidebar'] =True
-    context['last_history'] = last_history
-    context['asset'] = "{:.2f}".format(last_history.asset)
-    context['ticker_list'] = getFavrtTickers(request, 10)
-    return render(request, 'agora/feeds.html',context  )
+    player = User.objects.get(username = username).player_set.all()[0]
+    favrt_ticker_list = player.favrt_ticker.all()
+    following_list = player.following.all()
+    playtofeed_list= list(following_list) + [player]
+
+    memo_list = Memo.objects.filter(player__in = playtofeed_list).order_by('-pub_date')
+    transaction_list = Transaction.objects.filter(player__in = playtofeed_list, validation = "SUCCESS").order_by('-pub_date')
+    feeds_list = sorted(list(chain(memo_list, transaction_list)), key = lambda instance: instance.pub_date, reverse = True)
+    
+    return feeds_list
+
+
+def FeedsView(request):
+    if not request.user.is_authenticated:
+        return   HttpResponseRedirect("/accounts/login/?next=/agora/feeds") 
+    else:
+        username = request.user.username
+        player=User.objects.get(username=username).player_set.all()[0]
+
+        last_history=player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]
+        num_following = player.following.count()
+        num_follower = player.followers.count()
+        # feeds_list = Transaction.objects.order_by('-pub_date')
+        feeds_list = getFeedList(request)
+        paginator = Paginator(feeds_list, 10) # Show 2 contacts per page.
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context = {}
+        context['badgeimg']=getBadge(last_history.asset)
+        context['is_nav_sidebar_enabled'] =True  
+        context['last_history'] = last_history
+        context['asset'] = "{:.2f}".format(last_history.asset)
+        context['ticker_list'] = getFavrtTickers(request, 10)
+        context['page_obj']= page_obj
+        context['num_following'] = num_following
+        context['num_follower'] = num_follower
+
+        return render(request, 'agora/feeds.html',context  )
 
 def TickerView(request,ticker):
     quetrigger(100)

@@ -15,18 +15,17 @@
 
 {% block breadcrumbs %}{% endblock %}
 
-
-{% block content %}
-
-<div style= "display:flex;
-justify-content: space-evenly">
-{% if show_left_sidebar %}
-    <div id = "sidebar" style = "display: flex;
+{% block nav-sidebar %}
+    <div id = "sidebar" style = "
+    display: flex;
     flex-direction: column;
     width: 300px;
-    margin: 0;
-    float: center;
-    border-right: 3px solid rgb(77, 76, 76);
+    height: 100vh;
+    margin-top: 70px;
+    margin-left: 10vw;
+    position:fixed;
+    border-right: 2px solid rgba(77, 76, 76,50);
+    padding-right: 10px
     ">
         <div style = "display: flex; flex-direction: row;justify-content: center; margin-top:20px">
             {% if badgeimg %}
@@ -43,11 +42,11 @@ justify-content: space-evenly">
             <div style = "display: flex; flex-direction: column;justify-content: center">
                 <div class="glowdimshort" style="margin:0 5px; font-size: 7px;letter-spacing: 1px;">Followers</div>
                 <div class="glowdimshort" style="margin:0 5px;font-size: 14px">  <a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">
-                39</a></div>
+                {{ num_follower }}  </a></div>
             </div>
             <div style = "display: flex; flex-direction: column;justify-content: center">
                 <div class="glowdimshort" style="margin:0 5px; font-size: 7px;letter-spacing: 1px;">Followings</div>
-                <div class="glowdimshort" style="margin:0 5px;font-size: 14px"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">24</a></div>
+                <div class="glowdimshort" style="margin:0 5px;font-size: 14px"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);"> {{ num_following }}</a></div>
             </div>
         </div>
 
@@ -119,17 +118,7 @@ justify-content: space-evenly">
         </script>
         </div>
 
-        <div class="glowdimshort" style="margin:0 0 0 0;"><a href="/portfolio/overview/{{username}}" style="color:var(--header-link-color);">${{asset}}</a></div>
-
-        <div style = "display: flex; flex-direction: row;justify-content: center; ">
-            {% if user.is_authenticated  %}
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
-            <div class="glowdimshort" style="margin:0 5px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
-            {% endif %}
-
-        </div>
-                
+        
         <div style="margin: 5px 0 0 0; ">
             <table id="tickerboard" class="module" style="width:220px;text-align: center;  margin-left: auto;
             margin-right: auto;">
@@ -199,19 +188,82 @@ justify-content: space-evenly">
 
         </div>
     </div>
-    {% endif %}
+{% endblock %}
 
-    <div id="feedbox" style="display:flex;
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+
+    <!-- Here is the for the feeds! -->
+
+    <div class="feedbox infinite-container" style="
+    display:flex;
     flex-direction: column;
     margin: 0;
-    height: 100%;
-    width: 1000px;">
+    width: 100%;
+    padding:0;
+    ">
+        {% if not page_obj %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+            {% for entry in page_obj %}
+            <div class = "col-md-12 infinite-item" style= "display:flex; flex-direction:column; border-bottom:2px solid rgba(77, 76, 76,50);margin-top:10px; min-height: 50px">
+                <div style="display:flex;justify-content:space-between ">
+                    <div class="glowdimshort" style="margin:0 0 0 0; font-size:11px;letter-spacing:1px">
+                        <a href='/portfolio/overview/{{entry.player}} '>{{entry.player}}</a>
+                    </div>
+
+                    <div>
+                        <span class="mini quiet"> {{ entry.pub_date }}</span>
+                    </div>
+                </div>
+                {% if entry.validation %}
+                <div class="{% if entry.quantity > 0 %}buyaction{% else %}sellaction{% endif %}" style="margin-left:15px">
+                    <a href="/agora/ticker/{{entry.ticker}}">{{ entry.viewlistformat }}</a>
+                </div>
+                {% else %}
+                <div>
+                    {{entry.ticker}}: {{entry.content }}
+                </div>
+
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endif %}    
+
+        {% if page_obj.has_next %}
+            <a class="infinite-more-link" href="?page={{ page_obj.next_page_number }}"></a> 
+        {% endif %}
+
     </div>
+    
 
 
+<script src="{% static "home/jquery.waypoints.min.js" %}"></script>
+<script src="{% static "home/infinite.min.js" %}"></script>
+<script>
+    let infinite = new Waypoint.Infinite({
+        element: $('.infinite-container')[0], 
+        offset: 'bottom-in-view',
+        onBeforePageLoad: function() {
 
+        },
 
-</div>
+        onAfterPageLoad: function() {
+
+        }
+    }
+    )
+    // Here is the control of the style.
+    const containerid = document.getElementById("container");
+    const headerid = document.getElementById("header");
+    const contentid = document.getElementById("content");
+    const titleimageid = document.getElementById("titleimage");
+    headerid.style = "position:fixed;top:0;width:95vw;";
+    contentid.style = "margin-top: 70px;margin-left:calc(310px + 10vw); margin-right:10vw; padding-left:10px";
+    titleimageid.style = "margin:-26px 0 -35px  7vw;";
+    </script>
 
 {% endblock %}
 
