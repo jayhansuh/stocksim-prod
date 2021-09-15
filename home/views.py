@@ -50,7 +50,7 @@ def getFavrtTickers(request, num_full = 10):
 
 def index(request):
 
-    template='home/homepage_hexabin.html'
+    template='home/homepage.html'
     if(mobile(request) or request.GET.get('mobile')):
         print('mobile')
         template='home/homepage_mobile.html'

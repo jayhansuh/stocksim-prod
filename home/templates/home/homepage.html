@@ -38,8 +38,25 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
 <script src="{% static "portfolio/rankingbadge.v0.js" %}"></script>
+<script src="{% static "home/d3.v4.js" %}"></script>
+<script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+<script src="{% static "home/functions.v0.200817.js" %}"></script>
+
 {% if not user.is_authenticated %}
-<div class="glowmain" id="rectlogo"> {{ site_header|default:'StockSim' }} </div>
+{% comment %} <div class="glowmain" id="rectlogo"> {{ site_header|default:'StockSim' }} </div> {% endcomment %}
+<div id="rectlogo" style="
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+">
+<img src="{% static "home/img/mainlogo.svg" %}">
+</div>
 <div id="scrollIndicator" style="
     position: absolute;
     left: calc(100% - 100px);
@@ -65,7 +82,48 @@
     flex-direction: column;">
 
 <div id="content-main0" style="width:100%;height:100%;display:block;"></div>
-
+<div style="display:flex;margin: -30px;justify-content:space-between;width: 1100px;">
+  <div style="display:flex;">
+    {% comment %} <img src="{% static "home/img/mainlogo.svg" %}" width="600" style="margin: -150px -120px;"> {% endcomment %}
+    <img src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: 0 -30px 0 35px;">
+    <div style="font-family:azonix;font-size: 21px;line-height: 4;margin: 9px 0 0 0;text-shadow:
+        0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}</div>
+  </div>
+  <div style="display: flex;">
+    {% if user.is_authenticated%}
+    <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
+    {% else %}
+    <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
+    {% endif %}
+    <a href='/?help=force' class="nav-bar-text">HELP</a>&nbsp;
+    <a href='/?mobile=true' class="nav-bar-text">MOBILE</a>&nbsp;
+    <div style="
+      margin:5px;
+      align-self: center;
+      text-align: left;
+      height: 27px;
+      line-height: 29.8px;
+      font-size: 13px;
+      width: 165px;
+      box-shadow:
+        inset 0 0 45px 0px #555,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        0px 0 25px #555;
+      display: flex;
+      align-content: center;
+      ">
+      &nbsp;&nbsp;🔍&nbsp;&nbsp;
+      <input placeholder="Search" style='margin: 0;
+        background: none;
+        border: none;
+        color: #bbb;'>
+      </input>
+    </div>
+    <img src="{% static "home/img/icon-bell.svg" %}" width="31" style="margin:5px;">
+    <a style="margin: 0 3px;font-family:azonix;align-self: center;" onclick="menuonoff();">Menu</a>
+  </div>
+</div>
 <div id="content-main1" style="
   aspect-ratio: 2 / 1;
   width:1100px;
@@ -128,7 +186,7 @@
 </div>
 
 <div style="display:flex;flex-direction:column;align-items: center;"> 
-  <div id="menu" style="
+  {% comment %} <div id="menu" style="
       display: flex;
       justify-content: center;">
 
@@ -146,7 +204,7 @@
       <a href='/simulator/' ><div class="glowdim"  style="display:inline-block">SIMULATOR</div></a>
       
     </div>
-  </div>
+  </div> {% endcomment %}
 
   <div style="
       text-align: end;
@@ -155,11 +213,12 @@
       margin: 5px 0 ;
       width: 796px;
       ">
+    <!--
     {% if user.is_authenticated%}
     <a href='/?help=force' style="margin: 0 0 0 3px;">HELP</a>
     {% endif %}
     <a href='/?mobile=true' style="margin: 0 3px;">MOBILE</a>
-    <!--
+    <a style="margin: 0 3px;" onclick="menuonoff();">Menu</a>
     <a href='/?mobile=true' style="margin: 0 2px;">About us</a>
     <a href='/?mobile=true' style="margin: 0 2px;">Accounts</a>
     <a href='/?mobile=true'>REGISTER</a>
@@ -169,7 +228,6 @@
 
 </div>
 <script src="{% static "home/dbfetch.js" %}"></script>
-<script src="{% static "home/maketable.js" %}"></script>
 <script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
 <script id="asyncsrc" async src="{% static "home/plotly.js" %}"></script>
 <script src="{% static "home/functions.v0.200817.js" %}"></script>
@@ -318,7 +376,7 @@
   const tickerboard=document.getElementById("tickerboard").getElementsByTagName('tbody')[0];
   const menu=document.getElementById("menu");
 
-  function getMonth(ind){
+  function getMonthByInd(ind){
     return (new Date(1900,0,ind)).getMonth();
   };
 
@@ -424,10 +482,10 @@
       let strt_date=window.localdb[el].strt_date;
       let end_date=window.localdb[el].end_date;
 
-      let thismonth = getMonth(end_date-1);
+      let thismonth = getMonthByInd(end_date-1);
       let asset_thismonth = window.localdb[el].asset[end_date-1-strt_date];
       let lastmonth = end_date-1;
-      while(lastmonth>strt_date && getMonth(lastmonth)==thismonth){lastmonth-=1};
+      while(lastmonth>strt_date && getMonthByInd(lastmonth)==thismonth){lastmonth-=1};
       let asset_lastmonth = window.localdb[el].asset[lastmonth-strt_date];
       let monthly_gain=(asset_thismonth/asset_lastmonth-1)*100;
 
@@ -726,6 +784,163 @@
       })
     }
   },10000)
+
+</script>
+
+<div id="menusvgcontainer" style="
+  position:absolute;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  display:none;
+  opacity:0;
+  transition: opacity .3s;
+  "><svg class="menunav" width="100%" height="100%"></svg></div>
+<script>
+
+const cntdiv=document.querySelector('div#menusvgcontainer');
+function menuonoff(){
+  if(cntdiv.style.display=='none'){
+    cntdiv.style.display="";
+    setTimeout(()=>{cntdiv.style.opacity="1"},10);
+  }
+  else{
+    cntdiv.style.opacity="0";
+    setTimeout(()=>{cntdiv.style.display="none"},300);
+  }
+}
+
+var svg = d3.select("svg.menunav"),
+    width = window.innerWidth,
+    height = window.innerHeight;
+
+var delta = 2.2523513741471,
+    i = 0, j,
+    n = 8000, // Total number of random points.
+    k = 30; // Number of points to replace per frame.
+
+var rx = d3.randomNormal(width / 2, 240),
+    ry = d3.randomNormal(height / 2, 180),
+    points = d3.range(n).map(function() { return [rx(), ry()]; });
+
+var color = d3.scaleSequential(d3.interpolateLab("black", "#6f6f6f"))
+    .domain([0, 20]);
+
+var hexbin = d3.hexbin()
+    .radius(30)
+    .extent([[0, 0], [width, height]]);
+
+const shadow= svg.append("g").attr('class','shadow')
+
+var hexagon = shadow.selectAll("path")
+  .data(hexbin(points))
+  .enter().append("path")
+    .attr("d", hexbin.hexagon(120))
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
+
+{% comment %} var rx2 = d3.randomNormal(width / 2, 80),
+    ry2 = d3.randomNormal(height / 2, 80),
+    points2 = d3.range(35).map(function() { return [rx2(), ry2()]; }); {% endcomment %}
+
+const offset = hexbin([[width/2,height/2]])[0];
+const points2 = [
+    [-2.5,-0,3,60,'#aaa', 'Back' , false],
+    [-0.5,3,1,59,'#d2ebf9', 'Accounts' , '/accounts/password_change/'],
+    [-0.5,2,1,59,'#678', 'Portfolio', '/portfolio/'],
+    [-1.5,2,1,59,'#678', 'Hist Chart', '/portfolio/history/'],
+    [.5,3,1,59,'#678', 'Trade' , '/portfolio/transactions/'],
+    [-.5,1,2,119,'#d2ebf9', 'VR' , '/simulator/qlab/'],
+    [0,0,2.5,59,'#678',  'Ticker' , '/agora/'],
+    [1,0,2.5,59,'#678',  'PF review', '/agora/'],
+    [0,-1,2.5,59,'#d2ebf9', 'Agora', '/agora/'],
+
+    [5,4,2.5,59,'#678',  'Custom Chart' , '/simulator/histplot/'],
+    [4,4,2.5,59,'#678',  'Quant Lab' , '/simulator/qlab/'],
+    [4,3,2.5,59,'#d2ebf9',  'Simulator', '/simulator/'],
+    [3,3,2.5,59,'#678',  'Swing' , '/simulator/chartsurf/'],
+  ].map((el)=>{
+  const [i,j,k,r,color,text,onclick] = el;
+  return {x:(Math.sqrt(3)*60*(i-j/2) + offset.x) , y: offset.y - 1.5*60*j + k*60 , 'r': r , 'color': color , 'text' : text, 'onclick':onclick}
+})
+
+d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
+window.redlineDOM = null;
+
+const menudom= svg.append("g").attr('class','menu')
+const menuhexagon = menudom.selectAll("path")
+  .data(points2)//[[width/2,height/2],[width/2-120,height/2]]))
+  .enter().append("path")
+    .attr("d", d => hexbin.hexagon(d.r))
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", d => d.color )
+    .attr("stroke-width", 1.5)
+    .on("mouseover", function (d,i) {
+      menudom.selectAll("path")
+      .attr("stroke", '');
+
+      d3.select(this)
+      .moveToFront()
+      .attr("stroke", 'red')
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform').split('scale')[0]+' scale(1.5)' )
+    })
+    .on("mouseout", function () {
+      d3.select(this)
+      .transition()
+      .ease(d3.easeExp)
+      .duration(300)
+      .attr("transform", this.getAttribute('transform').split('scale')[0] )
+    })
+    .on("click",function(d,i){
+      if(d.onclick){
+        console.log(d.onclick);
+        window.location=d.onclick;
+      }
+      else{
+        menuonoff();
+      }
+    });
+
+svg.append("g").attr('class','menu-text').selectAll("text")
+  .data(points2)
+  .enter().append("text")
+    .attr('text-anchor' , 'middle')
+    .attr('alignment-baseline' , 'middle')
+    .text(d => d.text)
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .attr("fill", 'black' )
+    .style('font-size',12)
+
+let num = 0 ;
+d3.timer(function(elapsed) {
+  
+  if(elapsed < num*100 ){return;}
+  num+=1;
+  rx = d3.randomNormal(width / 2 + 240 * Math.cos(elapsed * delta), 180),
+  ry = d3.randomNormal(height / 2 + 160 * Math.sin(elapsed * delta), 120);
+  for (j = 0; j < k; ++j, i = (i + 1) % n) points[i][0] = rx(), points[i][1] = ry();
+
+  hexagon = hexagon
+    .data(hexbin(points), function(d) { return d.x + "," + d.y; });
+
+  hexagon.exit().remove();
+
+  hexagon = hexagon.enter().append("path")
+      .attr("d", hexbin.hexagon(30))
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .merge(hexagon)
+    .attr("fill", function(d) { return color(Math.min(40,d.length)); })
+    .attr("opacity", 0.1 );
+});
 
 </script>
 
