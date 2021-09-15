@@ -21,6 +21,7 @@ function getTBdata(ticker_name){
   return [daily_str,ma25_str];
 };
 
+// comment - This function depends on tickerboard so it might need to make it as an input when it's modulized.
 function enterDailyFluct() {
   
   const daily_list = tickerboard.getElementsByClassName("daily");
@@ -166,6 +167,9 @@ function resize(){
 //////////////////////////////////
 //window.plotly variables onload//
 //////////////////////////////////
+// comment - The following block is running on homepage.html if you add script in homepage.html (I remove for the next commit)
+// The setIntervals fetching overlapped information in homepage.html. Functions are defined twice in hompage.html if you include this file.
+// DISPLAY_DATES = 3 will not work for ma25 and also for holidays. It also makes ambiguous on what value it is in hompage.html.
 DISPLAY_DATES = 3;
 setInterval(()=>{
   if(document.hasFocus()){
