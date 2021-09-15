@@ -30,39 +30,17 @@
 {% endfor %}
 {% endif %}
 
-
-<style>
-    svg {
-	//box-shadow: -40px 5px 40px -5px rgba(0,0,0,0.2);
-	//border-radius: 5px;
-	//margin: 20px;
-}
-    .draggable {
-        cursor: move; /* fallback if grab cursor is unsupported */
-        cursor: grab;
-        cursor: -moz-grab;
-        cursor: -webkit-grab;
-    }
-
-    .dragging {
-        cursor: grabbing;
-        cursor: -moz-grabbing;
-        cursor: -webkit-grabbing;
-    }
-
-
-</style>
 {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script> {% endcomment %}
 <script src="{% static "home/d3.v4.js" %}"></script>
-<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="{% static "home/d3-scale-chromatic.v1.min.js" %}"></script>
 
 <script src="{% static 'portfolio/d3chart.js' %}"></script>
 
-<svg width="100%">
+<svg width="calc( 100vw - 80px )">
 </svg>
 <div id="test"></div>
 <script>
-
+    
     const svg=d3.select("svg")
     chrt=new d3chart(svg,{{history_list|length}});
     {% if mag_ratio %}
@@ -90,12 +68,14 @@
 
     var loop = setInterval(() =>{
         if(chrt.animationPlaying<5){
-                chrt.svg.selectAll("rect")
-                .data(chrt.pointlist)
-                .on("mouseover", handleMouseOver)
-                .on("mouseout", handleMouseOut)
-                .call(dragOn);
-                clearInterval(loop);
+
+            chrt.svg.selectAll("rect")
+            .data(chrt.pointlist)
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .call(dragOn);
+            clearInterval(loop);
+
         }
     }, 30);
 

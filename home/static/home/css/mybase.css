@@ -337,3 +337,16 @@ div.glowColored:hover{
   align-self: center;
   font-size: 12.5px;
 }
+
+.draggable {
+  cursor: move; /* fallback if grab cursor is unsupported */
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}    
