@@ -139,7 +139,7 @@
     }
   });
 
-  function getMonth(ind){
+  function getMonthByInd(ind){
     return (new Date(1900,0,ind)).getMonth();
   };
 
@@ -158,7 +158,7 @@
       let thismonth = getMonth(end_date-1);
       let asset_thismonth = window.localdb[el].asset[end_date-1-strt_date];
       let lastmonth = end_date-1;
-      while(lastmonth>strt_date && getMonth(lastmonth)==thismonth){lastmonth-=1};
+      while(lastmonth>strt_date && getMonthByInd(lastmonth)==thismonth){lastmonth-=1};
       let asset_lastmonth = window.localdb[el].asset[lastmonth-strt_date];
       let monthly_gain=(asset_thismonth/asset_lastmonth-1)*100;
 

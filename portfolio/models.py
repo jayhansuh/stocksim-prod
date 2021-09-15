@@ -18,7 +18,7 @@ class Player(models.Model):
     portfolio = models.JSONField('portfolio',default=portfolio_default)
     pub_date = models.DateTimeField('date published')
     favrt_ticker = models.ManyToManyField(Ticker, related_name = "subscriber", blank = True)
-    following = models.ManyToManyField("self", related_name = "followers", blank = True )
+    following = models.ManyToManyField("self", related_name = "followers", symmetrical=False, blank = True )
     
     def __str__(self):
         return self.user.username
