@@ -83,7 +83,7 @@ def getFeedList(request):
     following_list = player.following.all()
     playtofeed_list= list(following_list) + [player]
 
-    memo_list = Memo.objects.filter(player__in = playtofeed_list).order_by('-pub_date')
+    memo_list = Memo.objects.filter(player__in = playtofeed_list,isSubMemo= False).order_by('-pub_date')
     transaction_list = Transaction.objects.filter(player__in = playtofeed_list, validation = "SUCCESS").order_by('-pub_date')
     feeds_list = sorted(list(chain(memo_list, transaction_list)), key = lambda instance: instance.pub_date, reverse = True)
     

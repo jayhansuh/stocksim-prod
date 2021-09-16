@@ -335,7 +335,7 @@
         window.rbdata = makeTableData("player");
         enterTableData("rankingboard", window.rbdata , 0 );
         enterTableData("rankingboard", window.rbdata , 2 );
-
+        
         Object.keys(window.localdb).forEach((key)=>{
           if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
             window.plotly.enter(key,DISPLAY_DATES)

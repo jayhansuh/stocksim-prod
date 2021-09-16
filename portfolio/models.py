@@ -6,7 +6,9 @@ ptz = pytz.timezone("UTC")
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation
 from stockdb.models import Ticker, DayPrice
 from stockdb.makedb import updateTicker, get_last_price, setTicker
 from portfolio.scheduler import quetrigger
@@ -142,7 +144,21 @@ class Player(models.Model):
 
         return "TRANSACTION_FAIL_UncaughtError"
     
+class Like(models.Model):
+    content_type = models.ForeignKey(ContentType,on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type','object_id')
     
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Reply(models.Model):
+    content_type = models.ForeignKey(ContentType,on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type','object_id')
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.CharField(max_length = 280)
+    like = GenericRelation('Like', related_query_name='reply')    
 
 class Transaction(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -151,6 +167,9 @@ class Transaction(models.Model):
     quantity = models.IntegerField(default=0)
     price = models.FloatField(default=0)
     validation = models.CharField(max_length=16,null=True)
+    like = GenericRelation('Like',related_query_name='trns')
+    reply = GenericRelation('Reply',related_query_name = 'trns')
+
 
     def __str__(self):
         if(self.quantity>=0):

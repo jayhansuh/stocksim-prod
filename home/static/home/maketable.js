@@ -1,3 +1,5 @@
+
+
 function getTBdata(ticker_name){
     
   const close_set = window.localdb[`ticker__${ticker_name}`]["Close"];
@@ -162,45 +164,3 @@ function resize(){
   //    el.style.setProperty('fill-opacity','1');
   //})}
 }
-
-
-//////////////////////////////////
-//window.plotly variables onload//
-//////////////////////////////////
-// comment - The following block is running on homepage.html if you add script in homepage.html (I remove for the next commit)
-// The setIntervals fetching overlapped information in homepage.html. Functions are defined twice in hompage.html if you include this file.
-// DISPLAY_DATES = 3 will not work for ma25 and also for holidays. It also makes ambiguous on what value it is in hompage.html.
-DISPLAY_DATES = 3;
-setInterval(()=>{
-  if(document.hasFocus()){
-    let request={};
-    const daily_list = tickerboard.getElementsByClassName("daily");
-    for(let i = 0 ; i < daily_list.length; i++ ){
-      const ticker_key = 'ticker__'+daily_list[i].id;
-      request[ticker_key]=window.localdb_meta.__todayind-DISPLAY_DATES;
-    }
-    Object.keys(window.localdb).forEach((key)=>{
-      if(key in request){
-        request[key]=Math.min(request[key],window.localdb[key].end_date-1);
-      }
-      else if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
-        request[key]=window.localdb[key].end_date-1;
-      }
-    });
-
-    fetchDB(request).then((response_json)=>{
-      // window.rbdata = makeTableData("player");
-      // enterTableData("rankingboard", window.rbdata , 0 );
-      // enterTableData("rankingboard", window.rbdata , 2 );
-      enterDailyFluct();
-      console.log("fetch complete")
-      // Object.keys(window.localdb).forEach((key)=>{
-      //   if(key.split("__")[0]=="player" || key=='ticker__'+window.drawnTicker){
-      //     window.plotly.enter(key,DISPLAY_DATES)
-      //   }
-      // });
-      // window.plotly.plot();
-      saveLocalDB();
-    })
-  }
-},10000)

@@ -2,8 +2,11 @@ from django.db import models
 
 from django.utils import timezone
 import datetime
-
-from portfolio.models import Player
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation
+from portfolio.models import Player, Like, Reply
 from stockdb.models import Ticker
 
 import re
@@ -82,3 +85,34 @@ class MemoTag(models.Model):
                 pkset.add(memotag.memo.pk)
                 withoutRep.append(memotag.memo)
         return withoutRep
+
+STATUS = (
+    (0, "DRAFT"), 
+    (1,"Publish")
+)
+
+class Report(models.Model):
+    title =  models.CharField(max_length= 200)
+    player = models.ForeignKey(Player, null=True, on_delete=models.SET_NULL)
+    author = models.CharField(max_length=32)
+    pub_date = models.DateTimeField('date published', db_index = True)
+    content = models.TextField()
+    status = models.IntegerField(choices=STATUS, default = 0)
+    deleted = models.BooleanField(default=False)
+    like = GenericRelation('portfolio.Like',related_query_name='review')
+    reply = GenericRelation('portfolio.Reply',related_query_name = 'review')
+
+    def __str__(self):
+        return self.title
+
+class PortfReview(Report):
+    portfolio = models.JSONField('portfolio')
+
+class TickerReport(Report):
+    ticker = models.ForeignKey(Ticker, on_delete=models.CASCADE)
+
+class Feed(models.Model):
+    pub_date = models.DateTimeField('date published',db_index=True)
+    tag = models.CharField(max_length = 32, db_index = True)
+    content = models.JSONField()
+
