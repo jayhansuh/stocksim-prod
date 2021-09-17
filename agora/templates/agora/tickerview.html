@@ -22,22 +22,63 @@
 <script src="{% static "home/functions.v0.200817.js" %}"></script>
 <script src="http://kit.fontawesome.com/2d323a629b.js" crossorigin = "anonymous"></script>
 
+<script>
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+    const option = {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+    };
+
+    async function addFavorite() {
+        try {
+            const response = await fetch("addfav/", option);
+            const response_json = await response.json();
+            const subscribing = document.getElementById("substatus");
+
+            if(response_json.issubscribed){
+                subscribing.innerHTML = "<i class='fas fa-star' style = 'font-size:21px; color:white'></i>";
+            }
+            else{
+                subscribing.innerHTML = "<i class='far fa-star' style = 'font-size:21px; color: white'></i>";
+            }
+        } catch (err){
+            console.error("Error");
+        }
+    };
+</script>
+
 <div id="content-main">
 
 
     <div class="module" id="chrt-container" style="padding:10px;">
         <div class="titleshow" style="display:flex;background:#264b5d">
             <h2 style="font-size: 21px;">{{tickerObj.ticker}} - {{tickerObj.name}}</h2>
+            <button onclick="addFavorite();" style="background:none;border:none;margin:0;padding:0;cursor: pointer;" type="button">
             {% if subscribed  %}
-            <a href="addfav/" style="margin:0px;padding: 10px 12px;">
-            <!--    <li style = "font-size:21px; color:white"> &#9733; </li> -->
-                <i class="fas fa-star" style = "font-size:21px; color:white"></i>
-            </a>
+            <div id="substatus"><i class="fas fa-star" style = "font-size:21px; color:white"></i></div>
             {% else %}
-            <a href="addfav/" style="margin:0px;padding:10px 12px">
-                <i class="far fa-star" style = "font-size:21px; color: white"></i>
-            </a>
+            <div id="substatus" ><i class="far fa-star" style = "font-size:21px; color: white"></i></div>
             {% endif %}
+        </button>
         </div>
 
         <svg id='graph' style='width:100%'></svg>

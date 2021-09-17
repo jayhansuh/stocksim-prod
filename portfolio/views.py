@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 # Create your views here.
-
+import json
 from .models import Player, Transaction, AssetHistory
 from django.contrib.auth.decorators import login_required
 from .forms import TransactionForm
@@ -228,8 +228,8 @@ def getBadge(asset):
     return envelope[0] + envelope[1] + badgelist[n] + envelope[2]
 
 def AddFollowing(request,username):
-    if not request.user.is_authenticated:
-        raise Http404("The user does not log-in")
+    if request.method != 'POST':
+        raise Http404("This is not a valid approach.")
     else:    
         myname = request.user.username
         me=User.objects.get(username=myname).player_set.all()[0]
@@ -240,4 +240,4 @@ def AddFollowing(request,username):
         else:
             me.following.add(whotofollow)
         me.save()
-    return redirect('portfolio:overview',username)
+        return JsonResponse({"isfollowed" : not isfollowed })

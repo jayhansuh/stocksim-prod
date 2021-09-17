@@ -29,6 +29,71 @@
 
 {% block content_title %}
 {% if title_nav %}
+
+<script>
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+    const option = {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+    };
+    // function addfollow() {
+    //     fetch("/portfolio/overview/{{username}}/addfollow/", option)
+    //         .then( (response) => response.json())
+    //         .then( (response_json) => {
+    //             const following = document.getElementById("followstatus");
+    //             if(response_json.isfollowed){
+    //                 following.innerHTML = "Unfollow";
+    //             }
+    //             else{
+    //                 following.innerHTML = "Follow";
+    //             }
+    //         })
+    //         .catch((err)=>{
+    //         console.err("Error!");
+    //         return null;
+    //     });
+    // };
+
+    async function addfollow() {
+        try {
+            const response = await fetch("/portfolio/overview/{{username}}/addfollow/", option);
+            const response_json = await response.json();
+            const following = document.getElementById("followstatus");
+
+            if(response_json.isfollowed){
+                following.innerHTML = "Unfollow";
+                following.style = "color:rgba(255,255,255,0.3)";
+            }
+            else{
+                following.innerHTML = "Follow";
+                following.style = "color:var(--header-link-color);";
+
+            }
+        } catch (err){
+            console.err("Error");
+        }
+    };
+</script>
+
 <h1>
     <div style="display: flex;
     justify-content: center;
@@ -48,11 +113,13 @@
     <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
     <div class="glowdimshort" style="margin:0 15px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
     {% if user.is_authenticated and user.username != username %}
-        {% if isfollowed %}
-            <div class="glowdimshort" style="margin:0 15px;color:rgba(255,255,255,0.3)"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >UNFOLLOW</a></div>
-        {% else  %}
-            <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >FOLLOW</a></div>   
-        {% endif %}
+                <button onclick="addfollow();" style="background:none;border:none;margin:0;padding:0;cursor: pointer;" type="button">
+                    {% if isfollowed %}
+                    <div class="glowdimshort" id = "followstatus" style="margin:0; color:rgba(255,255,255,0.3)" > UNFOLLOW </div>
+                    {% else  %}
+                    <div class="glowdimshort" id = "followstatus" style="margin:0;" > FOLLOW </div>
+                    {% endif %}
+                </button>
     {% endif %}
 
     </div>

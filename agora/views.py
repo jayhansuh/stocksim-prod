@@ -181,20 +181,16 @@ def TickerView(request,ticker):
     return HttpResponseRedirect("/accounts/login/?next=/agora/ticker/"+ticker)
 
 def AddFavorite(request,ticker):
-    if(not Ticker.objects.filter(ticker=ticker).exists()):
-        setTicker(ticker)
-        return render(request,'home/construction.html',{
-            'css_style':'font-size:16px;',
-            'construction_msg': ticker.upper() +' - Invalid ticker or initializing'})
-    if not request.user.is_authenticated:
-        raise Http404("The user does not log-in")
+    if request.method != 'POST':
+        raise Http404("This is not a valid approach.")
     else:    
         username = request.user.username
         p=User.objects.get(username=username).player_set.all()[0]
         t = Ticker.objects.filter(ticker=ticker)[0]
-        if p.favrt_ticker.filter(pk = t.pk).exists():
+        issubscribed = p.favrt_ticker.filter(pk = t.pk).exists()
+        if issubscribed:
             p.favrt_ticker.remove(t)
         else:
             p.favrt_ticker.add(t)
         p.save()
-    return redirect('agora:agoraticker',ticker)
+    return JsonResponse({"issubscribed":  not issubscribed })
