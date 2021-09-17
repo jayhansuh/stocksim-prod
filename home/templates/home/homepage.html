@@ -78,7 +78,7 @@
     "><a href='/?mobile=true'>MOBILE VER</a></div>
 {% endif %}
 
-<div id="contents" style="opacity:0;display: inline-flex;
+<div id="contents" style="opacity:0;display: inline-flex;align-self: center;
     flex-direction: column;transition: transform 0.2s ease 0.05s;transform: scale({% if user.is_authenticated%}1{% else %}2.71828{% endif %});">
 
 <div id="content-main0" style="width:100%;height:100%;display:block;"></div>
@@ -534,7 +534,7 @@
       rownum++;
       row.innerHTML = `<td><a href='/portfolio/ranking/help/'>${getBadge(el[2],true)}</a></td>`;
       //row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${el[0]}</a></td>`;
-      row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${ (el[0].length>7) ? el[0].slice(0,7)+'...' : el[0] }</a></td>`;
+      row.innerHTML += `<td><a href="portfolio/profile/${el[0]}/">${ (el[0].length>7) ? el[0].slice(0,7)+'...' : el[0] }</a></td>`;
       row.innerHTML += `<td>${numformat(el[1])}%</td>`;
       row.innerHTML += `<td>${numformat(el[2])}</td>`;
     });
@@ -796,7 +796,15 @@
   display:none;
   opacity:0;
   transition: opacity .3s;
-  "><svg class="menunav" width="100%" height="100%"></svg></div>
+  "><svg class="menunav" width="100%" height="100%">
+  
+  <defs>
+    <pattern id="img1" patternUnits="userSpaceOnUse" width="100" height="100">
+      <image href="{% static "home/img/mainlogo.svg" %}" x="0" y="0" width="100" height="100" />
+    </pattern>
+  </defs>
+
+  </svg></div>
 <script>
 
 const cntdiv=document.querySelector('div#menusvgcontainer');

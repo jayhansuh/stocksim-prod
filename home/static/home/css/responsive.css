@@ -13,8 +13,8 @@ input[type="submit"], button {
     }
 
     td, th {
-        padding: 10px;
-        font-size: 14px;
+        /*padding: 10px;*/
+        font-size: 13px;
     }
 
     .small {

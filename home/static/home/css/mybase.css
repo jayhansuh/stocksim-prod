@@ -349,4 +349,15 @@ div.glowColored:hover{
   cursor: grabbing;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
-}    
+}
+
+@media (max-width: 720px) {
+  #content-sub{
+    width:95vw;
+  }
+
+  #nav-bar-right{
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+}

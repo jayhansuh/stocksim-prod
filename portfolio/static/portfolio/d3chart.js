@@ -74,6 +74,7 @@ class d3chart {
 
         this.maxSVGwidth=1000.;
         this.svgwidth=1000.;
+        this.textboxsize=110;
 
         this.hoverticker="";
 

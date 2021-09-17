@@ -1,4 +1,4 @@
-{% extends "base_site.html" %}
+{% extends "base_portfolio.html" %}
 {% load i18n static %}
 
 {% block extrastyle %}{{ block.super }}
@@ -6,15 +6,11 @@
     <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
 {% endblock %}
 
-{% block coltype %}colMS{% endblock %}
-
-{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
-
 {% block breadcrumbs %}{% endblock %}
 
 {% block nav-sidebar %}{% endblock %}
 
-{% block content %}
+{% block content-sub %}
 
 <div id="content-main">
     <div class="module" id="make-actions-module">
@@ -65,12 +61,6 @@
     }
 </script>
 
-{% endblock %}
-
-{% block sidebar %}
-<div id="content-related">
-<h2 style="text-align:center;">Portfolio Snapshot</h2>
-<ul id="portfolio"></ul>
 <script type='text/javascript'>
 
     async function validateButtonOn(){
@@ -119,19 +109,6 @@
         }
     }
     document.addEventListener('mousedown', validateButtonOff );
-
-    const portfolio={{portfolio|safe}};
-    const portDOM=document.getElementById("portfolio")
-    Object.keys(portfolio).forEach((key)=>{
-        let newli=document.createElement("li");
-        if(key=="_cash"){
-            newli.innerHTML="Cash: "+portfolio[key].toFixed(2);
-        }
-        else{
-            newli.innerHTML=`<a href='/agora/ticker/${key}'>${key}</a>: ${portfolio[key]}`;
-        }
-        portDOM.appendChild(newli);
-    })
 
 </script>
 
@@ -286,10 +263,5 @@ getTicker().then(tickers => autocomplete(document.getElementById("id_ticker"), t
 
 </script>
 
-{% comment %}
-<div id="content-related">
-  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
-</div>
-{% endcomment %}
 {% endblock %}
 
