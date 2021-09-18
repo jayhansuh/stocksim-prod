@@ -1,5 +1,5 @@
 
-{% extends "base_site.html" %}
+{% extends "base_portfolio.html" %}
 {% load i18n static %}
 
 {% block extrastyle %}{{ block.super }}
@@ -15,7 +15,7 @@
 
 {% block breadcrumbs %}{% endblock %}
 
-{% block content %}
+{% block content-sub %}
 
 {% if form.errors and not form.non_field_errors %}
 <p class="errornote">
@@ -35,12 +35,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 {% endcomment %}
+
+
 <script src="{% static "home/d3.v4.js" %}"></script>
 <script src="{% static "home/d3-scale-chromatic.v1.min.js" %}"></script>
 
 <script src="{% static 'portfolio/d3chart.js' %}"></script>
 
-<svg width="calc( 100vw - 80px )" height="500px" id="chart">
+<svg width="800px" height="500px" id="chart" style="max-width: 100%;">
 </svg>
 <script>
 
@@ -72,12 +74,6 @@
 
 </script>
 
-<div style="
-    display:flex;
-    justify-content: center;
-    align-items:flex-start;
-    flex-wrap: wrap;
-">
 
 <div style="
     display:flex;
@@ -94,7 +90,7 @@
         <table id="portfolioboard" class="module" style="width:100%;text-align: center;box-shadow: none;margin-bottom: 5px;">
         <thead>
             <tr>
-            <th scope="col">Ticker</th>
+            <th scope="col">Ticker1</th>
             <th scope="col">Quantity</th>
             <th scope="col">Price</th>
             <th scope="col">Value({{ asset |floatformat:"2g" }})</th>
@@ -170,7 +166,6 @@
     {% endfor %}
     </ul>
     {% endif %}
-</div>
 </div>
 {% endblock %}
 

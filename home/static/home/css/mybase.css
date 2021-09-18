@@ -330,3 +330,34 @@ div.glowColored:hover{
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
+
+.nav-bar-text {
+  margin: 3px;
+  font-family : azonix;
+  align-self: center;
+  font-size: 12.5px;
+}
+
+.draggable {
+  cursor: move; /* fallback if grab cursor is unsupported */
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+
+@media (max-width: 720px) {
+  #content-sub{
+    width:95vw;
+  }
+
+  #nav-bar-right{
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+}

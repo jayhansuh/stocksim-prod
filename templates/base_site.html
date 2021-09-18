@@ -5,7 +5,9 @@
 {% block branding %}
 <h1 id="site-name">
     <a href="/">
-        <div class="glow" id="rectlogo"> {{ site_header|default:'StockSim' }} </div>
+        {%load i18n static%}
+        <img id="titleimage" src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: -26px -35px;">
+        {% comment %} <div class="glow" id="rectlogo"> {{ site_header|default:'StockSim' }} </div> {% endcomment %}
     </a>
 </h1>
 {% endblock %}
@@ -40,7 +42,9 @@
     <div class="glowdimshort" style="margin:0 15px;">
     {% if username %}<a href='/portfolio/overview/{{username}}'>{{username}}</a>{% else %}Anonymous{% endif %}
     </div>
+    {% if user.is_authenticated and user.username == username %}
     <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
+    {% endif %}
     <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
     <div class="glowdimshort" style="margin:0 15px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
     {% if user.is_authenticated and user.username != username %}

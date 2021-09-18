@@ -890,7 +890,7 @@ table#change-history tbody th {
 }
 
 #content {
-    padding: 20px 40px;
+    padding: 20px 20px;
 }
 
 .dashboard #content {
@@ -917,6 +917,12 @@ table#change-history tbody th {
     width: 30vw;
     position: relative;
     margin-right: -35vw;
+}
+
+#content-sub{
+    width:calc(100% - 300px);
+    max-width:800px;
+    min-width:350px;
 }
 
 #footer {

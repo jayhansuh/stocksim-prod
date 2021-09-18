@@ -55,7 +55,7 @@ color_order_players = ['BAILLIE_GIFFORD','BAUPOST','jj']
 
 def indexView(request):
     if(request.user.is_authenticated):
-        return redirect("/portfolio/overview/"+request.user.username)
+        return redirect("/portfolio/profile/"+request.user.username)
     return HttpResponseRedirect('/portfolio/history/'+example_username)
 
 #@login_required
@@ -78,6 +78,7 @@ class HistoryView(generic.ListView):
         context['title']='History'
         context['username']=self.kwargs['username']
         context['title_nav'] = True
+        context['isfollowed'] = isfollowed(self.request,self.kwargs['username'])
         return context
 
     def get_queryset(self):
@@ -101,6 +102,58 @@ class HistoryView(generic.ListView):
         return queryset
         #else:
         #    return redirect("/accounts/login/?next=/portfolio/history/"+self.kwargs['username'])
+
+def isfollowed(request,username):
+    isfollowed = False
+    if request.user.is_authenticated:
+        myname = request.user.username
+        me=User.objects.get(username=myname).player_set.all()[0]
+        whotofollow = User.objects.get(username=username).player_set.all()[0]
+        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
+    return isfollowed
+
+def ProfileView(request,username):
+    quetrigger(100)
+    player=User.objects.get(username=username).player_set.all()[0]
+    #async_thread(player.makeHistory)()
+    last_history=player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]
+    ####################
+    if(username in color_order_players):
+        newamt={}
+        for t in color_order:
+            if(t in last_history.amount):
+                newamt[t]=last_history.amount[t]
+        for t in last_history.amount:
+            if(not (t in newamt)):
+                newamt[t]=last_history.amount[t]
+        if(len(newamt)==len(last_history.amount)):
+            last_history.amount = newamt
+    ####################
+    portfolioOverview=[]
+    for ticker in last_history.quant:
+        quantity = last_history.quant[ticker]
+        value = last_history.amount[ticker]
+        portfolioOverview.append({
+            'ticker': ticker if ticker!='_cash' else "Cash(USD)",
+            'quantity': str(quantity) if ticker!='_cash' else "NA",
+            'value': value,
+            'price': "{:.2f}".format(value/quantity),
+            'weight': "{:.1f}".format(value/last_history.asset*100),
+        })
+    portfolioOverview.sort(reverse=True, key=(lambda x : x['value']))
+ 
+    return render(request, 'portfolio/profile.html', {
+                    'title':'Overview',
+                    'username':username,
+                    'title_nav' : {'img':getBadge(last_history.asset,'width:200px;')},
+                    'last_history':last_history,
+                    'transaction_list' : player.transaction_set.order_by('-pub_date'),
+                    'memo_list' : MemoTag.getMemos(tag=username),
+                    'asset' : last_history.asset,
+                    'portfolioOverview' : portfolioOverview,
+                    'isfollowed': isfollowed(request,username),
+                    'portfolio' : player.portfolio,
+                })
 
 #@login_required
 def PortfolioView(request,username):
@@ -133,13 +186,6 @@ def PortfolioView(request,username):
         })
     portfolioOverview.sort(reverse=True, key=(lambda x : x['value']))
  
-    isfollowed = False
-    if request.user.is_authenticated:
-        myname = request.user.username
-        me=User.objects.get(username=myname).player_set.all()[0]
-        whotofollow = User.objects.get(username=username).player_set.all()[0]
-        isfollowed = me.following.filter(pk=whotofollow.pk).exists()
-
     return render(request, 'portfolio/overview.html', {
                     'title':'Overview',
                     'username':username,
@@ -149,7 +195,7 @@ def PortfolioView(request,username):
                     'memo_list' : MemoTag.getMemos(tag=username),
                     'asset' : last_history.asset,
                     'portfolioOverview' : portfolioOverview,
-                    'isfollowed': isfollowed
+                    'isfollowed': isfollowed(request,username),
                 })
 
 def trnsrender(request,player,form,trnsstatus):
@@ -199,9 +245,9 @@ def RankingHelp(request):
                     'title': 'Ranking Intro',
                 })
 
-def getBadge(asset):
+def getBadge(asset,style_string="width: 25px;"):
     envelope = [
-        '<a href="/portfolio/ranking/help/"><svg style="width: 25px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">',
+        '<a href="/portfolio/ranking/help/"><svg style="'+style_string+'" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">',
         '<path class="badge" d="',
         '" style="fill: #d2ebf9;stroke:none;filter:drop-shadow(0px 0px 14px rgb(255 255 255 / 0.7));"></path></svg></a>',
     ]
