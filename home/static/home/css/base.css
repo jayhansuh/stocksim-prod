@@ -891,8 +891,6 @@ table#change-history tbody th {
 }
 
 #content {
-    position: relative;
-    top: var(--header-size);
     padding: 20px 20px;
 }
 
@@ -937,6 +935,11 @@ table#change-history tbody th {
 
 .colMS {
     margin-right: 300px;
+}
+
+.colMH {
+    position: relative;
+    top: var(--header-size);
 }
 
 .colSM {

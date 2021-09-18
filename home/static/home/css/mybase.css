@@ -360,4 +360,7 @@ div.glowColored:hover{
     justify-content:center;
     flex-wrap:wrap;
   }
+  :root {
+    --header-size: 160px;
+  }
 }

@@ -1,10 +1,145 @@
-
-{% extends "base_site.html" %}
+{% extends "base_portfolio.html" %}
 {% load i18n static %}
+
 
 {% block extrastyle %}{{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+    <style>
+
+        .button, input[type=submit], input[type=button], .submit-row input, a.button, button {
+            background: var(--button-bg);
+            padding: 10px 14px;
+            border: none;
+            border-radius: 10px;
+            color: var(--button-fg);
+            cursor: pointer;
+            transition: background 0.15s;
+            width:35px;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            background-color: #121212;
+            flex-flow: center;
+            align-items: stretch;
+            width: 90%;    
+        }
+    
+        .glowdim-button{
+            background-color: #555;
+            text-align: center;
+            color:white;
+            box-shadow: inset 0 0 45px 0px black, inset 0px 0px 1.5px 1.5px #ccc, inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 45px #555;
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888;
+            position: relative;
+            font-family: 'Azonix';
+            font-size: 11px;
+            letter-spacing: 3px;
+            height: 90%;
+            border-color: transparent transparent rgb(218, 217, 217) transparent;
+            border-radius: 10px;
+            transition-duration: 0.5s;
+        }
+
+        .glowdim-button:hover {
+            background-color: rgb(37, 17, 37);
+            box-shadow: inset 0 0 10px 0px rgb(66, 6, 163), inset 0px 0px 1.5px 1.5px rgb(168, 140, 219), inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 10px rgb(168, 140, 219);
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px rgb(85, 85, 85), 0px 0 12px #888;
+            color: white;
+        }
+
+        .glowdim-select {
+            background-color: #121212;
+            text-align: center;
+            color:white;
+            box-shadow: inset 0 0 45px 0px #555, inset 0px 0px 1.5px 1.5px #ccc, inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 45px #555;
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888;
+            position: relative;
+            font-family: 'Azonix';
+            font-size:15px;
+            letter-spacing: 3px;
+            width: 100%;
+            height: 35px;
+            border-radius: 5px;
+            transition-duration: 0.5s;
+        }
+
+        .glowdim-select:hover {
+            background-color: rgb(37, 17, 37);
+            box-shadow: inset 0 0 10px 0px rgb(66, 6, 163), inset 0px 0px 1.5px 1.5px rgb(168, 140, 219), inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 10px rgb(168, 140, 219);
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px rgb(85, 85, 85), 0px 0 12px #888;
+            color: white;
+        }
+
+        .glowdim-text {
+            background-color: #121212;
+            text-align: center;
+            color:white;
+            box-shadow: inset 0 0 45px 0px #555, inset 0px 0px 1.5px 1.5px #ccc, inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 45px #555;
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555, 0px 0 12px #888;
+            position: relative;
+            font-family: Arial;
+            font-size: 15px;
+            letter-spacing:3px;
+            width: 87%;
+            height: 20px;
+            border-radius: 5px;
+            transition-duration: 0.5s;
+        }
+
+        .glowdim-text:hover {
+            background-color: rgb(37, 17, 37);
+            box-shadow: inset 0 0 10px 0px rgb(66, 6, 163), inset 0px 0px 1.5px 1.5px rgb(168, 140, 219), inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 10px rgb(168, 140, 219);
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px rgb(85, 85, 85), 0px 0 12px #888;
+            color: white;
+        }
+
+        .flex-container > div {
+        width: 110px;
+        margin: 5px;
+        text-align: center;
+        line-height: 7px;
+        font-size: 30px;
+    
+        }
+
+        div.glowdim {
+            margin: 2px;
+            width: 195px;
+            height: 33px;
+            font-size: 17px;
+            box-shadow: inset 0 0 45px 0px #555, inset 0px 0px 1.5px 1.5px #ccc, inset 0px 0px 1.5px 1.5px #ccc, 0 0 1.5px 1.5px #ccc, 0px 0 45px #555;
+            text-shadow: 0 0 5.4px #555, 0px 0px 1.5px #555, 0px 0px 0.6px #555, 0px 0 36px #555;
+            line-height: 36.4px;
+            text-align: center;
+            color: white;
+            font-family: 'Azonix';
+            letter-spacing: 3px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            transform: scale(1);
+        }
+
+        .break {
+        flex-basis: 100%;
+        height: 0;
+        }
+
+        input .nav-button{
+            width:100%;
+            margin:1px;
+        }
+
+        div.div-empty{
+            width:30px;
+        }
+    </style>
 {{ form.media }}
 {% endblock %}
 
@@ -14,7 +149,35 @@
 
 {% block breadcrumbs %}{% endblock %}
 
-{% block content %}
+{% block content_title %}
+<h1>
+    <div style="display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    flex-wrap: wrap;">
+    <div class="glowdimshort" style="margin:20px;color:#ade1f9;font-size:30px;height: auto;">
+    Custom-History-Chart
+    </div>
+    
+    </div>
+</h1>
+{% endblock %}
+
+{% block content-justify %}center{% endblock%}
+
+{% block left_content %}
+<div style="margin:0 10px;display:flex;flex-direction:column;"> 
+<div style="margin-left: auto;width:100%;"> <input class="glowdim-button" type="button" id="add_date" onclick="addDateRow()" value=" new date " style="width:100%;"> </div>
+
+<div id="div-scale-slider" style="margin-left: auto; " ><input type="range" id="scale-slider" min="0" max="100" value="10" style="width:100%; height: 30px; background: #d3d3d3;"></div>
+<div id="div-plot-button" ><input class="glowdim-button" type="button" id="plot-button" onclick= "makeInputDic()" value=" plot " style="font-size:16px; background-color: black;width:100%;"> </div>
+<div id="div-save-button" ><input class="glowdim-button" type="button" id="save-button" onclick= "saveUserData()" value=" save " style="font-size:16px; background-color: black;width:100%;"> </div>
+<div id="div-load-button" ><input class="glowdim-button" type="button" id="load-button" onclick= "loadSavedData()" value=" load " style="font-size:16px; background-color: black;width:100%;"> </div>
+</div>
+{% endblock %}
+
+{% block content-sub %}
 
 {% if form.errors and not form.non_field_errors %}
 <p class="errornote">
@@ -29,128 +192,460 @@
 </p>
 {% endfor %}
 {% endif %}
-<div style="display:flex;width:100%;justify-content: center;">
-    <textarea id="textarea" 
-    style="width:50%;
-        height:70vh;
-        position: relative;
-        background-color:#252525;
-        font-size:16px;"
-    ></textarea>
-    <div style="height:calc(70vh + 12px);display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;flex-direction:column;justify-content:center;">
-            <div>Scale</div>
-            <div>0~100</div>
-            <input type="text" id="scale" placeholder='10.0' style="
-                width: 30px;
-                background-color: #252525;
-                margin: 5px 0;">
-        </div>
-        <button class="button" onclick="clickOn(0)" style="height:25%;margin: 0 2px 1px 2px;padding: 8px;"> Ex </button>
-        <button class="button" onclick="clickOn(1)" style="height:25%;margin: 1px 2px;padding: 8px;background-color: #466b7d;"> Gen </button>
-        <button class="button" onclick="clickOn(3)" style="height:25%;margin: 1px 2px;padding: 8px;"> Save </button>
-        <button class="button" onclick="clickOn(2)" style="height:25%;margin: 1px 2px 0 2px;padding: 8px;background-color: #466b7d;"> Plot </button>
-        
-    </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<div class="flex-container" id="date-container_000"> 
+    <div id="div-remove-date_000"> <input class="glowdim-button" type="button" id="remove-date_000" onclick="removeDateRow()" value="X"> </div>
+    <div id="div-year_000"> <select class="glowdim-select" id="year_000"></select> </div>
+    <div id="div-month_000"> <select class="glowdim-select" id="month_000"></select> </div>
+    <div id="div-day_000"> <select class="glowdim-select" id="day_000"></select> </div>
+<div id="div-add-ticker_000" style="margin-left: auto;"> <input class="glowdim-button" type="button" id="add-ticker_000" onclick="addTickerRow('000')" value="+"> </div> 
+
 </div>
 
-{% if history_list %}
-{{ history_list|json_script:"history_list" }}
-{% endif %}
+<div class="flex-container" id="ticker-container_000">
+    <div id="div-break_000_000" class='break'> </div>
+    <div id="div-empty_000_000" class='div-empty'></div>
+    <div id="div-remove-ticker_000_000"> <input class="glowdim-button" type="button" id="remove-ticker_000_000" onclick="removeTickerRow()" value="X"> </div> 
+    <div id="div-ticker_000_000"> <input class="glowdim-text" type="text" id="ticker_000_000" onclick= "tickerToPrice()"> </div>
+    <div id="div-quant_000_000"> <input class="glowdim-text" type="number" id="quant_000_000" onclick= "quantToAmount()"> </div>
+    <div id="div-price_000_000"> <input class="glowdim-text" type="text" id="price_000_000"> </div>
+    <div id="div-amount_000_000"> <input class="glowdim-text" type="text" id="amount_000_000"> </div>
+    <div id="date-ticker-nextline_000" class="break"></div>
+</div>
+
 
 <script>
+
+
+    function dateFormat(date_row_num){
+        /* This function formats input date of the selected row to a formatted date ("year-month-day") 
+        input: a row number of date (e.g., "000", "001")
+        output: a year-month-day (e.g., "2021-1-12") */
+
+        let thisyear = document.getElementById("year_" + date_row_num).value
+        let thismonth = document.getElementById("month_" + date_row_num).value
+        let thisday = document.getElementById("day_" + date_row_num).value
+        let thisdate = thisyear + '-' + thismonth + '-' + thisday  
+        return thisdate
+    }
+
+    function tickerToPrice(){
+        /* This function is associated with onclick function.
+        This function gets the ticker from the current ticker box and associated dates.
+        This function gives the price of the ticker for the nearest day on the price box */
+
+        /*find the current ticker row number*/
+        let inputid = document.getElementById(window.event.path[0].id);
+        let date_row_loc = inputid.id.indexOf('_');
+        let date_row_num = inputid.id.substr(date_row_loc + 1, 3);
+        let ticker_row_num = inputid.id.substr(date_row_loc + 1, );
+
+        /*execute oneclick and find the nearest price*/
+        inputid.onclick = function(e){
+            let thisticker = inputid.value
+            let thisdate = dateFormat(date_row_num)
+                      
+            $.ajax({
+                url: "/stockdb/_get_last_price?",
+                data: {ticker: thisticker, date: thisdate},
+                dataType: "json",
+                success: function success(response){
+                    let thisprice = document.getElementById("price_" + ticker_row_num)
+                    if (response ["price"]== -1 || response["price"] == -2){thisprice.value = "no result"}
+                    else{thisprice.value = Math.round(response["price"]* 100) / 100}
+                }
+            });
+        }
+
+    }
+        
+    function quantToAmount(){
+        /* This function is associated with onclick function.
+        This function gets the quant from the current quant box and prices.
+        This function gives the amount om the amount box */
+
+        /*find the current ticker row number*/
+        let inputid = document.getElementById(window.event.path[0].id);
+        let date_row_loc = inputid.id.indexOf('_');
+        let ticker_row_num = inputid.id.substr(date_row_loc + 1, );
+
+        /*execute oneclick and calculate the amounts*/
+        inputid.onclick = function(e){
+            let thisquant = inputid
+            let thisprice = document.getElementById("price_" + ticker_row_num);
+            let thisamount = document.getElementById("amount_" + ticker_row_num);
+            thisamount.value = Math.round(thisprice.value * thisquant.value * 100) / 100
+            
+    }}
+
+    function removeDateRow(){
+        /* This function is associated with onclick function.
+        This function gets the id of current date row, and remove the selected date row. */
+
+        /*find the current date row number/id*/
+        let thisid = document.getElementById(window.event.path[0].id);
+        let date_row_loc = thisid.id.indexOf('_');
+        let date_row_num = thisid.id.substr(date_row_loc + 1, );
+
+        /*remove associated containers*/
+        document.getElementById("date-container_" + date_row_num).remove();
+        document.getElementById("ticker-container_" + date_row_num).remove();
+
+    }
+
+    let ticker_row_lists = ["div-break", "div-empty", "div-remove-ticker", "div-ticker", "div-quant", "div-price", "div-amount" ];
+
+    function removeTickerRow(){
+        /* This function is associated with onclick function.
+        This function gets the id of current ticker row, and remove the selected ticker row. */
+
+        /*find the current ticker row number/id*/
+        let thisid = document.getElementById(window.event.path[0].id);
+        let ticker_row_loc = thisid.id.indexOf('_');
+        let ticker_row_num = thisid.id.substr(ticker_row_loc + 1, );
+
+        /*remove associated divs*/
+        for (let i = 0; i < ticker_row_lists.length; i++){
+            document.getElementById(ticker_row_lists[i] + "_" + ticker_row_num).remove();
+        }
+    }
+
+    function addRemoveDateButton(input_id, input_class){
+        /* This function gets input_id and class,
+         and returns a customed button that removes associated date row. */
+
+        thisid = threefigures(cnt_date);
+
+        let element_div = document.createElement("div");
+        let element_id = input_id + '_' + thisid
+        let element = document.createElement("input");
+        element.classList.add(input_class); 
+        element_div.id = "div-" + element_id;
+        element.id = element_id;
+        element.type = "button";
+        element.value = "X"
+        element_div.appendChild(element);
+        element.onclick = removeDateRow;
+        
+        return element_div
+    }
+
+    function addRemoveTickerButton(current_date_num, input_id, input_class){
+        /* This function gets input_id and class,
+         and returns a customed button that removes associated ticker row. */
+
+        let element_div = document.createElement("div");
+        let element_id = input_id + '_' + current_date_num + '_' + threefigures(cnt_ticker);
+        let element = document.createElement("input");
+        element.classList.add(input_class); 
+        element_div.id = "div-" + element_id;
+        element.id = element_id;
+        element.type = "button";
+        element.value = "X"
+        element_div.appendChild(element);
+        element.onclick = removeTickerRow;
+        
+        return element_div
+    }
+
+    function addNewTickerButton(input_id, input_class){
+        /* This function gets input_id and class,
+         and returns a customed button that add new ticker row. */
+
+        let element_div = document.createElement("div");
+        let element_id = input_id + '_' + threefigures(cnt_date);
+        let element = document.createElement("input");
+        element.classList.add(input_class); 
+        element_div.id = "div-" + element_id;
+        element.id = element_id;
+        element.type = "button";
+        element.value = "+"
+        element_div.appendChild(element);
+
+        element.onclick = function(e){
+            let date_row_loc = e.path[0].id.indexOf('_')
+            let date_row_num = e.path[0].id.substr(date_row_loc + 1, );
+            addTickerRow(date_row_num)
+        }
+        
+        return element_div
+    }
+
+    function setDateOption(select_id, option_min, option_max) { 
+        /* This function takes select-box-id, min, max for the options
+        and creates and appends the customed date options to the associated select box*/
+        
+        let select_element = document.getElementById(select_id);
+        let select_fragment = document.createDocumentFragment(); 
+
+        /* create the option elements append as fragments */
+        for (let i = option_min; i <= option_max; i++) { 
+            
+            let option = document.createElement('option'); 
+            option.value = i; 
+            option.appendChild(document.createTextNode(i)); 
+            select_fragment.appendChild(option); 
+        }
+
+        select_element.appendChild(select_fragment); 
+    };
+
+    let cnt_date = 1
+
+    function addDateElement(input_id, input_element, input_class){
+        /* This function gets input_id, element and class,
+        and returns a customed html date items for date rows. */
+
+        let element_div = document.createElement("div");
+        let element_id = input_id + '_' + threefigures(cnt_date);
+        let element = document.createElement(input_element);
+        element.classList.add(input_class); 
+        element_div.id = "div-" + element_id
+        element.id = element_id;
+        element_div.appendChild(element);
+        return element_div
+    }
+
+    function addDateRow(){
+        /* This function is associated with onclick function.
+        This function add new date rows */
+
+        let added_date = document.createElement("div");
+        added_date.classList.add("flex-container");
+        added_date.id = "date-container_" + threefigures(cnt_date);
+
+        let content_sub = document.getElementById("content-sub");
+
+        added_date.appendChild(addRemoveDateButton('remove-date',"glowdim-button"))
+        added_date.appendChild(addDateElement('year','select',"glowdim-select"))
+        added_date.appendChild(addDateElement('month','select',"glowdim-select"))
+        added_date.appendChild(addDateElement('day','select',"glowdim-select"))
+        
+        newTickerButton = addNewTickerButton('add-ticker',"glowdim-button");
+        newTickerButton.style.marginLeft = 'auto'
+        added_date.appendChild(newTickerButton)
+
+        let added_ticker = document.createElement("div");
+        added_ticker.classList.add("flex-container");
+        added_ticker.id = "ticker-container_" + threefigures(cnt_date);
+        content_sub.appendChild(added_date);
+
+        let date_ticker_nextline = document.createElement("div");
+        date_ticker_nextline.classList.add("break");
+        date_ticker_nextline.id = "date-ticker-nextline_" + threefigures(cnt_date);
+        added_ticker.appendChild(date_ticker_nextline);
+        content_sub.appendChild(added_ticker);
+        
+        setDateOption('year_' + threefigures(cnt_date), 1900, 2021);
+        setDateOption('month_' + threefigures(cnt_date), 1, 12);
+        setDateOption('day_' + threefigures(cnt_date), 1, 31);
+
+        //addTickerRow(threefigures(cnt_date))
+        cnt_date += 1
+
+        }
+
+    let cnt_ticker = 1 
+
+    function addTickerElement(current_date_num, input_id, input_element, input_class, input_type){
+        /* This function gets datenum, input_id, element, class and types,
+        and returns a customed html ticker items for ticker rows. */
+        
+        let element_div = document.createElement("div");
+        let element_id = input_id + '_' + current_date_num + '_' + threefigures(cnt_ticker);
+        let element = document.createElement(input_element);
+        element.classList.add(input_class);
+        if (input_element == 'input') {element.type = input_type;}  
+        element_div.id = "div-" + element_id 
+        element.id = element_id;
+        element_div.appendChild(element);
+        
+        return element_div
+    }
+
+    function threefigures(cnt_number){
+        /* change number to three figured string items 
+        (e.g., 1 -> 001, 12 -> 012) */
+
+        if (cnt_number < 10){return "00" + cnt_number.toString()}
+        if (cnt_number >= 10 && cnt_number < 100 ){return "0" + cnt_number.toString()}
+        if (cnt_number >= 100 && cnt_number < 1000 ){return cnt_number.toString()}
+    }
+
+    function addTickerRow(input_id){
+        /* This function is associated with onclick function
+        This function add new ticker rows */
+
+        let current_date_num = input_id
+        let date_ticker_nextline = document.getElementById("date-ticker-nextline_" + current_date_num);
+        let ticker_div = document.getElementById("ticker-container_" + current_date_num);
+
+        let break_div = document.createElement("div");
+        break_div.id = "div-break_" + current_date_num + "_" + threefigures(cnt_ticker);
+        break_div.classList.add("break");
+        ticker_div.insertBefore(break_div, date_ticker_nextline);
+
+        let empty_div = document.createElement("div");
+        empty_div.id = "div-empty_" + current_date_num + "_" + threefigures(cnt_ticker);
+        empty_div.className="div-empty";
+        ticker_div.insertBefore(empty_div, date_ticker_nextline);
+
+        ticker_div.insertBefore(addRemoveTickerButton(current_date_num, 'remove-ticker',"glowdim-button"), date_ticker_nextline)
+        ticker_box = ticker_div.insertBefore(addTickerElement(current_date_num, 'ticker', 'input', 'glowdim-text', 'text'), date_ticker_nextline);
+        quant_box = ticker_div.insertBefore(addTickerElement(current_date_num, 'quant', 'input', 'glowdim-text', 'number'), date_ticker_nextline);
+        price_box =ticker_div.insertBefore(addTickerElement(current_date_num, 'price', 'input', 'glowdim-text', 'text'), date_ticker_nextline);
+        amount_box =ticker_div.insertBefore(addTickerElement(current_date_num, 'amount', 'input', 'glowdim-text', 'text'), date_ticker_nextline);
+        ticker_box.onclick = tickerToPrice;
+        quant_box.onclick = quantToAmount;
+        
+        cnt_ticker +=1
+    }
+
+    setDateOption('year_000', 1900, 2021);
+    setDateOption('month_000', 1, 12);
+    setDateOption('day_000', 1, 31);
+
+    toSave = 0
+    let scale = document.getElementById("scale-slider")
+
+    function makeInputDic(){
+
+        let input = [];
+        let userDates = document.querySelectorAll('*[id^="date-container"]')
+        let isnotfilled = 0;
+
+        for (let i = 0; i < userDates.length; i++){
+            
+            let date_row_loc = userDates[i].id.indexOf('_');
+            let date_row_num = userDates[i].id.substr(date_row_loc + 1, 3);
+            let userDate = dateFormat(date_row_num) 
+            let userTickers = document.querySelectorAll('*[id^="ticker_' + date_row_num + '"]') 
+
+            let inputDic = {};
+            let quantDic = {};
+            let priceDic = {};
+            let amountDic = {};
+            let asset = 0;
+        
+            for (let i = 0; i< userTickers.length; i++){
+                
+                let ticker_row_loc = userTickers[i].id.indexOf('_');
+                let ticker_row_num = userTickers[i].id.substr(ticker_row_loc + 1, );
+                
+                let userTicker = document.getElementById("ticker_" + ticker_row_num)
+                let userQuant = document.getElementById("quant_" + ticker_row_num)
+                let userPrice = document.getElementById("price_" + ticker_row_num)
+                let userAmount =document.getElementById("amount_" + ticker_row_num)
+
+                quantDic[userTicker.value] = parseFloat(userQuant.value)
+                priceDic[userTicker.value] = parseFloat(userPrice.value)
+                amountDic[userTicker.value] = parseFloat(userAmount.value)
+                asset += parseFloat(userAmount.value)
+
+                if (userTicker.value==""){
+                    userTicker.style.borderColor = "red";
+                    isnotfilled +=1;
+                } else {userTicker.style.borderColor = "#121212";}            
+                if (isNaN(parseFloat(userQuant.value))){
+                    userQuant.style.borderColor = "red";
+                    isnotfilled +=1
+                } else {userQuant.style.borderColor = "#121212";} 
+                if (isNaN(parseFloat(userPrice.value))){
+                    userPrice.style.borderColor = "red";
+                    isnotfilled +=1;
+                } else {userPrice.style.borderColor = "#121212";} 
+                if (isNaN(parseFloat(userAmount.value))){
+                    userAmount.style.borderColor = "red";
+                    isnotfilled +=1
+                }else {userAmount.style.borderColor = "#121212";} 
+
+            }
+
+            inputDic["Date"] = userDate;
+            inputDic["quant"] = quantDic;
+            inputDic["price"] = priceDic;
+            inputDic["amount"] = amountDic;
+            inputDic["asset"] = asset;
+
+            input.push(inputDic)
+        }
+
+        if (toSave == 1){ 
+            toSave = 0
+            return input
+        }
+        
+        
+        if (isnotfilled != 0){ window.alert("please fill in all the boxes") }
+
+        else{
+        const req={"data":input};
+        req['mag_ratio']=parseFloat(scale.value);
+
+        let url="/simulator/histplot/plot";
+        window.location=url+"?req="+JSON.stringify(req);
+        
+        }
+        
+    }
     
-    //const ex_value="[\n\t{\n\t\t\"Date\": \"2020-06-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 3,\n\t\t\t\"DAL\": 72,\n\t\t\t\"ZM\": 9,\n\t\t\t\"AMD\": 36\n\t\t}\n\t},\n\t{\n\t\t\"Date\": \"2020-09-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 1,\n\t\t\t\"AMD\": 36,\n\t\t\t\"COST\": 7,\n\t\t\t\"MRNA\": 10,\n\t\t\t\"_cash\": 4000\n\t\t}\n\t}\n]";
-    const ex_value="[\n\t{\n\t\t\"Date\": \"2020-06-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 6\n\t\t}\n\t},\n\t{\n\t\t\"Date\": \"2020-09-30\",\n\t\t\"quant\": {\n\t\t\t\"GOOGL\": 1,\n\t\t\t\"AMD\": 36,\n\t\t\t\"COST\": 7,\n\t\t\t\"_cash\": 4000\n\t\t}\n\t}\n]";
-
-    let textarea=document.getElementById("textarea")
-    let scale=document.getElementById("scale")
-    {% if history_list %}
-    const history_list = JSON.parse(document.getElementById('history_list').textContent);
-    textarea.value = JSON.stringify(history_list,
-        (key, value) => ( typeof(value) === 'number' ? parseFloat(value.toFixed(2)) : value),
-        '\t')
-    {% else %}
-    textarea.value=window.localStorage.getItem("lab_histplot")
-    if(!textarea.value){
-        textarea.value=ex_value;
-    }
-    if(window.localStorage.getItem("lab_histplot_scale")){
-        scale.value=window.localStorage.getItem("lab_histplot_scale");
-    }
-    {% endif %}
-
-    function clickOn(num){
-        try{
-            if(num==0){
-                textarea.value = ex_value;
-                return;
+    function saveUserData(){
+        toSave = 1
+        window.localStorage.setItem("lab_histplot",JSON.stringify(makeInputDic()));
+        window.localStorage.setItem("lab_histplot_scale",scale.value);
+        alert("Your browser saved your history to autoreload next time. You can append a new date portfolio and the Gen function will calculate the rest for you.");
             }
 
-            const data=JSON.parse(textarea.value);
-            const req={"data":data};
-            let url="/simulator/histplot/";
-            let scaleVal=scale.value;
-            if(scaleVal!=""){
-                scaleVal=parseFloat(scaleVal);
-                if(typeof(scaleVal)=="number" && !(isNaN(scaleVal)) && scaleVal>0 && scaleVal<100){
-                    req['mag_ratio']=scaleVal;
-                }
-                else{
-                    throw "Invalid scale value";
-                }
-            }
-            if(num==1){
-                url+="datagen";
-            }
-            else{
-                let flag=true;
-                data.forEach(el => {
-                    if(flag && !('amount' in el) && !('asset' in el)){
-                        flag=false;
-                    }
-                })
-                if(!flag){
-                    alert("Please generate the data first - click the Gen button");
-                    return;
-                }
-                if(num==2){
-                    url+="plot";
-                }
-            }
+    function loadSavedData(){
+        
+        userSavedData = JSON.parse(window.localStorage.getItem("lab_histplot"))
 
-            if(num==3){
-                window.localStorage.setItem("lab_histplot",textarea.value);
-                window.localStorage.setItem("lab_histplot_scale",scaleVal);
-                alert("Your browser saved your history to autoreload next time. You can append a new date portfolio and the Gen function will calculate the rest for you.");
-                return;
-            }
-
-            window.location=url+"?req="+JSON.stringify(req);
+        if (userSavedData === null){
+            return alert("You do not have a saved history");
         }
-        catch(err){
-            alert(err)
+        
+        scale.value = window.localStorage.getItem("lab_histplot_scale")
+        existingDates = document.querySelectorAll('*[id^="date-container"]')
+        existingTickers = document.querySelectorAll('*[id^="ticker-container"]')
+
+        cnt_date = 1
+
+        for (let i = 0; i < existingDates.length ; i++){
+        existingDates[i].remove()
+        existingTickers[i].remove()
         }
+
+        for (let i = 0; i < userSavedData.length; i++){
+            savedDate = userSavedData[i]["Date"]
+            first_Idx = savedDate.indexOf('-')
+            second_Idx = savedDate.indexOf('-', savedDate.indexOf('-') + 1)
+            savedYear = savedDate.substr(0, 4)
+            savedMonth = savedDate.substr(first_Idx + 1, second_Idx - first_Idx - 1)
+            savedDay = savedDate.substr(second_Idx + 1, )
+
+            addDateRow()
+            document.getElementById('year_'+threefigures(cnt_date-1)).value = parseFloat(savedYear)
+            document.getElementById('month_'+threefigures(cnt_date-1)).value = parseFloat(savedMonth)
+            document.getElementById('day_'+threefigures(cnt_date-1)).value = parseFloat(savedDay)
+
+            cnt_ticker = 1
+            for (let j = 0; j < Object.keys(userSavedData[i]["quant"]).length; j++){
+                addTickerRow(threefigures(cnt_date-1))
+                document.getElementById('ticker_'+threefigures(cnt_date-1)+"_"+threefigures(cnt_ticker-1)).value = Object.keys(userSavedData[i]["quant"])[j]
+                document.getElementById('quant_'+threefigures(cnt_date-1)+"_"+threefigures(cnt_ticker-1)).value = Object.values(userSavedData[i]["quant"])[j]
+                document.getElementById('price_'+threefigures(cnt_date-1)+"_"+threefigures(cnt_ticker-1)).value = Object.values(userSavedData[i]["price"])[j]
+                document.getElementById('amount_'+threefigures(cnt_date-1)+"_"+threefigures(cnt_ticker-1)).value = Object.values(userSavedData[i]["amount"])[j]
+                cnt_ticker += 1
+            }
+        }
+        
     }
 
-    textarea.addEventListener('keydown', function(e) {
-        if (e.key == 'Tab') {
-            e.preventDefault();
-            var start = this.selectionStart;
-            var end = this.selectionEnd;
 
-            // set textarea value to: text before caret + tab + text after caret
-            this.value = this.value.substring(0, start) +
-            "\t" + this.value.substring(end);
-
-            // put caret at right position again
-            this.selectionStart =
-            this.selectionEnd = start + 1;
-        }
-    });
 </script>
 
+
+
 {% endblock %}
-
-
-

@@ -12,6 +12,8 @@
 </h1>
 {% endblock %}
 
+{% block coltype %}colMH{% endblock %}
+
 {% block nav-global %}
 <div style="font-family:azonix;font-size: 21px;line-height: 1;text-shadow:
     0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">
@@ -55,19 +57,22 @@
 </div>
 
 {% endblock %}
-{% block content %}
 
 {% block content_title %}{% endblock %}
 
+{% block content %}
+
 <div style="display:flex;justify-content: center;">
 <div style="display: flex;
-    justify-content: space-evenly;
+    justify-content: {% block content-justify %}space-evenly{% endblock%};
     width: 100%;
     max-width:1300px;
     margin: 0;
     flex-wrap: wrap;
     align-self: center;">
 
+    {% block left_content %}
+    <div>
     <div style="margin:0 10px;display:flex;flex-direction:column;">
         {% if profile_img %}
         {{profile_img|safe}}
@@ -79,6 +84,8 @@
         <h2 style="text-align:center;">Portfolio Snapshot</h2>
         <ul id="portfoliosnapshot"></ul>
     </div>
+    </div>
+    {% endblock %}
 
     <div id="content-sub">
     
@@ -122,6 +129,7 @@
 </div>
 
 <script>
+    {% if portfolio %}
     const portfolio={{portfolio|safe}};
     const portDOM=document.getElementById("portfoliosnapshot")
     Object.keys(portfolio).forEach((key)=>{
@@ -134,5 +142,6 @@
         }
         portDOM.appendChild(newli);
     })
+    {% endif %}
 </script>
 {% endblock %}
