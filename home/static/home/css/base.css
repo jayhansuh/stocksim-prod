@@ -15,6 +15,7 @@
     --body-loud-color: #ffffff;
 
     --header-bg: var(--primary);
+    --header-size: 60px;
 
     --breadcrumbs-link-fg: #e0e0e0;
     --breadcrumbs-bg: var(--primary);
@@ -890,6 +891,8 @@ table#change-history tbody th {
 }
 
 #content {
+    position: relative;
+    top: var(--header-size);
     padding: 20px 20px;
 }
 
@@ -957,15 +960,17 @@ table#change-history tbody th {
 /* HEADER */
 
 #header {
-    width: auto;
+    position: fixed;
+    width: 100vw;
     height: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 40px;
+    padding: 8px 40px;
     background: var(--header-bg);
     color: var(--header-color);
     overflow: hidden;
+    z-index: 10;
 }
 
 #header a:link, #header a:visited {
