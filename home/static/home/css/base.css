@@ -890,9 +890,6 @@ table#change-history tbody th {
 }
 
 #content {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
     padding: 20px 20px;
 }
 

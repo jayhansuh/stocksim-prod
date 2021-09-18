@@ -145,7 +145,7 @@ def ProfileView(request,username):
     return render(request, 'portfolio/profile.html', {
                     'title':'Overview',
                     'username':username,
-                    'title_nav' : {'img':getBadge(last_history.asset)},
+                    'title_nav' : {'img':getBadge(last_history.asset,'width:200px;')},
                     'last_history':last_history,
                     'transaction_list' : player.transaction_set.order_by('-pub_date'),
                     'memo_list' : MemoTag.getMemos(tag=username),
@@ -245,9 +245,9 @@ def RankingHelp(request):
                     'title': 'Ranking Intro',
                 })
 
-def getBadge(asset):
+def getBadge(asset,style_string="width: 25px;"):
     envelope = [
-        '<a href="/portfolio/ranking/help/"><svg style="width: 25px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">',
+        '<a href="/portfolio/ranking/help/"><svg style="'+style_string+'" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">',
         '<path class="badge" d="',
         '" style="fill: #d2ebf9;stroke:none;filter:drop-shadow(0px 0px 14px rgb(255 255 255 / 0.7));"></path></svg></a>',
     ]
