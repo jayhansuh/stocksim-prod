@@ -891,7 +891,7 @@ table#change-history tbody th {
 }
 
 #content {
-    padding: 20px 20px;
+    /*padding: 20px 20px;*/
 }
 
 .dashboard #content {
@@ -964,7 +964,7 @@ table#change-history tbody th {
 
 #header {
     position: fixed;
-    width: 100vw;
+    width: calc( 100vw - 80px );
     height: auto;
     display: flex;
     justify-content: space-between;

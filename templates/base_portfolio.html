@@ -15,8 +15,7 @@
 {% block coltype %}colMH{% endblock %}
 
 {% block nav-global %}
-<div style="font-family:azonix;font-size: 21px;line-height: 1;text-shadow:
-    0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">
+<div style="font-family:azonix;font-size: 21px;line-height: 1;">
     Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}
 </div>
 

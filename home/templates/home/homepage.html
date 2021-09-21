@@ -126,10 +126,11 @@
     "><a href='/?mobile=true'>MOBILE VER</a></div>
 {% endif %}
 
-<div id="contents" style="opacity:0;display: inline-flex;align-self: center;
+
+<div id="contents" style="opacity:0;display: inline-flex;align-self: center;height:100vh;min-height:650px;justify-content: center;
     flex-direction: column;transition: transform 0.2s ease 0.05s;transform: scale({% if user.is_authenticated%}1{% else %}2.71828{% endif %});">
 
-<div id="content-main0" style="width:100%;display:block;transition: height 0.2s ease 0.05s;"></div>
+
 <div style="display:flex;justify-content:space-between;width: 1100px;">
   <div style="display:flex;">
     {% comment %} <img src="{% static "home/img/mainlogo.svg" %}" width="600" style="margin: -150px -120px;"> {% endcomment %}
@@ -138,7 +139,7 @@
         0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}</div>
   </div>
   <div style="display: flex;">
-    {% if user.is_authenticated%}
+    {% if user.is_authenticated %}
     <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
     {% else %}
     <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
@@ -436,7 +437,6 @@
   const DISPLAY_DATES=200;
   const rectlogo=document.getElementById("rectlogo");
   const maincontent=document.getElementById("contents");
-  const maincontent0=document.getElementById("content-main0");
   const maincontent1=document.getElementById("content-main1");
   const rankingboard=document.getElementById("rankingboard");
   const tickerboard=document.getElementById("tickerboard").getElementsByTagName('tbody')[0];
@@ -606,14 +606,9 @@
     });
   }
 
-  function block0height(){
-    return (window.innerHeight/2-365)+"px";
-  }
-
   function resize(){
     window.plotly.layout.width = document.getElementById("content-main1").clientWidth/2;
     window.plotly.layout.height = document.getElementById("content-main1").clientWidth/2 ;
-    maincontent0.style.height=block0height();
     window.plotly.layout.yaxis2.autorange=true;
     if(window.innerWidth>document.getElementById("content-main1").clientWidth){
       document.getElementById("content").style="justify-content: center;"
@@ -685,7 +680,7 @@
 
   let scrollIndicator = document.getElementById('scrollIndicator');
   let mobileIndicator = document.getElementById('mobileIndicator');
-  let scrollopacity = -2.5;
+  let scrollopacity = -1.5;
   let dopacity=0.05;
   let scrollInterval=setInterval(()=>{
     if(scrollopacity>1){dopacity=-0.05;mobileIndicator.style.opacity=1;}
@@ -706,8 +701,7 @@
       zoom = Math.min(zoom,1.4)
       rectlogo.style.transform = `scale(${Math.exp(zoom)})`;
       maincontent.style.opacity=-zoom/7;
-      maincontent.style.transform=`scale(${Math.exp((1+zoom/7))})`;
-      maincontent0.style.height="calc( "+(1+zoom/7)*100*0.1+'vw + '+block0height()+")";
+      maincontent.style.transform=`scale(${Math.exp(1+zoom/7)})`;
       if(zoom<=-7.+ZOOM_SPEED/2){
         dragOver();
       };
@@ -720,7 +714,7 @@
     mobileIndicator.style.display="none";
     rectlogo.style.display="none";
     maincontent.style.opacity=1;
-    maincontent.style.transform="none";
+    maincontent.style.transform=`scale(1)`;
     document.body.style.overflow="auto";
     resize();
     setTimeout(()=>{
@@ -1103,7 +1097,14 @@ d3.timer(function(elapsed) {
       height:75px;
       background-size: cover; 
       background-position:center;">&nbsp;</div>
-    <div style="width:160px;margin:5px;font-size:12px;color:#aaa;">${el.title}</div>`;
+    <div style="width:160px;margin:5px;font-size:12px;color:#aaa;">
+      <div>${el.title}</div>
+      <div style="font-size: 10px;
+        justify-content: end;
+        color:gray;
+        display: flex;
+        margin:1px;">${el.source.name}</div>
+    </div>`;
     const adiv=document.createElement('a');
     adiv.href=el.url;
     adiv.appendChild(newsdiv);
@@ -1111,3 +1112,5 @@ d3.timer(function(elapsed) {
   });
 </script>
 {% endblock %}
+
+{% block footer %}{% endblock %}
