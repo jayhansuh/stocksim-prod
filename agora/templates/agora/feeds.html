@@ -15,16 +15,21 @@
 
 {% block breadcrumbs %}{% endblock %}
 
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+    <!-- Here is the side bar-->
 {% block nav-sidebar %}
+<div stype="margin: 0 50px 0 10%; display:block;">
+
     <div id = "sidebar" style = "
     display: flex;
     flex-direction: column;
     width: 300px;
-    height: 100vh;
-    margin-top: 70px;
-    margin-left: 10vw;
-    position:fixed;
-    border-right: 2px solid rgba(77, 76, 76,50);
+    top: 70px;
+    position:sticky;
     padding-right: 10px
     ">
         <div style = "display: flex; flex-direction: row;justify-content: center; margin-top:20px">
@@ -168,14 +173,19 @@
 
         </div>
     </div>
+</div>
+
 {% endblock %}
 
+
+    
+<!-- Here is the for the feeds! -->
 {% block content %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="{% static "home/jquery.waypoints.min.js" %}"></script>
+    <script src="{% static "home/infinite.min.js" %}"></script>    
 
-
-    <!-- Here is the for the feeds! -->
 
     <div class="feedbox infinite-container" style="
     display:flex;
@@ -184,31 +194,122 @@
     width: 100%;
     padding:0;
     ">
+
+        <script type="text/javascript" >
+            function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+            }
+            const option = {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+            };
+
+            async function AddLike(likebuttondom, type, objectid){
+                try{
+                    const likebutton = document.getElementById(likebuttondom);
+                    const req = {"type": type, "objectid": objectid};
+                    const response = await fetch('/agora/_addlike/?req='+ JSON.stringify(req),option);
+                    const response_json = await response.json();
+                    if(response_json.liked){
+                        likebutton.innerHTML = `Downvote: ${response_json.like_count}` ;
+                    }
+                    else{
+                        likebutton.innerHTML = `Upvote: ${response_json.like_count}` ;
+                    }
+
+                } catch{
+                    console.error("Error!")
+                }
+            }
+
+            function ShowFeedContents(entryid){
+                const contentDOM = document.getElementById(`entry-content_${entryid}`);
+                const content = JSON.parse(contentDOM.textContent);
+                const likebuttonDOM = document.getElementById(`likebutton_${entryid}`);
+                const replybuttonDOM = document.getElementById(`replybutton_${entryid}`);
+                const repliesDOM = document.getElementById(`replies_${entryid}`);
+                const entrytypeDOM = document.getElementById(`entry-type_${entryid}`)
+                let entrytype = entrytypeDOM.textContent;
+                switch(entrytype){
+                    case 'transaction':
+                        if(content.quantity >=0){
+                            contentDOM.innerHTML = `BUYS ${content.ticker}: ${content.quantity} shares at ${(content.price).toFixed(2)}, total ${(content.price * content.quantity).toFixed(2)}`;
+                            likebuttonDOM.onclick = function() { AddLike(likebuttonDOM.id, "transaction", content.object_id )};
+
+                        } else {
+                            contentDOM.innerHTML = `SELLS ${content.ticker}: ${-content.quantity} shares at ${(content.price).toFixed(2)}, total ${(-content.price * content.quantity).toFixed(2)}`;
+                        }
+                    case 'portfreport':
+                        
+                }
+                replybuttonDOM.addEventListener("click",()=> {repliesDOM.style.display = (repliesDOM.style.display == "block") ? "none": "block";})
+
+            }
+        </script>
+
+
         {% if not page_obj %}
-        <p>{% translate 'None available' %}</p>
+            <p>{% translate 'None available' %}</p>
         {% else %}
             {% for entry in page_obj %}
-            <div class = "col-md-12 infinite-item" style= "display:flex; flex-direction:column; border-bottom:2px solid rgba(77, 76, 76,50);margin-top:10px; min-height: 50px">
+            <div class = "col-md-12 infinite-item" id = "entry_{{page_obj.number}}-{{forloop.counter}}" style= "display:flex; 
+            flex-direction:column; 
+            padding: 5px; 
+            border:2px solid rgba(77, 76, 76,50);
+            border-radius:3px;
+            margin-top:10px; 
+            min-height: 50px">
                 <div style="display:flex;justify-content:space-between ">
-                    <div class="glowdimshort" style="margin:0 0 0 0; font-size:11px;letter-spacing:1px">
-                        <a href='/portfolio/overview/{{entry.player}} '>{{entry.player}}</a>
+                    <div class="glowdimshort" style="margin:0 0 0 0; display:flex;font-size:11px;letter-spacing:1px">
+                        <a href='/portfolio/overview/{{entry.tag}} ' style='margin-right:5px'>{{entry.tag}}</a>
+                        
+                        <div id = "entry-type_{{page_obj.number}}-{{forloop.counter}}">{{entry.content_type.name}}</div>
+
                     </div>
 
                     <div>
-                        <span class="mini quiet"> {{ entry.pub_date }}</span>
+                        <span > {{ entry.pub_date }}</span>
                     </div>
                 </div>
-                {% if entry.validation %}
-                <div class="{% if entry.quantity > 0 %}buyaction{% else %}sellaction{% endif %}" style="margin-left:15px">
-                    <a href="/agora/ticker/{{entry.ticker}}">{{ entry.viewlistformat }}</a>
+
+                <div id = "entry-content_{{page_obj.number}}-{{forloop.counter}}">
+                    {{ entry.content | safe }}
                 </div>
-                {% else %}
                 <div>
-                    {{entry.ticker}}: {{entry.content }}
+                    <div style = "display:flex; justify-content: flex-end; ">
+                        <button id = "replybutton_{{page_obj.number}}-{{forloop.counter}}"  style="background:none;border:none;margin:0;padding:0;cursor: pointer;" type="button">
+                            Reply: {{ entry.reply_count }}</button>
+    
+                        <button id = "likebutton_{{page_obj.number}}-{{forloop.counter}}"  style="background:none;border:none;margin:0;padding:0;cursor: pointer;" type="button">
+                        Upvote: {{entry.like_count }} </button>
+                    </div>
+                    <div id = "replies_{{page_obj.number}}-{{forloop.counter}}" style = "display:none">  
+                        <div style = "border: 1px solid rgba(77, 76, 76,50);"> This is the reply sample...</div>
+                    </div>
+                    <script>
+                        ShowFeedContents("{{page_obj.number}}-{{forloop.counter}}");
+                    </script>
                 </div>
 
-                {% endif %}
             </div>
+
             {% endfor %}
         {% endif %}    
 
@@ -217,33 +318,42 @@
         {% endif %}
 
     </div>
-    
 
+    <script type="text/javascript">
+        let infinite = new Waypoint.Infinite({
+            element: $('.infinite-container')[0], 
+            offset: 'bottom-in-view',
+            onBeforePageLoad: function() {
 
-<script src="{% static "home/jquery.waypoints.min.js" %}"></script>
-<script src="{% static "home/infinite.min.js" %}"></script>
-<script>
-    let infinite = new Waypoint.Infinite({
-        element: $('.infinite-container')[0], 
-        offset: 'bottom-in-view',
-        onBeforePageLoad: function() {
+            },
 
-        },
+            onAfterPageLoad: function (items) {
+                len = items.length;
+                for(let i=0;i < items.length; i++){
+                    const entryDOM = items[i];
+                    const entryid = entryDOM.id.split('_')[1];
+                    ShowFeedContents(entryid);
 
-        onAfterPageLoad: function() {
-
+                    
+                }
+            }
         }
-    }
-    )
-    // Here is the control of the style.
-    const containerid = document.getElementById("container");
-    const headerid = document.getElementById("header");
-    const contentid = document.getElementById("content");
-    const titleimageid = document.getElementById("titleimage");
-    headerid.style = "position:fixed;top:0;width:95vw;";
-    contentid.style = "margin-top: 70px;margin-left:calc(310px + 10vw); margin-right:10vw; padding-left:10px";
-    titleimageid.style = "margin:-26px 0 -35px  7vw;";
+        )
     </script>
 
-{% endblock %}
+    <!--  Here is the control of the style. -->
 
+    <script>
+            const mainid = document.getElementById("main");
+            const headerid = document.getElementById("header");
+            const contentid = document.getElementById("content");
+            const contentcontainer = document.getElementById("content-container");
+            const titleimageid = document.getElementById("titleimage");
+            headerid.style = "position:fixed;top:0;width:95vw;z-index:6;";
+            // mainid.style = "display:flex;top:100px;"
+            contentid.style = "position:relative;top:100px;width:100%;margin:0";
+            titleimageid.style = "margin:-26px 0 -35px  7vw;";
+            contentcontainer.style = "display:flex; flex-direction:row;justify-content:center;top:100px";
+
+    </script>
+{% endblock %}

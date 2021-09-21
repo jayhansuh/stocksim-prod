@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
-from portfolio.models import Player, Like, Reply
+from portfolio.models import Player, Like, Reply, Feed
 from stockdb.models import Ticker
-
+import json
 import re
 
 # Create your models here.
@@ -40,6 +40,8 @@ class Memo(models.Model):
     pub_date = models.DateTimeField('date published',db_index=True)
     isSubMemo = models.BooleanField(default=False,db_index=True)
     deleted = models.BooleanField(default=False)
+    like = GenericRelation('portfolio.Like',related_query_name='memo')
+    reply = GenericRelation('portfolio.Reply',related_query_name = 'memo')
 
     def __str__(self):
         return self.content
@@ -111,8 +113,29 @@ class PortfReview(Report):
 class TickerReport(Report):
     ticker = models.ForeignKey(Ticker, on_delete=models.CASCADE)
 
-class Feed(models.Model):
-    pub_date = models.DateTimeField('date published',db_index=True)
-    tag = models.CharField(max_length = 32, db_index = True)
-    content = models.JSONField()
+    
+def feedMemo(memo):
+    content = {'object_id':memo.id, 'ticker': memo.ticker.ticker,  'content': memo.content }
 
+    feedmemo = Feed(
+        type =  'Memo', 
+        pub_date = memo.pub_date,
+        tag =  str(memo.author),
+        like_count = memo.like.count(),
+        reply_count = memo.reply.count(),
+        content = json.dumps(content),
+    )
+    feedmemo.save()
+
+def feedPortfReview(review):
+    content = {'type': 'PortfReview', 'object_id':review.id,  'portfolio': review.portfolio, 'content': review.content }
+
+    feedrvw = Feed(
+        type = 'PortfReview',
+        pub_date = review.pub_date,
+        tag =  str(review.author),
+        like_count = review.like.count(),
+        reply_count = review.reply.count(),
+        content = json.dumps(content)
+    )
+    feedrvw.save()

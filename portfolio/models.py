@@ -12,6 +12,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from stockdb.models import Ticker, DayPrice
 from stockdb.makedb import updateTicker, get_last_price, setTicker
 from portfolio.scheduler import quetrigger
+import json
 
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -132,6 +133,7 @@ class Player(models.Model):
 
             res=trns.applyTransaction(self.portfolio)
             trns.save()
+            feedTransaction(trns)
             if(res=="TRANSACTION_SUCCESS"):
                 self.save()
                 if(not Ticker.objects.filter(ticker=ticker).exists()):
@@ -158,7 +160,45 @@ class Reply(models.Model):
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length = 280)
+    pub_date = models.DateTimeField('date publihsed', default=datetime.datetime.now)
     like = GenericRelation('Like', related_query_name='reply')    
+
+class Feed(models.Model):
+    content_type = models.ForeignKey(ContentType,on_delete=models.CASCADE, blank = True, null = True)
+    object_id = models.PositiveIntegerField(blank = True, null = True)
+    content_object = GenericForeignKey('content_type','object_id')
+
+    #type = models.CharField(max_length = 32, db_index = True, default = 'not specified')
+    last_update = models.DateTimeField(auto_now = True)
+
+    pub_date = models.DateTimeField('date published',db_index=True)
+    like_count = models.IntegerField(default = 0)
+    reply_count = models.IntegerField(default = 0)
+    tag = models.CharField(max_length = 32, db_index = True)
+    content = models.JSONField()
+
+    def __str__(self):
+        return "%s,  %s, id: %s" % (self.content_type.name, self.tag, self.pk)
+
+    def update(self):
+        self.like_count = self.content_object.like.count()
+        self.reply_count = self.content_object.reply.count()
+
+
+
+def feedTransaction(trns):
+    content = {'object_id':trns.id, 'ticker': trns.ticker,  'quantity': trns.quantity, 'price':trns.price }
+
+    feedtrns = Feed(
+        content_object = trns,
+        pub_date = trns.pub_date,
+        tag = str(trns.player),
+        like_count = trns.like.count(),
+        reply_count = trns.reply.count(),
+        content = json.dumps(content)
+    )
+    feedtrns.save()
+
 
 class Transaction(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
@@ -169,7 +209,7 @@ class Transaction(models.Model):
     validation = models.CharField(max_length=16,null=True)
     like = GenericRelation('Like',related_query_name='trns')
     reply = GenericRelation('Reply',related_query_name = 'trns')
-
+    feed = GenericRelation('Feed', related_query_name = 'trns')
 
     def __str__(self):
         if(self.quantity>=0):

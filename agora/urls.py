@@ -9,4 +9,6 @@ urlpatterns = [
     path('hashtag/<str:tag>', views.MemoTagsView, name='agoratag'),
     path('ticker/<str:ticker>/', views.TickerView, name='agoraticker'),
     path('ticker/<str:ticker>/addfav/', views.AddFavorite, name='addfav'),
+    path('_addlike/', views.AddLike, name='addlike'),
+
 ]

@@ -1,6 +1,8 @@
+from agora.models import Report
 from django import forms
-from .models import Player, Transaction
+from .models import Player, Transaction, Reply
 from stockdb.models import Ticker
+from django.forms import ModelForm
 
 #import threading
 

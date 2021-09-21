@@ -2,9 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, Http404
 
 # Create your views here.
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation
+
 from django.contrib.auth.decorators import login_required
 from stockdb.models import Ticker
-from portfolio.models import Player, Transaction
+from portfolio.models import Player, Transaction, Feed, Like
 from .models import Memo, MemoTag
 from .forms import MemoForm
 from django.http import JsonResponse
@@ -15,6 +19,7 @@ from django.core.paginator import Paginator
 from itertools import chain
 from portfolio.views import getBadge
 from home.views import getFavrtTickers
+import json
 
 color_order=[
     "MRNA" ,
@@ -81,11 +86,8 @@ def getFeedList(request):
     player = User.objects.get(username = username).player_set.all()[0]
     favrt_ticker_list = player.favrt_ticker.all()
     following_list = player.following.all()
-    playtofeed_list= list(following_list) + [player]
-
-    memo_list = Memo.objects.filter(player__in = playtofeed_list,isSubMemo= False).order_by('-pub_date')
-    transaction_list = Transaction.objects.filter(player__in = playtofeed_list, validation = "SUCCESS").order_by('-pub_date')
-    feeds_list = sorted(list(chain(memo_list, transaction_list)), key = lambda instance: instance.pub_date, reverse = True)
+    feed_tags = list(favrt_ticker_list) + list(following_list) + [player]
+    feeds_list = Feed.objects.filter(tag__in = feed_tags).order_by('-pub_date')
     
     return feeds_list
 
@@ -194,3 +196,29 @@ def AddFavorite(request,ticker):
             p.favrt_ticker.add(t)
         p.save()
     return JsonResponse({"issubscribed":  not issubscribed })
+
+def AddLike(request):
+    if request.method != 'POST':
+        raise Http404("This is not a valid approach.")
+    else:
+        user = request.user
+        req = json.loads(request.GET.get('req',"{}"))
+        type = req["type"]
+        id = req["objectid"]
+        if type == "memo":
+            post = Memo.objects.get(id = id)
+        elif type == "transaction":
+            post = Transaction.objects.get(id = id)
+        ct = ContentType.objects.get_for_model(post)
+        like_set = Like.objects.filter(content_type = ct,object_id = post.id, user = user)
+        feed = post.feed.get()        
+
+        if like_set.count() ==0:
+            Like.objects.create(content_object = post, user = user)
+            liked = True
+        else:
+            like_set.delete()
+            liked = False
+        like_count = Like.objects.filter(content_type =ct, object_id = post.id).count()
+        feed.update()
+        return JsonResponse({"liked": liked, "like_count": like_count})
