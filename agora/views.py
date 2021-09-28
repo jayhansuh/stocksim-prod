@@ -9,8 +9,9 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.auth.decorators import login_required
 from stockdb.models import Ticker
 from portfolio.models import Player, Transaction, Feed, Like
-from .models import Memo, MemoTag
+from .models import Memo, MemoTag, PortfReview, TickerReport
 from .forms import MemoForm
+from portfolio.forms import ReplyForm
 from django.http import JsonResponse
 from stockdb.makedb import setTicker
 from django.contrib.auth.models import User
@@ -88,7 +89,6 @@ def getFeedList(request):
     following_list = player.following.all()
     feed_tags = list(favrt_ticker_list) + list(following_list) + [player]
     feeds_list = Feed.objects.filter(tag__in = feed_tags).order_by('-pub_date')
-    
     return feeds_list
 
 
@@ -104,6 +104,12 @@ def FeedsView(request):
         num_follower = player.followers.count()
         # feeds_list = Transaction.objects.order_by('-pub_date')
         feeds_list = getFeedList(request)
+        like_list = []
+        for feed in feeds_list:
+            liked = feed.content_object.like.filter(user= request.user).exists()
+            like_list.append(liked)
+
+
         paginator = Paginator(feeds_list, 10) # Show 2 contacts per page.
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -117,6 +123,8 @@ def FeedsView(request):
         context['page_obj']= page_obj
         context['num_following'] = num_following
         context['num_follower'] = num_follower
+        context['form'] = ReplyForm()
+        context['like_list'] = like_list
 
         return render(request, 'agora/feeds.html',context  )
 
@@ -216,9 +224,44 @@ def AddLike(request):
         if like_set.count() ==0:
             Like.objects.create(content_object = post, user = user)
             liked = True
-        else:
+        elif like_set.count() == 1:
             like_set.delete()
             liked = False
-        like_count = Like.objects.filter(content_type =ct, object_id = post.id).count()
+        else:
+            raise Http404("Something wrong: double count of the like.")
+        like_count = post.like.count()
         feed.update()
         return JsonResponse({"liked": liked, "like_count": like_count})
+
+def AddReply(request):
+    req = json.loads(request.GET.get('req',"{}"))
+    type = req["type"]
+    id = req["objectid"]
+    if type == "transaction":
+        parent = Transaction.objects.get(id = id)
+    elif type == "portfreport":
+        parent = PortfReview.objects.get(id = id)
+    elif type == "tickerreport":
+        parent = TickerReport.objects.get(id = id) 
+    else:
+        raise Http404("The parent is the invalid object")
+    feed = parent.feed.get()
+    if request.method == 'POST':
+        form = ReplyForm(request.POST)
+        user = request.user
+        if not form.is_valid():
+            raise Http404("The form is not valid.")
+        else:
+            newreply = form.makeReply(parent,user)
+            newreply.save()
+    feed.update()
+    replylist = []
+    for reply in parent.reply.order_by('pub_date'):
+        replydict = {}
+        replydict['pub_date'] = reply.pub_date.strftime('%b, %d, %Y %H:%M %p')
+        replydict['content'] = reply.content
+        replydict['user'] = reply.user.username
+        replydict['like_count'] = reply.like.count()
+        replylist.append(replydict)
+
+    return JsonResponse(json.dumps(replylist,default = str),safe=False)  

@@ -161,6 +161,8 @@ class Reply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length = 280)
     pub_date = models.DateTimeField('date publihsed', default=datetime.datetime.now)
+  #  deleted = models.BooleanField(default=False)
+
     like = GenericRelation('Like', related_query_name='reply')    
 
 class Feed(models.Model):
@@ -183,6 +185,7 @@ class Feed(models.Model):
     def update(self):
         self.like_count = self.content_object.like.count()
         self.reply_count = self.content_object.reply.count()
+        self.save()
 
 
 
