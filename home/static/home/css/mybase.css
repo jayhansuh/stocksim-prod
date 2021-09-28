@@ -271,6 +271,8 @@ div.multicol {
 .colMcenter {
   display: flex;
   justify-content: center;
+  margin:0;
+  padding:0;
 }
 
 a.no_underline:link { text-decoration: none; }
@@ -349,4 +351,18 @@ div.glowColored:hover{
   cursor: grabbing;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
-}    
+}
+
+@media (max-width: 720px) {
+  #content-sub{
+    width:95vw;
+  }
+
+  #nav-bar-right{
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  :root {
+    --header-size: 160px;
+  }
+}

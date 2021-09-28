@@ -15,6 +15,7 @@
     --body-loud-color: #ffffff;
 
     --header-bg: var(--primary);
+    --header-size: 60px;
 
     --breadcrumbs-link-fg: #e0e0e0;
     --breadcrumbs-bg: var(--primary);
@@ -890,7 +891,7 @@ table#change-history tbody th {
 }
 
 #content {
-    padding: 20px 40px;
+    /*padding: 20px 20px;*/
 }
 
 .dashboard #content {
@@ -919,6 +920,12 @@ table#change-history tbody th {
     margin-right: -35vw;
 }
 
+#content-sub{
+    width:calc(100% - 300px);
+    max-width:800px;
+    min-width:350px;
+}
+
 #footer {
     clear: both;
     padding: 10px;
@@ -928,6 +935,11 @@ table#change-history tbody th {
 
 .colMS {
     margin-right: 300px;
+}
+
+.colMH {
+    position: relative;
+    top: var(--header-size);
 }
 
 .colSM {
@@ -951,15 +963,17 @@ table#change-history tbody th {
 /* HEADER */
 
 #header {
-    width: auto;
+    position: fixed;
+    width: calc( 100vw - 80px );
     height: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 40px;
+    padding: 8px 40px;
     background: var(--header-bg);
     color: var(--header-color);
     overflow: hidden;
+    z-index: 10;
 }
 
 #header a:link, #header a:visited {

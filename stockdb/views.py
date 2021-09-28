@@ -19,6 +19,18 @@ import time
 def getLastPrice(request):
 
     ticker = request.GET.get('ticker')
+    
+    date = request.GET.get('date',False)
+    if(date):
+        t = Ticker.objects.filter(ticker=ticker.upper())
+        if(not t.exists()):
+            return JsonResponse({"ticker":ticker,"date":date,"price":-1})
+        arr=list(map(int,date.split("-")))
+        dp = t[0].dayprice_set.order_by('-Date').filter(Date__lte=datetime.datetime(arr[0],arr[1],arr[2]))
+        if(not dp.exists()):
+            return JsonResponse({"ticker":ticker,"date":date,"price":-2})
+        return JsonResponse({"ticker":ticker,"date":date,"price":dp[0].Close})
+
     try:
         price=get_last_price(ticker)
     except:

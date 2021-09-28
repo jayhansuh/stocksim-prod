@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Stocksim') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="/">
+        {%load i18n static%}
+        <img id="titleimage" src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: -26px -35px;">
+        {% comment %} <div class="glow" id="rectlogo"> {{ site_header|default:'StockSim' }} </div> {% endcomment %}
+    </a>
+</h1>
+{% endblock %}
+
+{% block coltype %}colMH{% endblock %}
+
+{% block nav-global %}
+<div style="font-family:azonix;font-size: 21px;line-height: 1;">
+    Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}
+</div>
+
+
+<div id="nav-bar-right" style="display: flex;">
+    {% if user.is_authenticated%}
+    <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
+    {% else %}
+    <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
+    {% endif %}
+    <a href='/?help=force' class="nav-bar-text">HELP</a>&nbsp;
+    <a href='/?mobile=true' class="nav-bar-text">MOBILE</a>&nbsp;
+    <div style="
+        margin:5px;
+        align-self: center;
+        text-align: left;
+        height: 27px;
+        line-height: 29.8px;
+        font-size: 13px;
+        width: 165px;
+        box-shadow:
+        inset 0 0 45px 0px #555,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        inset 0px 0px 1.5px 1.5px #ccc,
+        0px 0 25px #555;
+        display: flex;
+        align-content: center;
+        ">
+        &nbsp;&nbsp;🔍&nbsp;&nbsp;
+        <input placeholder="Search" style='margin: 0;
+        background: none;
+        border: none;
+        color: #bbb;'>
+        </input>
+    </div>
+    <img src="{% static "home/img/icon-bell.svg" %}" width="31" style="margin:5px;">
+    <a style="margin: 0 3px;font-family:azonix;align-self: center;" onclick="menuonoff();">Menu</a>
+</div>
+
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;justify-content: center;">
+<div style="display: flex;
+    justify-content: {% block content-justify %}space-evenly{% endblock%};
+    width: 100%;
+    max-width:1300px;
+    margin: 0;
+    flex-wrap: wrap;
+    align-self: center;">
+
+    {% block left_content %}
+    <div>
+    <div style="margin:0 10px;display:flex;flex-direction:column;">
+        {% if profile_img %}
+        {{profile_img|safe}}
+        {% elif title_nav.img %}
+        <div style="width:100%;display:flex;justify-content:center;">{{title_nav.img|safe}}</div>
+        {% endif %}
+        
+        <img src="{% static "portfolio/profile_ex.png" %}" width="250">
+        <h2 style="text-align:center;">Portfolio Snapshot</h2>
+        <ul id="portfoliosnapshot"></ul>
+    </div>
+    </div>
+    {% endblock %}
+
+    <div id="content-sub">
+    
+        {% if title_nav %}
+        <h1 style="display: flex;
+        justify-content: center;">
+            <div style="display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            max-width:600px;
+            margin: 0;
+            flex-wrap: wrap;
+            ">
+
+            <div class="glowdimshort" style="margin:0 15px;">
+            {% if username %}<a href='/portfolio/profile/{{username}}'>{{username}}</a>{% else %}Anonymous{% endif %}
+            </div>
+            {% if user.is_authenticated and user.username == username %}
+            <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/transactions/{{username}}" style="color:var(--header-link-color);">Trade</a></div>
+            {% endif %}
+            <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/history/{{username}}" style="color:var(--header-link-color);">History</a></div>
+            <div class="glowdimshort" style="margin:0 15px;"><a href="/agora/hashtag/{{username}}" style="color:var(--header-link-color);" >MEMO</a></div>
+            {% if user.is_authenticated and user.username != username %}
+                {% if isfollowed %}
+                    <div class="glowdimshort" style="margin:0 15px;color:rgba(255,255,255,0.3)"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >UNFOLLOW</a></div>
+                {% else  %}
+                    <div class="glowdimshort" style="margin:0 15px;"><a href="/portfolio/overview/{{username}}/addfollow/" style="color:var(--header-link-color);" >FOLLOW</a></div>   
+                {% endif %}
+            {% endif %}
+
+            </div>
+        </h1>
+
+        {% endif %}
+
+        {% block content-sub %}
+        {% endblock %}
+
+    </div>
+</div>
+</div>
+
+<script>
+    {% if portfolio %}
+    const portfolio={{portfolio|safe}};
+    const portDOM=document.getElementById("portfoliosnapshot")
+    Object.keys(portfolio).forEach((key)=>{
+        let newli=document.createElement("li");
+        if(key=="_cash"){
+            newli.innerHTML="Cash: "+portfolio[key].toFixed(2);
+        }
+        else{
+            newli.innerHTML=`<a href='/agora/ticker/${key}'>${key}</a>: ${portfolio[key]}`;
+        }
+        portDOM.appendChild(newli);
+    })
+    {% endif %}
+</script>
+{% endblock %}

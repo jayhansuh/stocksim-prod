@@ -3,6 +3,54 @@
 {% load i18n static %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+<style>
+  /* width */
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: rgb(33,33,33);
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #444;
+  }
+
+  .tabwrapper{
+    overflow:auto;
+    height:48.5%;
+    box-shadow: 0 0 5px 5px var(--darkened-bg);
+  }
+
+  table{
+    width:100%;text-align: center;background: var(--darkened-bg);
+  }
+
+  path.menuPath{
+    transition:stroke 0.2s;
+  }
+
+  path.menuPath:hover{
+    stroke:lightgreen;
+  }
+
+  .newsbox{
+    border-radius: 5px;
+    margin:1px;
+    border: 2px solid #333;
+    background: #121212;
+    height: 75px;
+    display:flex;
+  }
+</style>
 {{ form.media }}
 {% endblock %}
 
@@ -35,7 +83,6 @@
 {% endfor %}
 {% endif %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-2.1.0.min.js"></script>
 <script src="{% static "portfolio/rankingbadge.v0.js" %}"></script>
 <script src="{% static "home/d3.v4.js" %}"></script>
@@ -79,11 +126,12 @@
     "><a href='/?mobile=true'>MOBILE VER</a></div>
 {% endif %}
 
-<div id="contents" style="opacity:0;display: inline-flex;
+
+<div id="contents" style="opacity:0;display: inline-flex;align-self: center;height:100vh;min-height:650px;justify-content: center;
     flex-direction: column;transition: transform 0.2s ease 0.05s;transform: scale({% if user.is_authenticated%}1{% else %}2.71828{% endif %});">
 
-<div id="content-main0" style="width:100%;height:100%;display:block;"></div>
-<div style="display:flex;margin: -30px;justify-content:space-between;width: 1100px;">
+
+<div style="display:flex;justify-content:space-between;width: 1100px;">
   <div style="display:flex;">
     {% comment %} <img src="{% static "home/img/mainlogo.svg" %}" width="600" style="margin: -150px -120px;"> {% endcomment %}
     <img src="{% static "home/img/compactlogo.svg" %}" width="300" style="margin: 0 -30px 0 35px;">
@@ -91,7 +139,7 @@
         0 0 7.4px rgb(255 255 255 / 58%), 0px 0 32px rgb(255 255 255 / 24%);">Welcome, {% if user.is_authenticated %}<a href="/portfolio/" style="color:#ade1f9;">{{user.username}}</a>{% else %}Player{% endif %}</div>
   </div>
   <div style="display: flex;">
-    {% if user.is_authenticated%}
+    {% if user.is_authenticated %}
     <a href="/accounts/logout/" class="nav-bar-text">Log Out</a>&nbsp;
     {% else %}
     <a href="/accounts/login/" class="nav-bar-text">Log In</a>&nbsp;
@@ -122,9 +170,10 @@
       </input>
     </div>
     <img src="{% static "home/img/icon-bell.svg" %}" width="31" style="margin:5px;">
-    <a style="margin: 0 3px;font-family:azonix;align-self: center;" onclick="menuonoff();">Menu</a>
+    <a style="margin: 0 3px;font-family:azonix;align-self: center;opacity:0;" onclick="menuonoff();">Menu</a>
   </div>
 </div>
+  
 <div id="content-main1" style="
   aspect-ratio: 2 / 1;
   width:1100px;
@@ -133,58 +182,75 @@
   align-items: flex-start;
   ">
 
-<div style="margin: 40px 10px 0 0;">
-  <table id="tickerboard" class="module" style="width:100%;text-align: center;">
-    <thead>
-      <tr>
-        <th scope="col">Ticker</th>
-        {% comment %} <th scope="col">name</th> {% endcomment %}
-        <th scope="col">daily</th>
-        <th scope="col">ma25{% comment %} ℹ️{% endcomment %}</th> 
-        <th scope="col">Chart</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for ticker in ticker_list %}
-      <tr>
-        <td>
-        <a href="/agora/ticker/{{ ticker.ticker }}">{{ ticker.ticker }}</a>
-        </td>
-        {% comment %} <td>
-        {{ ticker.name | safe }}
-        </td> {% endcomment %}
-        <td class = "daily" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
-        <td class = "ma25" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
-        <td>
-        <input type="checkbox" id="chbx:{{ ticker.ticker | safe }}" onclick="tickerCheckBox('{{ ticker.ticker | safe }}');">
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div style="height:550px;width: 270px;">
+    <div class="tabwrapper">
+      <table id="tickerboard">
+        <thead>
+          <tr>
+            <th scope="col">Ticker</th>
+            {% comment %} <th scope="col">name</th> {% endcomment %}
+            <th scope="col">daily</th>
+            <th scope="col">ma25{% comment %} ℹ️{% endcomment %}</th> 
+            <th scope="col">Chart</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for ticker in ticker_list %}
+          <tr>
+            <td>
+            <a href="/agora/ticker/{{ ticker.ticker }}">{{ ticker.ticker }}</a>
+            </td>
+            {% comment %} <td>
+            {{ ticker.name | safe }}
+            </td> {% endcomment %}
+            <td class = "daily" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+            <td class = "ma25" id = "{{ticker.ticker}}" style="transition: color 0.6s;"></td>
+            <td>
+            <input type="checkbox" id="chbx:{{ ticker.ticker | safe }}" onclick="tickerCheckBox('{{ ticker.ticker | safe }}');">
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="height:3%;"></div>
+    <div class="tabwrapper">
+      <table id="rankingboard">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 1 );">Name</th>
+            <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 2 );">Monthly</th>
+            <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 3 );">AllTime</th>
+          </tr> 
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="width:5px;"></div>
+
+  <div id="chartplot" style="width:550px;height:550px;"></div>
+
+  <div style="width:5px;"></div>
+
+  <div style="height:550px;width: 270px;">
+    <svg style="height:34%;width:100%;">
+      <text text-anchor="middle" alignment-baseline="middle" x='58' y='68' fill="white" style="font-size: 12px;">Profile</text>
+      <text text-anchor="middle" alignment-baseline="middle" x='138' y='114' fill="white" style="font-size: 12px;">Agora</text>
+      <text text-anchor="middle" alignment-baseline="middle" x='218' y='68' fill="white" style="font-size: 12px;">Simulator</text>
+      <a href="/portfolio/"><path class="menuPath" d="M 64.434 25.000 L 78.868 50.000 L 64.434 75.000 L 35.566 75.000 L 21.132 50.000 L 35.566 25.000 Z" fill="transparent" transform="translate(-27,-16) scale(1.7)" stroke="white"></path></a>
+      <a href="/agora/feeds"><path class="menuPath" d="M 64.434 25.000 L 78.868 50.000 L 64.434 75.000 L 35.566 75.000 L 21.132 50.000 L 35.566 25.000 Z" fill="transparent" transform="translate(53,30) scale(1.7)" stroke="white"></path></a>
+      <a href="/simulator/"><path class="menuPath" d="M 64.434 25.000 L 78.868 50.000 L 64.434 75.000 L 35.566 75.000 L 21.132 50.000 L 35.566 25.000 Z" fill="transparent" transform="translate(133,-16) scale(1.7)" stroke="white"></path></a>
+    </svg>
+    <div style="height:66%;width:100%;overflow: auto;" id="newswrapper">
+    </div>
+  </div>
+
 </div>
 
-<div id="chartplot" style="width:550px;height:550px;"></div>
-
-<div style="width:calc(25% - 15px);margin: 25px 0 0 10px;">
-
-  <table id="rankingboard" class="module" style="width:100%;text-align: center;">
-    <thead>
-      <tr>
-        <th scope="col"></th>
-        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 1 );">Name</th>
-        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 2 );">Monthly</th>
-        <th scope="col" onclick="enterTableData('rankingboard', window.rbdata , 3 );">AllTime</th>
-      </tr> 
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
-</table>
-
-</div>
-
-</div>
 
 <div style="display:flex;flex-direction:column;align-items: center;"> 
   {% comment %} <div id="menu" style="
@@ -371,7 +437,6 @@
   const DISPLAY_DATES=200;
   const rectlogo=document.getElementById("rectlogo");
   const maincontent=document.getElementById("contents");
-  const maincontent0=document.getElementById("content-main0");
   const maincontent1=document.getElementById("content-main1");
   const rankingboard=document.getElementById("rankingboard");
   const tickerboard=document.getElementById("tickerboard").getElementsByTagName('tbody')[0];
@@ -535,20 +600,15 @@
       rownum++;
       row.innerHTML = `<td><a href='/portfolio/ranking/help/'>${getBadge(el[2],true)}</a></td>`;
       //row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${el[0]}</a></td>`;
-      row.innerHTML += `<td><a href="portfolio/overview/${el[0]}/">${ (el[0].length>7) ? el[0].slice(0,7)+'...' : el[0] }</a></td>`;
+      row.innerHTML += `<td><a href="portfolio/profile/${el[0]}/">${ (el[0].length>7) ? el[0].slice(0,7)+'...' : el[0] }</a></td>`;
       row.innerHTML += `<td>${numformat(el[1])}%</td>`;
       row.innerHTML += `<td>${numformat(el[2])}</td>`;
     });
   }
 
-  function block0height(){
-    return (window.innerHeight/2-315)+"px";
-  }
-
   function resize(){
     window.plotly.layout.width = document.getElementById("content-main1").clientWidth/2;
     window.plotly.layout.height = document.getElementById("content-main1").clientWidth/2 ;
-    maincontent0.style.height=block0height();
     window.plotly.layout.yaxis2.autorange=true;
     if(window.innerWidth>document.getElementById("content-main1").clientWidth){
       document.getElementById("content").style="justify-content: center;"
@@ -569,6 +629,7 @@
   //window.plotly variables onload//
   //////////////////////////////////
   document.getElementById('asyncsrc').addEventListener('load', ()=>{
+
 
   window.plotly.layout.width = document.getElementById("content-main1").clientWidth/2 ;
   window.plotly.layout.height = document.getElementById("content-main1").clientWidth/2;
@@ -619,7 +680,7 @@
 
   let scrollIndicator = document.getElementById('scrollIndicator');
   let mobileIndicator = document.getElementById('mobileIndicator');
-  let scrollopacity = -2.5;
+  let scrollopacity = -1.5;
   let dopacity=0.05;
   let scrollInterval=setInterval(()=>{
     if(scrollopacity>1){dopacity=-0.05;mobileIndicator.style.opacity=1;}
@@ -640,8 +701,7 @@
       zoom = Math.min(zoom,1.4)
       rectlogo.style.transform = `scale(${Math.exp(zoom)})`;
       maincontent.style.opacity=-zoom/7;
-      maincontent.style.transform=`scale(${Math.exp((1+zoom/7))})`;
-      maincontent0.style.height="calc( "+(1+zoom/7)*100*0.1+'vw + '+block0height()+")";
+      maincontent.style.transform=`scale(${Math.exp(1+zoom/7)})`;
       if(zoom<=-7.+ZOOM_SPEED/2){
         dragOver();
       };
@@ -654,7 +714,7 @@
     mobileIndicator.style.display="none";
     rectlogo.style.display="none";
     maincontent.style.opacity=1;
-    maincontent.style.transform="none";
+    maincontent.style.transform=`scale(1)`;
     document.body.style.overflow="auto";
     resize();
     setTimeout(()=>{
@@ -797,7 +857,15 @@
   display:none;
   opacity:0;
   transition: opacity .3s;
-  "><svg class="menunav" width="100%" height="100%"></svg></div>
+  "><svg class="menunav" width="100%" height="100%">
+  
+  <defs>
+    <pattern id="img1" patternUnits="userSpaceOnUse" width="100" height="100">
+      <image href="{% static "home/img/mainlogo.svg" %}" x="0" y="0" width="100" height="100" />
+    </pattern>
+  </defs>
+
+  </svg></div>
 <script>
 
 const cntdiv=document.querySelector('div#menusvgcontainer');
@@ -858,7 +926,7 @@ const points2 = [
     [1,0,2.5,59,'#678',  'PF review', '/agora/'],
     [0,-1,2.5,59,'#d2ebf9', 'Agora', '/agora/'],
 
-    [5,4,2.5,59,'#678',  'Custom Chart' , '/simulator/histplot/'],
+    [5,4,2.5,59,'#678',  'Custom Chart' , '/simulator/histplot/datagen/'],
     [4,4,2.5,59,'#678',  'Quant Lab' , '/simulator/qlab/'],
     [4,3,2.5,59,'#d2ebf9',  'Simulator', '/simulator/'],
     [3,3,2.5,59,'#678',  'Swing' , '/simulator/chartsurf/'],
@@ -945,4 +1013,104 @@ d3.timer(function(elapsed) {
 
 </script>
 
+<script>
+
+  const exjson={
+  "status": "ok",
+  "totalResults": 70,
+  "articles": [
+    {
+      "source": {
+        "id": "business-insider",
+        "name": "Business Insider"
+      },
+      "author": "Sarah Jackson",
+      "title": "Amazon drivers are punished when other people cut them off: report - Business Insider",
+      "description": "Amazon drivers have been punished for looking at side mirrors, adjusting the radio, and being cut off in traffic by other people, Motherboard reports.",
+      "url": "https://www.businessinsider.com/amazon-delivery-drivers-netradyne-ai-cameras-punished-when-cut-off-2021-9",
+      "urlToImage": "https://i.insider.com/6148b4daca11af00192b05db?width=1200&format=jpeg",
+      "publishedAt": "2021-09-20T17:38:10Z",
+      "content": "Amazon drivers are being punished for some driving habits that are considered safe and others that are beyond their control, Motherboard reported. \r\nDrivers told Motherboard that the AI-powered camer… [+3743 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Yahoo Entertainment"
+      },
+      "author": "David Hollerith",
+      "title": "Bitcoin, cryptocurrencies tumble as China sends shudders down markets - Yahoo Finance",
+      "description": "As risk-sensitive assets plunged, bitcoin shed over $3,000.",
+      "url": "https://finance.yahoo.com/news/bitcoin-tumbles-as-china-sends-shudders-down-markets-173300045.html",
+      "urlToImage": "https://s.yimg.com/ny/api/res/1.2/SqwzufNnLgw0ywq_4cfpVQ--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDM-/https://s.yimg.com/os/creatr-uploaded-images/2021-06/95719720-d907-11eb-b4ff-f37ece2e8cf1",
+      "publishedAt": "2021-09-20T17:34:36Z",
+      "content": "Investors unnerved by the financial strains of a Chinese real estate firm sent cryptocurrencies reeling on Monday, with bitcoin (BTC-USD) tumbling by more than 7%.\r\nAs risk-sensitive assets plunged, … [+2857 chars]"
+    },
+    {
+      "source": {
+        "id": "cnn",
+        "name": "CNN"
+        },
+      "author": "Parija Kavilanz, CNN Business",
+      "title": "Holiday bummer: Now prices are soaring for Christmas trees and decorations - CNN",
+      "description": null,
+      "url": "https://www.cnn.com/2021/09/20/business/christmas-tree-prices-2021/index.html",
+      "urlToImage": "https://cdn.cnn.com/cnnnext/dam/assets/210917161205-restricted-national-tree-company-super-tease.jpg",
+      "publishedAt": "2021-09-20T17:26:00Z",
+      "content": null
+    },
+    {
+      "source": {
+        "id": "reuters",
+        "name": "Reuters"
+      },
+      "author": null,
+      "title": "Fed to reveal new projections with investors on alert for rate liftoff timing - Reuters",
+      "description": "U.S. Federal Reserve officials will lay bare how soon and how often they think the economy will need interest rates rises over the next three years when they release new forecasts at their policy meeting on Wednesday, with investors on alert for a faster pace…",
+      "url": "https://www.reuters.com/business/finance/fed-reveal-new-projections-with-investors-alert-rate-liftoff-timing-2021-09-20/",
+      "urlToImage": "https://www.reuters.com/resizer/Po22Ycw8KyW-gOu9GmBMYd6cbFc=/1200x628/smart/filters:quality(80)/cloudfront-us-east-2.images.arcpublishing.com/reuters/4O6DLF5T7BO73GYZX3LP4EWCAU.jpg",
+      "publishedAt": "2021-09-20T17:02:00Z",
+      "content": "Sept 20 (Reuters) - U.S. Federal Reserve officials will lay bare how soon and how often they think the economy will need interest rates rises over the next three years when they release new forecasts… [+5947 chars]"
+    },
+    {
+      "source": {
+        "id": "cnn",
+        "name": "CNN"
+        },
+      "author": "Anneken Tappe, CNN Business",
+      "title": "The Delta variant is keeping the US economy from getting back to normal - CNN",
+      "description": "The US economy is further from being back to normal again. Thanks, Delta.",
+      "url": "https://www.cnn.com/2021/09/20/economy/back-to-normal-index-delta-drop/index.html",
+      "urlToImage": "https://cdn.cnn.com/cnnnext/dam/assets/210920112509-back-to-normal-index-restricted-super-tease.jpg",
+      "publishedAt": "2021-09-20T17:01:00Z",
+      "content": null
+    }]
+};
+
+  const newswrapper=document.getElementById('newswrapper');
+  exjson.articles.forEach((el)=>{
+    const newsdiv=document.createElement('div');
+    newsdiv.className="newsbox";
+    newsdiv.innerHTML=`<div 
+      style="background-image:
+            url('${el.urlToImage}'); 
+      width:100px; 
+      height:75px;
+      background-size: cover; 
+      background-position:center;">&nbsp;</div>
+    <div style="width:160px;margin:5px;font-size:12px;color:#aaa;">
+      <div>${el.title}</div>
+      <div style="font-size: 10px;
+        justify-content: end;
+        color:gray;
+        display: flex;
+        margin:1px;">${el.source.name}</div>
+    </div>`;
+    const adiv=document.createElement('a');
+    adiv.href=el.url;
+    adiv.appendChild(newsdiv);
+    newswrapper.appendChild(adiv);
+  });
+</script>
 {% endblock %}
+
+{% block footer %}{% endblock %}
