@@ -246,9 +246,10 @@ def AddReply(request):
     else:
         raise Http404("The parent is the invalid object")
     feed = parent.feed.get()
+    user = request.user
+
     if request.method == 'POST':
         form = ReplyForm(request.POST)
-        user = request.user
         if not form.is_valid():
             raise Http404("The form is not valid.")
         else:
@@ -261,6 +262,7 @@ def AddReply(request):
         replydict['pub_date'] = reply.pub_date.strftime('%b, %d, %Y %H:%M %p')
         replydict['content'] = reply.content
         replydict['user'] = reply.user.username
+        replydict['editable'] = (user == reply.user)
         replydict['like_count'] = reply.like.count()
         replylist.append(replydict)
 

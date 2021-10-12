@@ -23,8 +23,9 @@ class ReplyForm(forms.Form):
         "placeholder":"Add a reply here (# to tag a user or a word e.g. #admin)",
         "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
 }))
-    #flag = forms.CharField(max_length=5,required=True, label=False, widget=forms.HiddenInput())
-    #parentpk = forms.IntegerField(widget=forms.HiddenInput(),required=False)
+    # flag = forms.CharField(max_length=5,required=True, label=False, widget=forms.HiddenInput())
+    # parenttype = forms.CharField(max_length=20, required = True, widget = forms.HiddenInput())
+    # parentpk = forms.IntegerField(widget=forms.HiddenInput(),required=False)
 
     def makeReply(self,parent,user):
         
