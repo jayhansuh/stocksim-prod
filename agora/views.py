@@ -8,7 +8,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 
 from django.contrib.auth.decorators import login_required
 from stockdb.models import Ticker
-from portfolio.models import Player, Transaction, Feed, Like
+from portfolio.models import Player, Transaction, Feed, Like, Reply
 from .models import Memo, MemoTag, PortfReview, TickerReport
 from .forms import MemoForm
 from portfolio.forms import ReplyForm
@@ -234,36 +234,47 @@ def AddLike(request):
         return JsonResponse({"liked": liked, "like_count": like_count})
 
 def AddReply(request):
-    req = json.loads(request.GET.get('req',"{}"))
-    type = req["type"]
-    id = req["objectid"]
-    if type == "transaction":
-        parent = Transaction.objects.get(id = id)
-    elif type == "portfreport":
-        parent = PortfReview.objects.get(id = id)
-    elif type == "tickerreport":
-        parent = TickerReport.objects.get(id = id) 
-    else:
-        raise Http404("The parent is the invalid object")
-    feed = parent.feed.get()
-    user = request.user
 
     if request.method == 'POST':
         form = ReplyForm(request.POST)
         if not form.is_valid():
             raise Http404("The form is not valid.")
+
+        type = form.cleaned_data['parenttype']
+        id = form.cleaned_data['parentpk']
+        if type == "transaction":
+            parent = Transaction.objects.get(id = id)
+        elif type == "portfreport":
+            parent = PortfReview.objects.get(id = id)
+        elif type == "tickerreport":
+            parent = TickerReport.objects.get(id = id) 
         else:
+            raise Http404("The parent is the invalid object")
+        feed = parent.feed.get()
+        user = request.user
+        if form.cleaned_data['flag'] =="add":
             newreply = form.makeReply(parent,user)
             newreply.save()
-    feed.update()
-    replylist = []
-    for reply in parent.reply.order_by('pub_date'):
-        replydict = {}
-        replydict['pub_date'] = reply.pub_date.strftime('%b, %d, %Y %H:%M %p')
-        replydict['content'] = reply.content
-        replydict['user'] = reply.user.username
-        replydict['editable'] = (user == reply.user)
-        replydict['like_count'] = reply.like.count()
-        replylist.append(replydict)
+        elif form.cleaned_data['flag'] =="del":
+            reply = Reply.objects.get(id=form.cleaned_data['replypk'])
+            reply.delete()
+        elif form.cleaned_data['flag'] =="show":
+            pass
 
-    return JsonResponse(json.dumps(replylist,default = str),safe=False)  
+        feed.update()
+        replylist = []
+        parentinfo = {}
+        parentinfo['parenttype'] = type
+        parentinfo['parentid'] = id
+        replylist.append(parentinfo)
+        for reply in parent.reply.order_by('pub_date'):
+            replydict = {}
+            replydict['pub_date'] = reply.pub_date.strftime('%b, %d, %Y %H:%M %p')
+            replydict['content'] = reply.content
+            replydict['user'] = reply.user.username
+            replydict['editable'] = (user == reply.user)
+            replydict['like_count'] = reply.like.count()
+            replydict['replyid'] = reply.id
+            replylist.append(replydict)
+
+        return JsonResponse(json.dumps(replylist,default = str),safe=False)  

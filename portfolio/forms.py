@@ -18,14 +18,15 @@ class TransactionForm(forms.Form):
         return player.makeTransaction(ticker,self.cleaned_data['quantity'])
 
 class ReplyForm(forms.Form):
-    content = forms.CharField(max_length=280,required=True, label=False, widget=forms.Textarea(attrs={
+    content = forms.CharField(max_length=280,required=False, label=False, widget=forms.Textarea(attrs={
         "rows":5,
         "placeholder":"Add a reply here (# to tag a user or a word e.g. #admin)",
         "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
 }))
-    # flag = forms.CharField(max_length=5,required=True, label=False, widget=forms.HiddenInput())
-    # parenttype = forms.CharField(max_length=20, required = True, widget = forms.HiddenInput())
-    # parentpk = forms.IntegerField(widget=forms.HiddenInput(),required=False)
+    flag = forms.CharField(max_length=5,required=True, label=False, widget=forms.HiddenInput())
+    parenttype = forms.CharField(max_length=20, required = True, widget = forms.HiddenInput())
+    parentpk = forms.IntegerField(widget=forms.HiddenInput(),required=False)
+    replypk = forms.IntegerField(widget=forms.HiddenInput(),required=False)
 
     def makeReply(self,parent,user):
         
@@ -35,3 +36,9 @@ class ReplyForm(forms.Form):
                 'pub_date':timezone.now(),}
 
         return Reply(**kwargs)
+
+    def delReply(self,user):
+        reply = Reply.objects.get(pk=self.cleaned_data['replypk'])
+        if(reply.user.pk==user.pk):
+            reply.delete()
+            reply.save()

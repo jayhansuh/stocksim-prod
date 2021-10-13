@@ -260,38 +260,42 @@
                         
                 }
                 replybuttonDOM.addEventListener("click",()=> {
-                    repliesDOM.style.display = (repliesDOM.style.display == "flex") ? "none": "flex";
-                    AddReply('GET',entryid,entrytype,content.object_id);
+                    if(repliesDOM.style.display == "flex"){
+                        repliesDOM.style.display = "none";
+                    }else{
+                        repliesDOM.style.display = "flex";
+                        AddReply(entryid,`replylistform_${entryid}`);
+                    }
                 })
 
             }
 
-            async function AddReply(methods,entryid,type,object_id){
-                const replyformDOM = document.getElementById(`replyform_${entryid}`);
-                const req = {"type": type, "objectid": object_id};
+            async function AddReply(entryid,replyformid){
+                const replyformDOM = document.getElementById(replyformid);
                 formData = new FormData(replyformDOM);
-                let options = {};
-                if(methods == 'POST'){
-                    options = {
-                        method: methods, 
+                const options = {
+                        method: 'POST', 
                         body: formData,
                         credentials:"same-origin",
                         'X-CSRFToken': getCookie('csrftoken')
-                    };
-                }else if (methods == 'GET'){
-                    options = {        
-                         method: methods, 
-                    };
-                }
+                };
                 try{
-                    
-                    const response = await fetch('/agora/_addreply/?req='+ JSON.stringify(req),options);
+                
+                    // const response = await fetch('/agora/_addreply/?req='+ JSON.stringify(req),options);
+                    const response = await fetch('/agora/_addreply/',options);
                     replyformDOM.reset();
+                    const replylistDOM = document.getElementById(`replylist_${entryid}`);
+
                     const response_json = await response.json();
                     const replylist = JSON.parse(response_json);
-                    const replylistDOM = document.getElementById(`replylist_${entryid}`);
+                    console.log(entryid);
+
+                    parent = replylist[0];
+                    const  replybuttonDOM = document.getElementById(`replybutton_${entryid}`);
+                    replybuttonDOM.innerHTML = `Reply: ${replylist.length-1}`
+
                     replylistDOM.innerHTML = "";
-                    for(let i = 0;i<replylist.length;i++){
+                    for(let i = 1;i<replylist.length;i++){
                         let reply = replylist[i];
                         let replyid = `reply_${entryid}_${i}`;
                         replylistDOM.innerHTML += `<div id=${replyid} style="display:flex;
@@ -309,13 +313,21 @@
                             <div class = "glowdimshort" style = "width: 100px;
                             font-size: 7px;letter-spacing: 1px;"> ${reply.user} </div>
                             <div style="font-size:4px; color:rgba(90, 90, 90,100); "> ${reply.pub_date}</div>
-                            <div> </div>
+                            <div id = "deldeiv_${entryid}_${reply.replyid}"> </div>
                             </div>`;
-
-                        replyDOM.innerHTML += `<div style="margin-left:10px"> ${reply.content}</div>`;
+                        let delDOM = document.getElementById(`deldeiv_${entryid}_${reply.replyid}`);
                         if(reply.editable){ 
-                            replyDOM.innerHTML+= `del`;
+                            delDOM.innerHTML+= `<form method="post" action="" id = "delform_${entryid}_${reply.replyid}" >
+                        {% csrf_token %}
+                        <input type="hidden" name="flag" value="del" >
+                        <input type="hidden" name="parenttype" id="id_parenttype" value="${parent.parenttype}">
+                        <input type="hidden" name="parentpk" id="id_parentpk" value="${parent.parentid}">
+                        <input type="hidden" name="replypk" id="id_parentpk" value="${reply.replyid}">
+                        <button  id ="delbutton_${entryid}_${reply.replyid}" onclick="AddReply('${entryid}', 'delform_${entryid}_${reply.replyid}');" style="background:none;border:none;margin-right:2px;padding:0;cursor: pointer;" type="button">
+                            del </button>
+                        </form>`;
                         }
+                        replyDOM.innerHTML+= `<div> ${reply.content}</div>`
                     }
                 }catch{
                     console.error("Error!")
@@ -356,24 +368,33 @@
                 </div>
                 <div>
                     <div style = "display:flex; justify-content: flex-end; ">
+                        <form method="post" action="" id = "replylistform_{{page_obj.number}}-{{forloop.counter}}" >
+                        {% csrf_token %}
+                        <input type="hidden" name="flag" value="show" >
+                        <input type="hidden" name="parenttype" id="id_parenttype" value="{{ entry.content_type.name }}">
+                        <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.object_id }}">
                         <button id = "replybutton_{{page_obj.number}}-{{forloop.counter}}"  style="background:none;border:none;margin-right:2px;padding:0;cursor: pointer;" type="button">
                             Reply: {{ entry.reply_count }}  </button>
-    
+                        </form>
                         <button id = "likebutton_{{page_obj.number}}-{{forloop.counter}}"  style="background:none;border:none;margin:0;padding:0;cursor: pointer;" type="button">
 
                             Upvote: {{entry.like_count }} </button>
                     </div>
                     <div id = "replies_{{page_obj.number}}-{{forloop.counter}}" style = "display:none; flex-direction:column">  
                         <div id = "replylist_{{page_obj.number}}-{{forloop.counter}}" style = "display:flex;flex-direction:column"></div>
-                        <form action = "" method = 'post' style="display:flex; 
+                        <form action = "" method = 'post'  id = "replyform_{{page_obj.number}}-{{forloop.counter}}"
+                        style="display:flex; 
                         align-items:center;
                         margin-left:10px;
                         margin-top:3px;
                         border:2px solid rgba(77, 76, 76,50);
-                        border-radius:3px; " id = "replyform_{{page_obj.number}}-{{forloop.counter}}">
+                        border-radius:3px; ">
                         <div class="glowdimshort" style = "font-size: 7px;letter-spacing: 1px;width:100px;"> {{user}} </div>
                         {% csrf_token %}
                         {{form}}
+                        <input type="hidden" name="flag" value="add" >
+                        <input type="hidden" name="parenttype" id="id_parenttype" value="{{ entry.content_type.name }}">
+                        <input type="hidden" name="parentpk" id="id_parentpk" value="{{ entry.object_id }}">
                         <input type="submit" value = "Submit" id = "replysubmit_{{page_obj.number}}-{{forloop.counter}}"> 
                         </form>
 
@@ -390,7 +411,7 @@
                         // replyformDOM.action = '/agora/_addreply/?req='+JSON.stringify(req)
                         replyformDOM.addEventListener("submit",e=> {
                             e.preventDefault();
-                            AddReply('POST',entryid, "{{entry.content_type.name}}", content.object_id);
+                            AddReply(entryid,`replyform_${entryid}`);
                         }); 
                         ShowFeedContents(entryid);
                         })();
@@ -447,7 +468,7 @@
                     const replyformDOM = document.getElementById(`replyform_${entryid}`);
                     replyformDOM.addEventListener("submit",e=> {
                             e.preventDefault();
-                            AddReply('POST',entryid, "transaction", content.object_id);
+                            AddReply(entryid);
                         }); 
 
                     ShowFeedContents(entryid);
