@@ -12,5 +12,6 @@ urlpatterns = [
     path('transactions/<str:username>/', views.TransactionsView, name='transactions'),
     path('ranking/help/', views.RankingHelp, name='rankinghelp'),
     path('_get_portfolio', views.getPortfolio, name='getPortfolio'),
-    path('overview/<str:username>/addfollow/',views.AddFollowing,name='addfollow')
+    path('writereport/<str:username>/',views.WriteReportView, name='writereport'),
+    path('overview/<str:username>/addfollow/',views.AddFollowing,name='addfollow'),
 ]

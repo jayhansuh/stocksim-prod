@@ -1,5 +1,5 @@
 from django import forms
-from .models import Memo, MemoTag, subMemo
+from .models import Memo, MemoTag, TickerReport, subMemo, PortfReview
 from stockdb.models import Ticker
 from django.utils import timezone
 
@@ -57,3 +57,51 @@ class MemoForm(forms.Form):
                 break
         return memolist
              
+class TickerReportForm(forms.ModelForm):
+    class Meta:
+        model = TickerReport
+        fields = ['title','ticker','status','content']
+        widgets = {
+            'title': forms.Textarea(attrs={
+            "rows":1,
+            "placeholder":"Ticker Report",
+            "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
+        }),
+            'content': forms.Textarea(attrs={
+            "rows":15,
+            "placeholder":"Add your analysis on the ticker here. (# to tag a user or a word e.g. #admin)",
+            "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
+        })
+        }
+
+    def makeReport(self,user):
+
+        kwargs={
+                'title': self.cleaned_data['title'],
+                'player': user.player_set.all()[0],
+                'author': user,
+                'pub_date':timezone.now(),
+                'content':self.cleaned_data['content'],
+                'status': self.cleaned_data['status'],
+                'ticker': self.cleaned_data['ticker']
+                }
+        return TickerReport(**kwargs)
+        
+
+class PortfReviewForm(forms.ModelForm):
+    class Meta:
+        model = PortfReview
+        fields = ['title','status','content']
+        widgets = {
+            'title': forms.Textarea(attrs={
+            "rows":1,
+            "placeholder":"Ticker Report",
+            "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
+        }),
+            'content': forms.Textarea(attrs={
+            "rows":15,
+            "placeholder":"Add your analysis on the ticker here. (# to tag a user or a word e.g. #admin)",
+            "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
+        })
+        }
+

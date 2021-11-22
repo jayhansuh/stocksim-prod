@@ -1,4 +1,4 @@
-from agora.models import Report
+# from agora.models import Report
 from django import forms
 from .models import Player, Transaction, Reply
 from stockdb.models import Ticker
@@ -41,4 +41,3 @@ class ReplyForm(forms.Form):
         reply = Reply.objects.get(pk=self.cleaned_data['replypk'])
         if(reply.user.pk==user.pk):
             reply.delete()
-            reply.save()

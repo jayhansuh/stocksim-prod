@@ -9,10 +9,11 @@ import json
 from .models import Player, Transaction, AssetHistory
 from django.contrib.auth.decorators import login_required
 from .forms import TransactionForm
+from agora.forms import TickerReportForm
 
 from stockdb.models import Ticker
 from stockdb.makedb import get_last_price
-from agora.models import MemoTag
+from agora.models import MemoTag, feedTickerreport, feedPortfreview
 from portfolio.scheduler import quetrigger
 
 import math
@@ -148,6 +149,8 @@ def ProfileView(request,username):
                     'title_nav' : {'img':getBadge(last_history.asset,'width:200px;')},
                     'last_history':last_history,
                     'transaction_list' : player.transaction_set.order_by('-pub_date'),
+                    'portfreview_list' : player.portfreview_set.order_by('-pub_date'),
+                    'tickerreport_list' : player.tickerreport_set.order_by('-pub_date'),
                     'memo_list' : MemoTag.getMemos(tag=username),
                     'asset' : last_history.asset,
                     'portfolioOverview' : portfolioOverview,
@@ -284,3 +287,25 @@ def AddFollowing(request,username):
             me.following.add(whotofollow)
         me.save()
         return JsonResponse({"isfollowed" : not isfollowed })
+
+def WriteReportView(request,username):
+
+    if request.method != 'POST':
+        form = TickerReportForm()
+        return render(request, 'portfolio/writereview.html',{
+                            'form' : form,
+        }
+    )
+    else:
+        form = TickerReportForm(request.POST)
+        if not form.is_valid():
+            raise Http404("The form is not valid.")
+        else:
+            newReport = form.makeReport(request.user)
+            newReport.save()
+            feedTickerreport(newReport)
+        
+        return redirect("/portfolio/profile/"+request.user.username)
+
+        
+

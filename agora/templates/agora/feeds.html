@@ -226,7 +226,7 @@
                     const likebutton = document.getElementById(likebuttondom);
                     const req = {"type": type, "objectid": objectid};
                     const response = await fetch('/agora/_addlike/?req='+ JSON.stringify(req),option);
-                    const response_json = await response.json();
+                    const response_json = await response.json();            
                     if(response_json.liked){
                         likebutton.innerHTML = `Downvote: ${response_json.like_count}` ;
                     }
@@ -251,14 +251,18 @@
                     case 'transaction':
                         if(content.quantity >=0){
                             contentDOM.innerHTML = `BUYS ${content.ticker}: ${content.quantity} shares at ${(content.price).toFixed(2)}, total ${(content.price * content.quantity).toFixed(2)}`;
-                            likebuttonDOM.onclick = function() { AddLike(likebuttonDOM.id, "transaction", content.object_id )};
-
                         } else {
                             contentDOM.innerHTML = `SELLS ${content.ticker}: ${-content.quantity} shares at ${(content.price).toFixed(2)}, total ${(-content.price * content.quantity).toFixed(2)}`;
                         }
-                    case 'portfreport':
-                        
+                        break;
+                    case 'ticker report':
+                        contentDOM.innerHTML = `<h3> ${content.title } on ${content.ticker}</h3>`;
+                        contentDOM.innerHTML += `<p> ${content.content_preview}</p>`;
+                        contentDOM.innerHTML += `<a href="" class = "btn btn-primary"> Read More &rarr; </a>`;
+                        break;
                 }
+                likebuttonDOM.onclick = function() { AddLike(likebuttonDOM.id, entrytype, content.object_id )};
+
                 replybuttonDOM.addEventListener("click",()=> {
                     if(repliesDOM.style.display == "flex"){
                         repliesDOM.style.display = "none";
@@ -489,6 +493,7 @@
             const contentcontainer = document.getElementById("content-container");
             const titleimageid = document.getElementById("titleimage");
             headerid.style.zIndex = 15;
+            headerid.style.position="fixed";
             // mainid.style = "display:flex;top:100px;"
             contentid.style = "position:relative;top:100px;width:100%;margin:0";
             titleimageid.style = "margin:-26px 0 -35px  7vw;";

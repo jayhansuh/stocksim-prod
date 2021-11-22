@@ -103,9 +103,13 @@ class Report(models.Model):
     deleted = models.BooleanField(default=False)
     like = GenericRelation('portfolio.Like',related_query_name='review')
     reply = GenericRelation('portfolio.Reply',related_query_name = 'review')
+    feed = GenericRelation('portfolio.Feed', related_query_name = 'review')
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        abstract = True
 
 class PortfReview(Report):
     portfolio = models.JSONField('portfolio')
@@ -127,15 +131,29 @@ def feedMemo(memo):
     )
     feedmemo.save()
 
-def feedPortfReview(review):
-    content = {'type': 'PortfReview', 'object_id':review.id,  'portfolio': review.portfolio, 'content': review.content }
+def feedPortfreview(review):
+    content = {'type': 'Portfreview', 'object_id':review.id,  'portfolio': review.portfolio, 'content': review.content }
 
     feedrvw = Feed(
-        type = 'PortfReview',
+        type = 'Portfreview',
         pub_date = review.pub_date,
         tag =  str(review.author),
         like_count = review.like.count(),
         reply_count = review.reply.count(),
+        content = json.dumps(content)
+    )
+    feedrvw.save()
+
+def feedTickerreport(report):
+    content_preview = report.content[:100] if len(report.content) > 100 else report.content
+    content = {'title': report.title, 'object_id': report.id, 'ticker': str(report.ticker), 'content_preview': content_preview }
+
+    feedrvw = Feed(
+        content_object = report,
+        pub_date = report.pub_date,
+        tag = str(report.player),
+        like_count = report.like.count(),
+        reply_count = report.reply.count(),
         content = json.dumps(content)
     )
     feedrvw.save()

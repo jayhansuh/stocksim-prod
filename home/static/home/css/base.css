@@ -963,7 +963,7 @@ table#change-history tbody th {
 /* HEADER */
 
 #header {
-    position: fixed;
+    position: relative;
     width: calc( 100vw - 80px );
     height: auto;
     display: flex;

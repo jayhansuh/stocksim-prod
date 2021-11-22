@@ -138,30 +138,79 @@
         {% endif %}
     </div>
 
+    <div class="module multicol" id="recent-actions-module">
+        <h2>{% translate 'Portfolio Reviews' %} (<a href="">write</a>)</h2>
+        {% if not portfreview_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <div class="col-md-8 mt-3 left">
+        {% for entry in portfreview_list %}
+        <div class="portfolio-body">
+            <!-- Here please write a module to show the portfolio itself. -->
+            <h3 class="portfolio-title">{{entry.title}}</h3>
+            <p class="portfolio-text text-muted h6">  {{ entry.pub_date}}</p>
+            <p class="portfolio-text"> {{entry.content |slice:":100" }}...  </p>
+            <p><a href="" class = "btn btn-primary"> Read More &rarr; </a></p>
+        </div>
+        {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="module multicol" id="recent-actions-module">
+        <h2>{% translate 'Ticker Reports' %} (<a href="/portfolio/writereport/{{username}}">write</a>)</h2>
+        {% if not tickerreport_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <div class="col-md-8 mt-3 left">
+        {% for entry in tickerreport_list %}
+        <div class="ticker-body">
+            <h3 class="ticker-title">{{entry.title}}  | {{entry.ticker }}</h3>
+            <p class="ticker-text text-muted h6">  {{ entry.pub_date}}</p>
+            <p class="tickerreview-text"> {{entry.content |slice:":100" }}...  </p>
+            <p><a href="" class = "btn btn-primary"> Read More &rarr; </a></p>
+        </div>
+        {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+
+
+    <div class="module multicol" id="recent-actions-module" style="max-width:630px">
+    <h2>{% translate 'Memos' %} (<a href="/agora/hashtag/{{username}}">more</a>)</h2>
+        {% if not memo_list %}
+        <p>{% translate 'None available' %}</p>
+        {% else %}
+        <ul class="memolist" style="margin: 0;padding: 0;">
+        {% for entry in memo_list %}
+        <li class="memo">
+            <div class="memo-name">
+                <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
+                <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
+            </div>
+            <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
+            <div class="memo-date">
+                <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
+            </div>
+        </li>
+        <hr>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
 </div>
 
-<div class="module multicol" id="recent-actions-module" style="max-width:630px">
-<h2>{% translate 'Memos' %} (<a href="/agora/hashtag/{{username}}">more</a>)</h2>
-    {% if not memo_list %}
-    <p>{% translate 'None available' %}</p>
-    {% else %}
-    <ul class="memolist" style="margin: 0;padding: 0;">
-    {% for entry in memo_list %}
-    <li class="memo">
-        <div class="memo-name">
-            <div style="overflow-wrap: anywhere;"><a href="/portfolio/overview/{{ entry.author }}">{{ entry.author }}</a></div>
-            <div style="overflow-wrap: anywhere;"><a href="/agora/ticker/{{ entry.ticker }}">{{ entry.ticker }}</a></div>
-        </div>
-        <span class="memo-content"> {{ entry.getInnerHTML | safe }}</span>
-        <div class="memo-date">
-            <span class="small quiet">{{ entry.pub_date | date:"Y/m/d" }}</span>
-        </div>
-    </li>
-    <hr>
-    {% endfor %}
-    </ul>
-    {% endif %}
-</div>
+    <!--  Here is the control of the style. -->
+
+    <script>
+        const headerid = document.getElementById("header");
+        headerid.style.zIndex = 15;
+        headerid.style.position="fixed";
+
+</script>
+
+
 {% endblock %}
 
 

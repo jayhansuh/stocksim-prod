@@ -217,6 +217,8 @@ def AddLike(request):
             post = Memo.objects.get(id = id)
         elif type == "transaction":
             post = Transaction.objects.get(id = id)
+        elif type == "ticker report":
+            post = TickerReport.objects.get(id=id)
         ct = ContentType.objects.get_for_model(post)
         like_set = Like.objects.filter(content_type = ct,object_id = post.id, user = user)
         feed = post.feed.get()        
@@ -246,7 +248,7 @@ def AddReply(request):
             parent = Transaction.objects.get(id = id)
         elif type == "portfreport":
             parent = PortfReview.objects.get(id = id)
-        elif type == "tickerreport":
+        elif type == "ticker report":
             parent = TickerReport.objects.get(id = id) 
         else:
             raise Http404("The parent is the invalid object")
@@ -256,8 +258,7 @@ def AddReply(request):
             newreply = form.makeReply(parent,user)
             newreply.save()
         elif form.cleaned_data['flag'] =="del":
-            reply = Reply.objects.get(id=form.cleaned_data['replypk'])
-            reply.delete()
+            form.delReply(user)
         elif form.cleaned_data['flag'] =="show":
             pass
 
