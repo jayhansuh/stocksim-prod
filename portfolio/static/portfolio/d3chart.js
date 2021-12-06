@@ -59,6 +59,7 @@ class d3chart {
 
         this.textlist=['ticker','quant','amt'];
         this.textOffSet={'ticker':27,'quant':40 , 'amt':65, 'date':24,'asset':39};
+        this.assetprepend="";
         this.fontSize={'ticker':'17px','quant':'10px','amt':'10px','date':'13px','asset':'13px'};
         this.textSVG={'ticker':{},'quant':{} , 'amt':{}};
         
@@ -170,7 +171,7 @@ class d3chart {
         let acc=0.;
         let monthindex=Object.keys(this.monthMap).length;
         this.monthMap[history.date]=monthindex
-        this.datelist.push({date:history.date,asset:moneyForm(history.asset)});
+        this.datelist.push({date:history.date,asset:this.assetprepend+moneyForm(history.asset)});
         this.svgwidth=Math.min(this.maxSVGwidth,document.querySelector(this.qname).clientWidth);
         this.datelist[monthindex].y = (this.numRows-1-monthindex)*this.yShift+this.yOffSet;
       
@@ -443,4 +444,47 @@ function resizeChrt(){
     handleMouseOut(null,null);
     chrt.svg.selectAll('text.datetext,text.assettext')
     .attr('x', document.querySelector(chrt.qname).clientWidth-chrt.datemargin);
+}
+
+function d3oneline(selector,asset,quant,amount){
+    const svg=d3.select(selector)
+    chrt=new d3chart(svg,1,selector);
+    chrt.assetprepend="Asset "
+    try{
+        chrt.rectWidth=.87/asset;
+        if(typeof(chrt.rectWidth)!='number'){throw '';}
+    }
+    catch{
+        chrt.rectWidth=1./150/1000;
+    }
+    
+    chrt.textOffSet.asset=-12;
+    
+    chrt.addRectRow({
+        portfolio_quant:quant,
+        portfolio_money:amount,
+        date:"",
+        asset:asset,
+    })
+
+    svg.attr('height',document.querySelector(selector).clientHeight-25);
+
+    draginit();
+
+    svg.select('text.assettext')
+    .attr('text-anchor' , 'middle')
+    .attr('x',document.querySelector(selector).clientWidth/2)
+
+    chrt.svg.selectAll("rect")
+    .data(chrt.pointlist)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .call(dragOn);
+    //window.addEventListener('resize', resizeChrt);
+
+    // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
+    // use curve monotone y
+    // https://archive.nytimes.com/www.nytimes.com/interactive/2012/10/15/us/politics/swing-history.html
+
+    return chrt;
 }

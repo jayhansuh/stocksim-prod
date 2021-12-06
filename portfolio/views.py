@@ -156,6 +156,8 @@ def ProfileView(request,username):
                     'portfolioOverview' : portfolioOverview,
                     'isfollowed': isfollowed(request,username),
                     'portfolio' : player.portfolio,
+                    'num_following' : player.following.count(),
+                    'num_follower' : player.followers.count(),
                 })
 
 #@login_required

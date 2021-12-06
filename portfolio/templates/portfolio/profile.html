@@ -40,7 +40,9 @@
 <svg width="800px" height="500px" id="chart" style="max-width: 100%;">
 </svg>
 <script>
-
+    d3oneline("svg#chart",{{last_history.asset}},{{last_history.quant|safe}},{{last_history.amount|safe}})
+    
+    {% comment %} 
     const svg=d3.select("svg#chart")
     chrt=new d3chart(svg,1,"svg#chart");
 
@@ -61,7 +63,7 @@
     .on("mouseover", handleMouseOver)
     .on("mouseout", handleMouseOut)
     .call(dragOn);
-    window.addEventListener('resize', resizeChrt);
+    window.addEventListener('resize', resizeChrt); {% endcomment %}
 
     // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
     // use curve monotone y
