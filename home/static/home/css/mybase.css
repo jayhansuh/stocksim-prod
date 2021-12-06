@@ -366,3 +366,24 @@ div.glowColored:hover{
     --header-size: 160px;
   }
 }
+
+.avatar {
+  border-radius: 50%;
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+  vertical-align: middle;
+  background-color: var(--color-avatar-bg);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(240,246,252,0.1);
+}
+
+.profile-badge {
+  position: relative;
+  bottom: 88px;
+  left: 100%;
+  z-index: 2;
+  width: 88px;
+  height: 88px;
+  margin-left: -88px;
+}

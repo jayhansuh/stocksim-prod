@@ -93,15 +93,16 @@
     {% block left_content %}
     <div>
     <div style="margin:0 10px;display:flex;flex-direction:column;">
-        {% if profile_img %}
-        {{profile_img|safe}}
-        {% elif title_nav.img %}
-        <div style="width:100%;display:flex;justify-content:center;">{{title_nav.img|safe}}</div>
-        {% endif %}
-        
-        <img src="{% static "portfolio/profile_ex.png" %}" width="250">
-        <h2 style="text-align:center;">Portfolio Snapshot</h2>
+        <div style="margin-top:40px;margin-bottom: -88px;">
+            <img class="avatar" src="{% static "portfolio/noprofile.png" %}" width="250">
+            <div class="profile-badge">{{title_nav.img|safe}}</div>
+        </div>
+        {% comment %} <img src="{% static "portfolio/profile_ex.png" %}" width="250">{% endcomment %}
+        <div style="color: var(--link-fg);font-size: 15px;line-height: 23px;margin:20px;"> I am an intelligent investor</div>
+        <h2 style="text-align:center;">Portfolio Snapshot</h2> 
         <ul id="portfoliosnapshot"></ul>
+        <h2 style="text-align:center;">Followers</h2>
+        <h2 style="text-align:center;">Fvrt Tickers</h2>
     </div>
     </div>
     {% endblock %}
