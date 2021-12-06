@@ -53,13 +53,13 @@ def genOHUQ(string):
   if(len(timestamp)!=32):
     timestamp='1900-00-00 00:00:00.000000+00:00'
   
-  return timestamp + salt + getOHUQ( salt + "ITZY CHERRY" + string + timestamp)
+  return timestamp + salt + getOHUQ( salt + "ITZY" + string + timestamp)
 
 def checkOHUQ(key,hashstr):
   timestamp = hashstr[:32]
   salt = hashstr[32:36]
   hashstr = hashstr[36:]
-  return (getOHUQ( salt + "ITZY CHERRY" + key + timestamp)==hashstr)
+  return (getOHUQ( salt + "ITZY" + key + timestamp)==hashstr)
 
 def chartsurf_nofetch(request):
 
@@ -69,31 +69,34 @@ def chartsurf_nofetch(request):
       form = GainForm(request.POST)
       if(form.is_valid() and checkOHUQ(request.user.username,form.cleaned_data['OHUQ'])):
         player = Player.objects.get(user__username=request.user.username)
-        max_earning = 1000*100
-        todayhist = player.transaction_set.filter(ticker='_swing',pub_date__date=timezone.now().date(),validation='SUCCESS').order_by('-pub_date')
-        maxtime = timezone.now() - datetime.timedelta(seconds=109)
-        if(str(maxtime)<form.cleaned_data['OHUQ'][:32] or
-          (todayhist.exists() and maxtime < todayhist[0].pub_date)):
-          alert_msg = 'ERROR - INVALID FORM'
+        if((player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]).asset>200000):
+          alert_msg = 'Level greater than 2(>200k)<br>cannot earn DAILY GAIN'
         else:
-          for el in todayhist.values('quantity','price'):
-            max_earning -= round( el['price'] * 100)
-          if( max_earning <= 0 ):
-            alert_msg = 'You already reached<br>the MAX DAILY GAIN(1k)'
+          max_earning = 1000*100
+          todayhist = player.transaction_set.filter(ticker='_swing',pub_date__date=timezone.now().date(),validation='SUCCESS').order_by('-pub_date')
+          maxtime = timezone.now() - datetime.timedelta(seconds=109)
+          if(str(maxtime)<form.cleaned_data['OHUQ'][:32] or
+            (todayhist.exists() and maxtime < todayhist[0].pub_date)):
+            alert_msg = 'ERROR - INVALID FORM'
           else:
-            earning = int(form.cleaned_data['AGLW'])
-            if(earning > 0):
-              trns=Transaction(player = player ,
-                pub_date = timezone.now(),
-                ticker = '_swing',
-                quantity = 1,
-                price = min( max_earning , earning ) / 100)
-              alert_msg = trns.applyTransaction(player.portfolio)
-              trns.save()
-              if(alert_msg=="TRANSACTION_SUCCESS"):
-                player.save()
-                quetrigger(100)
-                return redirect('/simulator/chartsurf/')
+            for el in todayhist.values('quantity','price'):
+              max_earning -= round( el['price'] * 100)
+            if( max_earning <= 0 ):
+              alert_msg = 'You already reached<br>the MAX DAILY GAIN(1k)'
+            else:
+              earning = int(form.cleaned_data['AGLW'])
+              if(earning > 0):
+                trns=Transaction(player = player ,
+                  pub_date = timezone.now(),
+                  ticker = '_swing',
+                  quantity = 1,
+                  price = min( max_earning , earning ) / 100)
+                alert_msg = trns.applyTransaction(player.portfolio)
+                trns.save()
+                if(alert_msg=="TRANSACTION_SUCCESS"):
+                  player.save()
+                  quetrigger(100)
+                  return redirect('/simulator/chartsurf/')
       else:
         alert_msg = 'ERROR - INVALID FORM'
     else:
