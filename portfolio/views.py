@@ -146,7 +146,7 @@ def ProfileView(request,username):
     return render(request, 'portfolio/profile.html', {
                     'title':'Overview',
                     'username':username,
-                    'title_nav' : {'img':getBadge(last_history.asset,'width:200px;')},
+                    'title_nav' : {'img':getBadge(last_history.asset,'width:88px;border-radius: 50%;')},
                     'last_history':last_history,
                     'transaction_list' : player.transaction_set.order_by('-pub_date'),
                     'portfreview_list' : player.portfreview_set.order_by('-pub_date'),
@@ -156,6 +156,8 @@ def ProfileView(request,username):
                     'portfolioOverview' : portfolioOverview,
                     'isfollowed': isfollowed(request,username),
                     'portfolio' : player.portfolio,
+                    'num_following' : player.following.count(),
+                    'num_follower' : player.followers.count(),
                 })
 
 #@login_required

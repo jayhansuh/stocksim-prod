@@ -32,7 +32,7 @@ class d3graph {
         this.last_close = null;
 
         this.ANIM_INTERVAL=300;
-        this.PLAY_INTERVAL=1000;
+        this.PLAY_INTERVAL=301;
     }
     
     draw(){
