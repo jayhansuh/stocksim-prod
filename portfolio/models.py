@@ -349,6 +349,30 @@ class AssetHistory(models.Model):
 
             return
 
+class pseudoAssetHistory(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    Date = models.DateField(db_index = True)
+    asset = models.FloatField(null=True)
+    quant = models.JSONField(null=True)
+    amount = models.JSONField(null=True)
+
+    def __str__(self):
+        return " %s , asset %s , ( %s )" % ( self.player, self.asset, self.Date)
+
+def getCurrentAssetHistory(player):
+    last_history=player.assethistory_set.filter(code__gt=0).order_by('-Date')[0]
+    last_pseudohistory = pseudoAssetHistory(
+        player = player,
+        Date = last_history.Date,
+        asset = last_history.asset,
+        quant = last_history.quant,
+        amount = last_history.amount
+    )
+    last_pseudohistory.save()
+    return last_pseudohistory
+
+
+
 # flag=True
 # for h in li:
 #     newamt={}

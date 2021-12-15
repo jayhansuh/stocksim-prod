@@ -216,9 +216,12 @@ def AddLike(request):
         if type == "memo":
             post = Memo.objects.get(id = id)
         elif type == "transaction":
-            post = Transaction.objects.get(id = id)
+            post = Transaction.objects.get(id=id)
         elif type == "ticker report":
             post = TickerReport.objects.get(id=id)
+        elif type == "porf review":
+            post = PortfReview.objects.get(id=id)
+            
         ct = ContentType.objects.get_for_model(post)
         like_set = Like.objects.filter(content_type = ct,object_id = post.id, user = user)
         feed = post.feed.get()        
@@ -246,7 +249,7 @@ def AddReply(request):
         id = form.cleaned_data['parentpk']
         if type == "transaction":
             parent = Transaction.objects.get(id = id)
-        elif type == "portfreport":
+        elif type == "portf review":
             parent = PortfReview.objects.get(id = id)
         elif type == "ticker report":
             parent = TickerReport.objects.get(id = id) 

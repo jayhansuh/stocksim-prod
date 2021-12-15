@@ -91,17 +91,29 @@ class TickerReportForm(forms.ModelForm):
 class PortfReviewForm(forms.ModelForm):
     class Meta:
         model = PortfReview
-        fields = ['title','status','content']
+        fields = ['title','status','content','portfolio']
         widgets = {
             'title': forms.Textarea(attrs={
             "rows":1,
-            "placeholder":"Ticker Report",
+            "placeholder":"Portfolio Review",
             "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
         }),
             'content': forms.Textarea(attrs={
             "rows":15,
-            "placeholder":"Add your analysis on the ticker here. (# to tag a user or a word e.g. #admin)",
+            "placeholder":"Add your reasoning on your portfolio here. (# to tag a user or a word e.g. #admin)",
             "style":"align-content:left;width:calc(100% - 15px);resize: vertical;"
-        })
+        }),
         }
 
+    def makeReview(self,user):
+        player = user.player_set.all()[0]
+        kwargs={
+                'title': self.cleaned_data['title'],
+                'player': player,
+                'author': user,
+                'pub_date':timezone.now(),
+                'content':self.cleaned_data['content'],
+                'status': self.cleaned_data['status'],
+                'portfolio': self.cleaned_data['portfolio']
+                }
+        return PortfReview(**kwargs)

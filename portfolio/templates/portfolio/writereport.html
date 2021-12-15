@@ -1,0 +1,29 @@
+{% extends "base_portfolio.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/dashboard.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/login.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "home/css/mybase.css" %}">
+{{ form.media }}
+{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content-sub %}
+{% if portfolio %}
+    <h3>{{portfolio}}  </h3>
+    <p> {{portfolio.amount}} </p>
+{% endif %}
+<form action="{{ app_path }}" method="post" id="memo-form" style="padding: 10px 0;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="flag" id="id_flag" value="add"/>
+    <input type="submit" class="submit-row" value="{% translate 'Submit' %}" style="float: right;">
+</form>
+
+{% endblock %}

@@ -260,6 +260,9 @@
                         contentDOM.innerHTML += `<p> ${content.content_preview}</p>`;
                         contentDOM.innerHTML += `<a href="" class = "btn btn-primary"> Read More &rarr; </a>`;
                         break;
+                    case 'portf review':
+                        contentDOM.innerHTML = `<h3> ${content.title }  </h3>`;
+                        break;
                 }
                 likebuttonDOM.onclick = function() { AddLike(likebuttonDOM.id, entrytype, content.object_id )};
 

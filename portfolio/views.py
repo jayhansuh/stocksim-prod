@@ -6,10 +6,10 @@ from django.contrib.auth.models import User
 
 # Create your views here.
 import json
-from .models import Player, Transaction, AssetHistory
+from .models import Player, Transaction, AssetHistory, getCurrentAssetHistory
 from django.contrib.auth.decorators import login_required
 from .forms import TransactionForm
-from agora.forms import TickerReportForm
+from agora.forms import TickerReportForm, PortfReviewForm
 
 from stockdb.models import Ticker
 from stockdb.makedb import get_last_price
@@ -289,22 +289,41 @@ def AddFollowing(request,username):
         return JsonResponse({"isfollowed" : not isfollowed })
 
 def WriteReportView(request,username):
-
+    type = request.GET.get('type',"{}")
     if request.method != 'POST':
-        form = TickerReportForm()
-        return render(request, 'portfolio/writereview.html',{
+        if type == 'tickerreport':
+            form = TickerReportForm()
+            return render(request, 'portfolio/writereport.html',{
+                'form' : form,
+            })
+
+        elif type == 'portfreview':
+            player = request.user.player_set.all()[0]
+            portfolio = getCurrentAssetHistory(player)
+            form = PortfReviewForm(initial={'portfolio': portfolio})
+            return render(request, 'portfolio/writereport.html',{
                             'form' : form,
-        }
-    )
+                            'portfolio': portfolio
+            })
     else:
-        form = TickerReportForm(request.POST)
-        if not form.is_valid():
-            raise Http404("The form is not valid.")
-        else:
-            newReport = form.makeReport(request.user)
-            newReport.save()
-            feedTickerreport(newReport)
-        
+        if type == 'tickerreport':
+            form = TickerReportForm(request.POST)
+            if not form.is_valid():
+                raise Http404("The form is not valid.")
+            else:
+                newReport = form.makeReport(request.user)
+                newReport.save()
+                feedTickerreport(newReport)
+        elif type == 'portfreview':
+            form = PortfReviewForm(request.POST)
+            if not form.is_valid():
+                raise Http404("The form is not valid.")
+            else:
+                newReview = form.makeReview(request.user)
+                newReview.save()
+                feedPortfreview(newReview)
+
+
         return redirect("/portfolio/profile/"+request.user.username)
 
         

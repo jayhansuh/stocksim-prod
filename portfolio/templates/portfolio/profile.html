@@ -139,7 +139,7 @@
     </div>
 
     <div class="module multicol" id="recent-actions-module">
-        <h2>{% translate 'Portfolio Reviews' %} (<a href="">write</a>)</h2>
+        <h2>{% translate 'Portfolio Reviews' %} (<a href="/portfolio/writereport/{{username}}/?type=portfreview">write</a>)</h2>
         {% if not portfreview_list %}
         <p>{% translate 'None available' %}</p>
         {% else %}
@@ -158,7 +158,7 @@
     </div>
 
     <div class="module multicol" id="recent-actions-module">
-        <h2>{% translate 'Ticker Reports' %} (<a href="/portfolio/writereport/{{username}}">write</a>)</h2>
+        <h2>{% translate 'Ticker Reports' %} (<a href="/portfolio/writereport/{{username}}/?type=tickerreport">write</a>)</h2>
         {% if not tickerreport_list %}
         <p>{% translate 'None available' %}</p>
         {% else %}

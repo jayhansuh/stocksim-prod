@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
-from portfolio.models import Player, Like, Reply, Feed
+from portfolio.models import Player, Like, Reply, Feed, pseudoAssetHistory
 from stockdb.models import Ticker
 import json
 import re
@@ -112,7 +112,7 @@ class Report(models.Model):
         abstract = True
 
 class PortfReview(Report):
-    portfolio = models.JSONField('portfolio')
+    portfolio = models.ForeignKey(pseudoAssetHistory, on_delete=models.CASCADE)
 
 class TickerReport(Report):
     ticker = models.ForeignKey(Ticker, on_delete=models.CASCADE)
@@ -132,10 +132,16 @@ def feedMemo(memo):
     feedmemo.save()
 
 def feedPortfreview(review):
-    content = {'type': 'Portfreview', 'object_id':review.id,  'portfolio': review.portfolio, 'content': review.content }
+    content = {'type': 'Portfreview', 
+    'object_id':review.id,  
+    'asset': review.portfolio.asset, 
+    'quant': review.portfolio.quant, 
+    'amount': review.portfolio.amount, 
+    'Date':str(review.portfolio.Date),
+    'content': review.content }
 
     feedrvw = Feed(
-        type = 'Portfreview',
+        content_object = review,
         pub_date = review.pub_date,
         tag =  str(review.author),
         like_count = review.like.count(),
