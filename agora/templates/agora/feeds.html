@@ -62,45 +62,8 @@
         <script src="{% static 'portfolio/d3chart.js' %}"></script>
         <svg width="300" height="500px" id="chart" ></svg>
         <script>
-            d3oneline("svg#chart",{{last_history.asset}},{{last_history.quant|safe}},{{last_history.amount|safe}})
-            {% comment %} const svg=d3.select("svg#chart")
-            chrt=new d3chart(svg,1,"svg#chart");
-            try{
-                chrt.rectWidth=.87/{{last_history.asset}};
-                if(typeof(chrt.rectWidth)!='number'){throw '';}
-            }
-            catch{
-                chrt.rectWidth=1./150/1000;
-            }
-            
-            chrt.textOffSet.asset=-12;
-            
-            chrt.addRectRow({
-                portfolio_quant:{{last_history.quant|safe}},
-                portfolio_money:{{last_history.amount|safe}},
-                date:"",
-                asset:{{last_history.asset|safe}},
-            })
-
-            svg.attr('height',document.querySelector("svg#chart").clientHeight-25);
-
-            draginit();
-
-            svg.select('text.assettext')
-            .attr('text-anchor' , 'middle')
-            .attr('x',150)
-
-            chrt.svg.selectAll("rect")
-            .data(chrt.pointlist)
-            .on("mouseover", handleMouseOver)
-            .on("mouseout", handleMouseOut)
-            .call(dragOn);
-            //window.addEventListener('resize', resizeChrt);
-
-            // http://bl.ocks.org/d3indepth/b6d4845973089bc1012dec1674d3aff8
-            // use curve monotone y
-            // https://archive.nytimes.com/www.nytimes.com/interactive/2012/10/15/us/politics/swing-history.html {% endcomment %}
-
+            d3oneline("svg#chart",{{last_history.asset}},{{last_history.quant|safe}},{{last_history.amount|safe}});
+     
         </script>
         </div>
 
@@ -195,7 +158,6 @@
     width: 100%;
     padding:0;
     ">
-
         <script type="text/javascript" >
             function getCookie(name) {
             var cookieValue = null;
@@ -263,6 +225,10 @@
                         break;
                     case 'portf review':
                         contentDOM.innerHTML = `<h3> ${content.title }  </h3>`;
+                        contentDOM.innerHTML += `<svg width="300" height="500px" id="chrt_${entryid}" >  </svg>`;
+                        contentDOM.innerHTML += `<p id="test_${entryid}"> ${content.content_preview }  </p>`;
+                        contentDOM.innerHTML += `<a href="" class = "btn btn-primary"> Read More &rarr; </a>`;
+                        d3oneline(`svg#chrt_${entryid}`,content.asset,content.quant,content.amount);
                         break;
                 }
                 likebuttonDOM.onclick = function() { AddLike(likebuttonDOM.id, entrytype, content.object_id )};

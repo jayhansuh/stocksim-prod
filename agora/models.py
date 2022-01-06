@@ -132,13 +132,15 @@ def feedMemo(memo):
     feedmemo.save()
 
 def feedPortfreview(review):
+    content_preview = review.content[:100] if len(review.content) > 100 else review.content
     content = {'type': 'Portfreview', 
+    'title': review.title,
     'object_id':review.id,  
     'asset': review.portfolio.asset, 
     'quant': review.portfolio.quant, 
     'amount': review.portfolio.amount, 
     'Date':str(review.portfolio.Date),
-    'content': review.content }
+    'content_preview': content_preview  }
 
     feedrvw = Feed(
         content_object = review,

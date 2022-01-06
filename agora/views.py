@@ -219,7 +219,7 @@ def AddLike(request):
             post = Transaction.objects.get(id=id)
         elif type == "ticker report":
             post = TickerReport.objects.get(id=id)
-        elif type == "porf review":
+        elif type == "portf review":
             post = PortfReview.objects.get(id=id)
             
         ct = ContentType.objects.get_for_model(post)
